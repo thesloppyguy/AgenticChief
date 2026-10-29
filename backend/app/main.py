@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.alerts import router as alerts_router
 from app.api.approvals import router as approvals_router
 from app.api.assets import agents_router, skills_router
+from app.api.auth import router as auth_router
 from app.api.connections import router as connections_router
 from app.api.copilot import router as copilot_router
 from app.api.documents import router as documents_router
@@ -63,6 +64,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="CHRO Copilot API", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins,
                    allow_methods=["*"], allow_headers=["*"])
+app.include_router(auth_router)
 app.include_router(router)
 app.include_router(copilot_router)
 app.include_router(ingestion_router)

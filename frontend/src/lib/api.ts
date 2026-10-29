@@ -1,9 +1,35 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const KEY = "chro_token";
+const TOKEN_EVENT = "chro:token";
 
 export const getToken = () => (typeof window === "undefined" ? null : localStorage.getItem(KEY));
-export const setToken = (t: string) => localStorage.setItem(KEY, t);
-export const clearToken = () => localStorage.removeItem(KEY);
+
+function notifyToken() {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(TOKEN_EVENT));
+}
+
+export const setToken = (t: string) => {
+  localStorage.setItem(KEY, t);
+  notifyToken();
+};
+export const clearToken = () => {
+  localStorage.removeItem(KEY);
+  notifyToken();
+};
+
+/** Subscribe to token changes for useSyncExternalStore. */
+export function subscribeToken(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === KEY || e.key === null) onStoreChange();
+  };
+  window.addEventListener(TOKEN_EVENT, onStoreChange);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(TOKEN_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStorage);
+  };
+}
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
