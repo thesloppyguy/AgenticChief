@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 
@@ -24,11 +25,10 @@ export default function PinButton({ kind, target, label }: { kind: string; targe
   }
   return (
     <span className="inline-flex items-center gap-2">
-      <button onClick={toggle} disabled={busy || pins.loading} aria-pressed={!!mine}
-        className={`rounded border px-3 py-1.5 text-sm ${mine ? "border-slate-900 bg-slate-100" : "border-slate-300"} disabled:opacity-50`}>
+      <Button variant={mine ? "secondary" : "outline"} onClick={toggle} disabled={busy || pins.loading} aria-pressed={!!mine}>
         {mine ? "★ Pinned" : "☆ Pin"}
-      </button>
-      {err && <span role="alert" className="text-xs text-red-700">{err}</span>}
+      </Button>
+      {err && <span role="alert" className="text-xs text-destructive">{err}</span>}
     </span>
   );
 }

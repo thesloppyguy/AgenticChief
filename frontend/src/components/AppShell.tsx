@@ -6,6 +6,14 @@ import { api, clearToken, getClaims, getToken } from "@/lib/api";
 import { readSse } from "@/lib/sse";
 import type { LiveAlert, UnreadSummary } from "@/lib/types";
 import { currentPeriod } from "@/lib/format";
+import { toast } from "sonner";
+import { useTheme } from "next-themes";
+import { LogOut, Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader,
+  SidebarInset, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 type NavItem = { href: string; label: string; badge?: "alerts" | "approvals_pending" };
 const NAV: { heading: string; items: NavItem[] }[] = [
@@ -46,7 +54,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     const t = setInterval(load, 60_000);
     return () => { live = false; clearInterval(t); };
   }, [hasToken, path]);
-  const [toasts, setToasts] = useState<(LiveAlert & { key: number })[]>([]);
+  const { resolvedTheme, setTheme } = useTheme();
   const onLogin = path === "/login";
   useEffect(() => {
     if (!hasToken || onLogin) return;
@@ -62,9 +70,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
             if (name !== "alert") return;
             const a = data as LiveAlert;
             refresh();
-            const key = Date.now() + a.id;
-            setToasts((t) => [...t.slice(-3), { ...a, key }]);
-            setTimeout(() => live && setToasts((t) => t.filter((x) => x.key !== key)), 10_000);
+            const urgent = a.severity === "urgent" || a.severity === "high";
+            (urgent ? toast.error : toast.warning)(a.title, {
+              description: a.severity, duration: 10_000,
+              action: { label: "View", onClick: () => router.push("/unread") },
+            });
           }, ac.signal);
           delay = 1000;
         } catch { /* dropped or refused: retry below */ }
@@ -74,7 +84,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       }
     })();
     return () => { live = false; ac.abort(); };
-  }, [hasToken, onLogin]);
+  }, [hasToken, onLogin, router]);
   useEffect(() => {
     // Read storage directly: `hasToken` is the server value (false) during hydration, so using it here
     // would bounce a signed-in user to /login on every hard reload.
@@ -84,44 +94,48 @@ export default function AppShell({ children }: { children: ReactNode }) {
   if (path === "/login") return <>{children}</>;
   if (!ready) return null;
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-56 shrink-0 overflow-y-auto border-r border-slate-200 bg-white p-4">
-        <div className="mb-5 font-semibold">CHRO Copilot</div>
-        <nav className="space-y-4" aria-label="Main">
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader className="px-4 py-3 font-semibold">CHRO Copilot</SidebarHeader>
+        <SidebarContent>
           {NAV.map((g) => (
-            <div key={g.heading}>
-              <div className="mb-1 px-3 text-xs font-medium uppercase tracking-wide text-slate-400">{g.heading}</div>
-              <div className="space-y-0.5">
-                {g.items.map((n) => {
-                  const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
-                  return (
-                    <Link key={n.href} href={n.href} aria-current={active ? "page" : undefined}
-                      className={`block rounded px-3 py-1.5 text-sm ${active ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"}`}>
-                      {n.label}
-                      {n.badge && counts[n.badge] > 0 && (
-                        <span className="ml-2 rounded-full bg-red-600 px-1.5 text-xs text-white" aria-label={`${counts[n.badge]} unread`}>{counts[n.badge]}</span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
+            <SidebarGroup key={g.heading}>
+              <SidebarGroupLabel>{g.heading}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {g.items.map((n) => {
+                    const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
+                    const count = n.badge ? counts[n.badge] : 0;
+                    return (
+                      <SidebarMenuItem key={n.href}>
+                        <SidebarMenuButton isActive={active} render={<Link href={n.href} aria-current={active ? "page" : undefined} />}>
+                          {n.label}
+                        </SidebarMenuButton>
+                        {count > 0 && <SidebarMenuBadge aria-label={`${count} unread`}>{count}</SidebarMenuBadge>}
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
           ))}
-        </nav>
-        {me && <p className="mt-6 px-3 text-xs text-slate-500">Signed in as <strong>{me.sub}</strong> ({me.role})</p>}
-        <button className="mt-8 text-xs text-slate-500 underline"
-          onClick={() => { clearToken(); router.replace("/login"); }}>Sign out</button>
-      </aside>
-      <main className="min-w-0 flex-1 p-6">{children}</main>
-      <div role="status" aria-live="polite" className="pointer-events-none fixed bottom-4 right-4 z-50 w-80 space-y-2">
-        {toasts.map((t) => (
-          <Link key={t.key} href="/unread" onClick={() => setToasts((all) => all.filter((x) => x.key !== t.key))}
-            className="pointer-events-auto block rounded-lg border border-slate-300 bg-white p-3 text-sm shadow-lg hover:bg-slate-50">
-            <span className={`mr-2 rounded-full px-2 py-0.5 text-xs font-medium ${t.severity === "urgent" || t.severity === "high" ? "bg-red-100 text-red-900" : "bg-amber-100 text-amber-900"}`}>{t.severity}</span>
-            {t.title}
-          </Link>
-        ))}
-      </div>
-    </div>
+        </SidebarContent>
+        <SidebarFooter className="gap-2 p-4">
+          {me && <p className="text-xs text-muted-foreground">Signed in as <strong>{me.sub}</strong> ({me.role})</p>}
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="flex-1"
+              onClick={() => { clearToken(); router.replace("/login"); }}><LogOut />Sign out</Button>
+            <Button variant="outline" size="icon-sm" aria-label="Toggle theme"
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
+              <Sun className="dark:hidden" /><Moon className="hidden dark:block" />
+            </Button>
+          </div>
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarInset className="min-w-0">
+        <header className="flex h-12 items-center border-b px-4 md:hidden"><SidebarTrigger /></header>
+        <div className="p-6">{children}</div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

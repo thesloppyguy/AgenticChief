@@ -5,12 +5,25 @@ import { useSearchParams } from "next/navigation";
 import { usePeriod } from "@/components/AppShell";
 import { Card, Loading, ScoreTile, StatusBadge } from "@/components/ui";
 import PinButton from "@/components/PinButton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { download } from "@/lib/api";
 import { fmt, label, PILLAR_SHORT, STATUS_STYLE } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import type { Scorecard } from "@/lib/types";
 
 type StatusFilter = "all" | "green" | "amber" | "red" | "none";
+
+const FILTER_ITEMS = [
+  { value: "all", label: "All" }, { value: "red", label: "Off track" },
+  { value: "amber", label: "Needs attention" }, { value: "green", label: "On track" },
+  { value: "none", label: "No data" },
+];
 
 function Dashboard() {
   const params = useSearchParams();
@@ -47,25 +60,28 @@ function Dashboard() {
       <div className="flex items-end justify-between">
         <h1 className="text-2xl font-semibold">Group HR Scorecard</h1>
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <label>Period{" "}
-            <input type="month" value={period} onChange={(e) => e.target.value && setPeriod(e.target.value)}
-              className="rounded border border-slate-300 px-2 py-1" />
-          </label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="period">Period</Label>
+            <Input id="period" type="month" value={period} onChange={(e) => e.target.value && setPeriod(e.target.value)}
+              className="w-auto" />
+          </div>
           <PinButton kind="view" target={viewPath} label={`Dashboard ${period}${filter !== "all" ? ` · ${filter}` : ""}${q ? ` · “${q}”` : ""}`} />
           {(["xlsx", "csv"] as const).map((f) => (
-            <button key={f} className="rounded border border-slate-300 px-3 py-1.5" onClick={() => download(`/reports/export/scorecard.${f}?period=${period}`, `group-hr-scorecard-${period}.${f}`).then(() => setExportError(null)).catch((e) => setExportError(e.message))}>
+            <Button key={f} variant="outline" onClick={() => download(`/reports/export/scorecard.${f}?period=${period}`, `group-hr-scorecard-${period}.${f}`).then(() => setExportError(null)).catch((e) => setExportError(e.message))}>
               Export {f === "xlsx" ? "Excel" : "CSV"}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
       <Loading error={error} loading={loading} />
-      {exportError && <p role="alert" className="text-sm text-red-700">{exportError}</p>}
+      {exportError && <Alert variant="destructive"><AlertDescription>{exportError}</AlertDescription></Alert>}
       {data?.synthetic_data && (
-        <p role="note" className="rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-          <strong>Synthetic data.</strong> Some or all values come from generated stub data because the
-          source systems are not connected. Do not use these numbers for decisions.
-        </p>
+        <Alert role="note" className="border-warning/30 bg-warning/10 text-warning">
+          <AlertDescription className="text-warning">
+            <strong>Synthetic data.</strong> Some or all values come from generated stub data because the
+            source systems are not connected. Do not use these numbers for decisions.
+          </AlertDescription>
+        </Alert>
       )}
       {data && (
         <>
@@ -85,25 +101,25 @@ function Dashboard() {
             <Card title="Companies by status">
               <ul className="flex flex-wrap gap-3 text-sm">
                 {(["green", "amber", "red"] as const).map((s) => (
-                  <li key={s} className={`rounded px-3 py-2 ring-1 ${STATUS_STYLE[s]}`}>
+                  <li key={s} className={cn("rounded-md border px-3 py-2", STATUS_STYLE[s])}>
                     <span className="text-xl font-semibold tabular-nums">{dist[s]}</span> {s}
                   </li>
                 ))}
-                <li className="rounded bg-slate-50 px-3 py-2 ring-1 ring-slate-200">
+                <li className="rounded-md border bg-muted px-3 py-2">
                   <span className="text-xl font-semibold tabular-nums">{dist.none}</span> no data
                 </li>
               </ul>
             </Card>
             <Card title="Data quality">
-              <p className="text-sm text-slate-700">
+              <p className="text-sm text-muted-foreground">
                 {lowCoverage} of {data.companies.length} companies have at least one pillar with no scoreable KPI.
                 Missing or not-yet-due KPIs are excluded and remaining weights rescaled — never treated as zero.
               </p>
               {data.no_source_kpis.length > 0 && (
-                <p className="mt-2 text-sm text-slate-700">
+                <p className="mt-2 text-sm text-muted-foreground">
                   <strong>{data.no_source_kpis.length} KPIs have no source</strong> ({data.no_source_kpis.map(label).join(", ")}).
                   They are excluded from every score until a source is connected.{" "}
-                  <Link href="/connections" className="underline">Connections</Link>
+                  <Link href="/connections" className="underline hover:text-foreground">Connections</Link>
                 </p>
               )}
             </Card>
@@ -112,49 +128,47 @@ function Dashboard() {
           <Card title={`Companies (${rows.length})`}
             action={
               <div className="flex gap-2 text-sm">
-                <input aria-label="Search companies" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)}
-                  className="rounded border border-slate-300 px-2 py-1" />
-                <select aria-label="Filter by status" value={filter} onChange={(e) => setFilter(e.target.value as StatusFilter)}
-                  className="rounded border border-slate-300 px-2 py-1">
-                  <option value="all">All</option><option value="red">Off track</option>
-                  <option value="amber">Needs attention</option><option value="green">On track</option>
-                  <option value="none">No data</option>
-                </select>
+                <Input aria-label="Search companies" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)}
+                  className="w-auto" />
+                <Select items={FILTER_ITEMS} value={filter} onValueChange={(v) => v != null && setFilter(v as StatusFilter)}>
+                  <SelectTrigger aria-label="Filter by status"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {FILTER_ITEMS.map((i) => <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             }>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs text-slate-500">
-                  <tr>
-                    <th className="py-2">Company</th>
-                    <th aria-sort={asc ? "ascending" : "descending"}>
-                      <button onClick={() => setAsc(!asc)} className="underline decoration-dotted">Overall {asc ? "▲" : "▼"}</button>
-                    </th>
-                    <th>Status</th>
-                    {data.group.pillars.map((p) => <th key={p.pillar} title={label(p.pillar)} className="px-1 text-center font-normal">{PILLAR_SHORT[p.pillar] ?? label(p.pillar)}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((c) => (
-                    <tr key={c.company_id} className="border-t border-slate-100">
-                      <td className="py-1.5"><Link className="hover:underline" href={`/companies/${c.company_id}`}>{c.code} · {c.name}</Link></td>
-                      <td className="tabular-nums">{fmt(c.score)}</td>
-                      <td><StatusBadge status={c.status} withheld={c.status_withheld} /></td>
-                      {c.pillars.map((p) => {
-                        const s = p.status;
-                        return (
-                          <td key={p.pillar} className="px-1 text-center">
-                            <span className={`inline-block w-12 rounded px-1 text-xs tabular-nums ring-1 ${s ? STATUS_STYLE[s] : "bg-slate-50 text-slate-400 ring-slate-100"}`}>
-                              {fmt(p.score, 0)}
-                            </span>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Company</TableHead>
+                  <TableHead aria-sort={asc ? "ascending" : "descending"}>
+                    <Button variant="link" size="xs" onClick={() => setAsc(!asc)} className="px-0 decoration-dotted">Overall {asc ? "▲" : "▼"}</Button>
+                  </TableHead>
+                  <TableHead>Status</TableHead>
+                  {data.group.pillars.map((p) => <TableHead key={p.pillar} title={label(p.pillar)} className="px-1 text-center font-normal">{PILLAR_SHORT[p.pillar] ?? label(p.pillar)}</TableHead>)}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((c) => (
+                  <TableRow key={c.company_id}>
+                    <TableCell><Link className="hover:underline" href={`/companies/${c.company_id}`}>{c.code} · {c.name}</Link></TableCell>
+                    <TableCell className="tabular-nums">{fmt(c.score)}</TableCell>
+                    <TableCell><StatusBadge status={c.status} withheld={c.status_withheld} /></TableCell>
+                    {c.pillars.map((p) => {
+                      const s = p.status;
+                      return (
+                        <TableCell key={p.pillar} className="px-1 text-center">
+                          <span className={cn("inline-block w-12 rounded-md border px-1 text-xs tabular-nums", s ? STATUS_STYLE[s] : "bg-muted text-muted-foreground")}>
+                            {fmt(p.score, 0)}
+                          </span>
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Card>
         </>
       )}

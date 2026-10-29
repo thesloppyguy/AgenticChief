@@ -3,6 +3,8 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import ReportView from "@/components/ReportView";
 import PinButton from "@/components/PinButton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Card, Loading } from "@/components/ui";
 import { API_URL, api, download, getToken } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
@@ -46,32 +48,32 @@ export default function RunPage({ params }: { params: Promise<{ id: string }> })
 
   return (
     <div className="max-w-5xl space-y-6">
-      <Link href="/reports" className="text-sm text-slate-500 hover:underline">← Reports</Link>
+      <Link href="/reports" className="text-sm text-muted-foreground hover:underline">← Reports</Link>
       <Loading error={error} loading={loading && !data} />
       {data && (
         <>
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <h1 className="text-2xl font-semibold">Monthly review <span className="text-base font-normal text-slate-500">{data.period} · run #{data.id} · {data.status}</span></h1>
-            <div className="flex gap-2 text-sm">
+            <h1 className="text-2xl font-semibold">Monthly review <span className="text-base font-normal text-muted-foreground">{data.period} · run #{data.id} · {data.status}</span></h1>
+            <div className="flex gap-2">
               <PinButton kind="run" target={id} />
               {data.status === "succeeded" && <>
-                <button onClick={() => download(`/workflows/runs/${id}/pdf`, `monthly-review-${data.period}.pdf`).catch((e) => setMsg({ ok: false, text: e.message }))} className="rounded border border-slate-300 px-3 py-1.5">Download PDF</button>
-                <button onClick={download_md} className="rounded border border-slate-300 px-3 py-1.5">Download Markdown</button>
-                <button onClick={publish} className="rounded bg-slate-900 px-3 py-1.5 text-white">Propose publishing</button></>}
-              {(data.status === "failed" || data.status === "interrupted") && <button onClick={resume} className="rounded bg-slate-900 px-3 py-1.5 text-white">Resume</button>}
+                <Button variant="outline" size="sm" onClick={() => download(`/workflows/runs/${id}/pdf`, `monthly-review-${data.period}.pdf`).catch((e) => setMsg({ ok: false, text: e.message }))} >Download PDF</Button>
+                <Button variant="outline" size="sm" onClick={download_md}>Download Markdown</Button>
+                <Button size="sm" onClick={publish}>Propose publishing</Button></>}
+              {(data.status === "failed" || data.status === "interrupted") && <Button size="sm" onClick={resume}>Resume</Button>}
             </div>
           </div>
-          {msg && <p role={msg.ok ? "status" : "alert"} className={`text-sm ${msg.ok ? "text-emerald-700" : "text-red-700"}`}>
-            {msg.text} {msg.href && <Link href={msg.href} className="underline">Open request</Link>}</p>}
+          {msg && <Alert variant={msg.ok ? "default" : "destructive"} role={msg.ok ? "status" : "alert"}><AlertDescription className={msg.ok ? "text-success" : undefined}>
+            {msg.text} {msg.href && <Link href={msg.href} className="underline">Open request</Link>}</AlertDescription></Alert>}
           {data.status !== "succeeded" && (
             <Card title="Progress">
               <ol className="space-y-1 text-sm">
                 {data.steps.map((s) => (
-                  <li key={s.key} className={s.done ? "text-emerald-800" : "text-slate-500"}>{s.done ? "✓" : "○"} {s.label}</li>
+                  <li key={s.key} className={s.done ? "text-success" : "text-muted-foreground"}>{s.done ? "✓" : "○"} {s.label}</li>
                 ))}
               </ol>
-              {data.error && <p role="alert" className="mt-3 text-sm text-red-700">Stopped with {data.error}. Finished steps are kept; Resume continues from the next one.</p>}
-              {data.status === "interrupted" && <p className="mt-3 text-sm text-slate-600">The worker stopped. Resume continues from the last finished step.</p>}
+              {data.error && <Alert variant="destructive" role="alert" className="mt-3"><AlertDescription>Stopped with {data.error}. Finished steps are kept; Resume continues from the next one.</AlertDescription></Alert>}
+              {data.status === "interrupted" && <p className="mt-3 text-sm text-muted-foreground">The worker stopped. Resume continues from the last finished step.</p>}
             </Card>
           )}
           {data.result && <ReportView r={data.result} />}

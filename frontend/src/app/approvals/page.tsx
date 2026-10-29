@@ -3,20 +3,30 @@ import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { usePeriod } from "@/components/AppShell";
 import { Card, Loading } from "@/components/ui";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { label } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import type { ActionDef, Approval } from "@/lib/types";
 
 const STATUS: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-800 ring-amber-200", executed: "bg-emerald-50 text-emerald-800 ring-emerald-200",
-  approved: "bg-emerald-50 text-emerald-800 ring-emerald-200", rejected: "bg-slate-100 text-slate-700 ring-slate-300",
-  denied: "bg-red-50 text-red-800 ring-red-200", failed: "bg-red-50 text-red-800 ring-red-200",
-  changes_requested: "bg-blue-50 text-blue-800 ring-blue-200",
+  pending: "border-warning/30 bg-warning/10 text-warning", executed: "border-success/30 bg-success/10 text-success",
+  approved: "border-success/30 bg-success/10 text-success", rejected: "bg-muted text-muted-foreground",
+  denied: "border-destructive/30 bg-destructive/10 text-destructive", failed: "border-destructive/30 bg-destructive/10 text-destructive",
+  changes_requested: "bg-secondary text-secondary-foreground",
 };
 const Pill = ({ s }: { s: string }) => (
-  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${STATUS[s] ?? ""}`}>{label(s)}</span>
+  <Badge variant="outline" className={cn(STATUS[s])}>{label(s)}</Badge>
 );
+
+const ALL = "all";  // Select values cannot be empty; maps to "no filter"
 
 function Detail({ id, onChange }: { id: number; onChange: () => void }) {
   const { data, error, loading, reload } = useApi<Approval>(`/approvals/${id}`);
@@ -38,33 +48,36 @@ function Detail({ id, onChange }: { id: number; onChange: () => void }) {
         <div className="space-y-3 text-sm">
           <div className="flex items-center gap-2"><Pill s={data.status} /><span className="font-medium">{data.summary}</span></div>
           <dl className="grid grid-cols-2 gap-2">
-            <div><dt className="text-slate-500">Requested by</dt><dd>{data.requested_by}{data.via === "copilot" ? " (via Copilot)" : ""}</dd></div>
-            <div><dt className="text-slate-500">Risk</dt><dd>{label(data.risk)}</dd></div>
+            <div><dt className="text-muted-foreground">Requested by</dt><dd>{data.requested_by}{data.via === "copilot" ? " (via Copilot)" : ""}</dd></div>
+            <div><dt className="text-muted-foreground">Risk</dt><dd>{label(data.risk)}</dd></div>
           </dl>
-          {data.context?.reason && <p><span className="text-slate-500">Reason: </span>{data.context.reason}</p>}
-          <div><div className="text-xs text-slate-500">Arguments</div>
-            <pre className="overflow-x-auto rounded bg-slate-50 p-2 text-xs">{JSON.stringify(data.args, null, 2)}</pre></div>
+          {data.context?.reason && <p><span className="text-muted-foreground">Reason: </span>{data.context.reason}</p>}
+          <div><div className="text-xs text-muted-foreground">Arguments</div>
+            <pre className="overflow-x-auto rounded-md bg-muted p-2 text-xs">{JSON.stringify(data.args, null, 2)}</pre></div>
           {data.context && Object.keys(data.context).filter((k) => k !== "reason").length > 0 && (
-            <div><div className="text-xs text-slate-500">What you are approving (checked by the server)</div>
-              <pre className="overflow-x-auto rounded bg-amber-50 p-2 text-xs">{JSON.stringify(Object.fromEntries(Object.entries(data.context).filter(([k]) => k !== "reason")), null, 2)}</pre></div>
+            <div><div className="text-xs text-muted-foreground">What you are approving (checked by the server)</div>
+              <pre className="overflow-x-auto rounded-md border border-warning/30 bg-warning/10 p-2 text-xs">{JSON.stringify(Object.fromEntries(Object.entries(data.context).filter(([k]) => k !== "reason")), null, 2)}</pre></div>
           )}
-          {data.decision_comment && <p><span className="text-slate-500">Comment: </span>{data.decision_comment}</p>}
-          {data.result && <p><span className="text-slate-500">Result: </span><code>{JSON.stringify(data.result)}</code></p>}
+          {data.decision_comment && <p><span className="text-muted-foreground">Comment: </span>{data.decision_comment}</p>}
+          {data.result && <p><span className="text-muted-foreground">Result: </span><code>{JSON.stringify(data.result)}</code></p>}
           {data.status === "pending" && (
-            <div className="space-y-2 border-t border-slate-100 pt-3">
-              <label className="block">Comment (required to reject or request changes)
-                <input value={comment} onChange={(e) => setComment(e.target.value)} className="mt-1 w-full rounded border border-slate-300 px-2 py-1" />
-              </label>
-              <div className="flex gap-2">
-                <button onClick={() => decide("approve")} className="rounded bg-emerald-700 px-3 py-1.5 text-white">Approve and run</button>
-                <button onClick={() => decide("request_changes")} className="rounded border border-slate-300 px-3 py-1.5">Request changes</button>
-                <button onClick={() => decide("reject")} className="rounded border border-red-300 px-3 py-1.5 text-red-800">Reject</button>
+            <div className="space-y-2">
+              <Separator />
+              <div className="space-y-1 pt-1">
+                <Label htmlFor={`comment-${id}`}>Comment (required to reject or request changes)</Label>
+                <Input id={`comment-${id}`} value={comment} onChange={(e) => setComment(e.target.value)} />
               </div>
-              <p className="text-xs text-slate-500">Only admins can decide, and not on their own requests. The server enforces both.</p>
+              <div className="flex gap-2">
+                <Button onClick={() => decide("approve")}>Approve and run</Button>
+                <Button variant="outline" onClick={() => decide("request_changes")}>Request changes</Button>
+                <Button variant="destructive" onClick={() => decide("reject")}>Reject</Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Only admins can decide, and not on their own requests. The server enforces both.</p>
             </div>
           )}
-          {msg && <p role="alert" className="text-red-700">{msg}</p>}
-          <ol className="border-t border-slate-100 pt-3 text-xs text-slate-600">
+          {msg && <Alert variant="destructive"><AlertDescription>{msg}</AlertDescription></Alert>}
+          <Separator />
+          <ol className="text-xs text-muted-foreground">
             {data.events?.map((e, i) => (
               <li key={i}>{new Date(e.at).toLocaleString()} · {e.actor} · {label(e.event)}{e.comment ? ` — ${e.comment}` : ""}</li>
             ))}
@@ -98,25 +111,42 @@ function NewRequest({ onCreated }: { onCreated: (id: number) => void }) {
       onCreated(r.approval.id);
     } catch (err) { setMsg({ ok: false, text: err instanceof Error ? err.message : "Failed" }); }
   }
-  const input = "mt-1 w-full rounded border border-slate-300 px-2 py-1";
+  const actionItems = (actions.data ?? []).map((a) => ({ value: a.key, label: label(a.key) }));
   return (
     <Card title="New request">
       <form onSubmit={submit} className="space-y-3 text-sm">
-        <label className="block">Action
-          <select value={action} onChange={(e) => setAction(e.target.value)} className={input}>
-            {actions.data?.map((a) => <option key={a.key} value={a.key}>{label(a.key)}</option>)}
-          </select>
-        </label>
-        <p className="text-xs text-slate-500">{actions.data?.find((a) => a.key === action)?.description} Period: {period}.</p>
+        <div className="space-y-1">
+          <Label htmlFor="action">Action</Label>
+          <Select items={actionItems} value={action} onValueChange={(v) => v != null && setAction(v)}>
+            <SelectTrigger id="action" className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {actionItems.map((a) => <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-xs text-muted-foreground">{actions.data?.find((a) => a.key === action)?.description} Period: {period}.</p>
         {action === "send_kpi_reminder" && (
           <>
-            <label className="block">Company codes (comma-separated, max 5)<input required value={codes} onChange={(e) => setCodes(e.target.value)} placeholder="IC001, IC002" className={input} /></label>
-            <label className="block">KPI (optional key, e.g. kra_submission)<input value={kpi} onChange={(e) => setKpi(e.target.value)} className={input} /></label>
-            <label className="block">Note (optional)<input maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} className={input} /></label>
+            <div className="space-y-1">
+              <Label htmlFor="codes">Company codes (comma-separated, max 5)</Label>
+              <Input id="codes" required value={codes} onChange={(e) => setCodes(e.target.value)} placeholder="IC001, IC002" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="kpi">KPI (optional key, e.g. kra_submission)</Label>
+              <Input id="kpi" value={kpi} onChange={(e) => setKpi(e.target.value)} />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="note">Note (optional)</Label>
+              <Input id="note" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
+            </div>
           </>
         )}
-        {msg && <p role={msg.ok ? "status" : "alert"} className={msg.ok ? "text-emerald-700" : "text-red-700"}>{msg.text}</p>}
-        <button className="rounded bg-slate-900 px-4 py-2 text-white">Submit</button>
+        {msg && (
+          <Alert role={msg.ok ? "status" : "alert"} variant={msg.ok ? "default" : "destructive"} className={cn(msg.ok && "text-success")}>
+            <AlertDescription className={cn(msg.ok && "text-success")}>{msg.text}</AlertDescription>
+          </Alert>
+        )}
+        <Button type="submit">Submit</Button>
       </form>
     </Card>
   );
@@ -127,6 +157,7 @@ function Inner() {
   const router = useRouter();
   const [status, setStatus] = useState("");
   const list = useApi<Approval[]>(`/approvals${status ? `?status=${status}` : ""}`);
+  const statusItems = [{ value: ALL, label: "All" }, ...Object.keys(STATUS).map((s) => ({ value: s, label: label(s) }))];
   const selected = params.get("id") ? Number(params.get("id")) : null;
 
   return (
@@ -135,26 +166,28 @@ function Inner() {
         <h1 className="text-2xl font-semibold">Approvals</h1>
         <Card title="Requests"
           action={
-            <select aria-label="Filter by status" value={status} onChange={(e) => setStatus(e.target.value)} className="rounded border border-slate-300 px-2 py-1 text-sm">
-              <option value="">All</option>
-              {Object.keys(STATUS).map((s) => <option key={s} value={s}>{label(s)}</option>)}
-            </select>
+            <Select items={statusItems} value={status || ALL} onValueChange={(v) => v != null && setStatus(v === ALL ? "" : v)}>
+              <SelectTrigger aria-label="Filter by status"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {statusItems.map((i) => <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
           }>
           <Loading error={list.error} loading={list.loading} />
-          <ul className="divide-y divide-slate-100 text-sm">
+          <ul className="divide-y text-sm">
             {list.data?.map((a) => (
               <li key={a.id}>
-                <button onClick={() => router.replace(`/approvals?id=${a.id}`)} className={`flex w-full items-center justify-between gap-2 py-2 text-left hover:bg-slate-50 ${a.id === selected ? "bg-slate-50" : ""}`}>
+                <Button variant="ghost" onClick={() => router.replace(`/approvals?id=${a.id}`)} className={cn("h-auto w-full justify-between gap-2 py-2 text-left font-normal", a.id === selected && "bg-muted")}>
                   <span className="truncate">#{a.id} · {a.summary}</span><Pill s={a.status} />
-                </button>
+                </Button>
               </li>
             ))}
-            {list.data?.length === 0 && <li className="py-2 text-slate-500">No requests.</li>}
+            {list.data?.length === 0 && <li className="py-2 text-muted-foreground">No requests.</li>}
           </ul>
         </Card>
         <NewRequest onCreated={(id) => { list.reload(); router.replace(`/approvals?id=${id}`); }} />
       </div>
-      <div className="pt-0 md:pt-11">{selected ? <Detail key={selected} id={selected} onChange={list.reload} /> : <p className="text-sm text-slate-500">Select a request to see its history.</p>}</div>
+      <div className="pt-0 md:pt-11">{selected ? <Detail key={selected} id={selected} onChange={list.reload} /> : <p className="text-sm text-muted-foreground">Select a request to see its history.</p>}</div>
     </div>
   );
 }

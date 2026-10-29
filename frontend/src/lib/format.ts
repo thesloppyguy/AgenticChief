@@ -24,9 +24,9 @@ export const STATUS_TEXT: Record<string, string> = {
 
 // Colour is never the only signal: every status also renders its text label.
 export const STATUS_STYLE: Record<string, string> = {
-  green: "bg-emerald-50 text-emerald-800 ring-emerald-200",
-  amber: "bg-amber-50 text-amber-800 ring-amber-200",
-  red: "bg-red-50 text-red-800 ring-red-200",
+  green: "border-success/30 bg-success/10 text-success",
+  amber: "border-warning/30 bg-warning/10 text-warning",
+  red: "border-destructive/30 bg-destructive/10 text-destructive",
 };
 
 export const currentPeriod = () => {

@@ -1,6 +1,12 @@
 "use client";
 import { useState } from "react";
 import { usePeriod } from "@/components/AppShell";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { label } from "@/lib/format";
@@ -34,59 +40,75 @@ export default function Inputs() {
     }
   }
 
-  const input = "w-full rounded border border-slate-300 px-2 py-1";
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold">Manual inputs <span className="text-base font-normal text-slate-500">{period}</span></h1>
-      <p className="text-sm text-slate-600">Editors only. Every change keeps the previous value, who changed it and when.</p>
+      <h1 className="text-2xl font-semibold">Manual inputs <span className="text-base font-normal text-muted-foreground">{period}</span></h1>
+      <p className="text-sm text-muted-foreground">Editors only. Every change keeps the previous value, who changed it and when.</p>
       <Loading error={companies.error} loading={companies.loading} />
       <Card>
         <form onSubmit={submit} className="space-y-3 text-sm">
-          <label className="block">Company
-            <select required value={companyId} onChange={(e) => setCompanyId(e.target.value)} className={input}>
-              <option value="">Select…</option>
-              {companies.data?.map((c) => <option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}
-            </select>
-          </label>
-          <label className="block">KPI
-            <select value={kpi} onChange={(e) => setKpi(e.target.value)} className={input}>
-              {KPIS.map((k) => <option key={k} value={k}>{label(k)}</option>)}
-            </select>
-          </label>
+          <div className="space-y-1">
+            <Label htmlFor="in-company">Company</Label>
+            <Select value={companyId} onValueChange={(v) => setCompanyId(v ?? "")}
+              items={companies.data?.map((c) => ({ value: String(c.id), label: `${c.code} · ${c.name}` })) ?? []}>
+              <SelectTrigger id="in-company" className="w-full"><SelectValue placeholder="Select…" /></SelectTrigger>
+              <SelectContent>
+                {companies.data?.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.code} · {c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="in-kpi">KPI</Label>
+            <Select value={kpi} onValueChange={(v) => { if (v) setKpi(v); }}
+              items={KPIS.map((k) => ({ value: k, label: label(k) }))}>
+              <SelectTrigger id="in-kpi" className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {KPIS.map((k) => <SelectItem key={k} value={k}>{label(k)}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
           {kpi === "cost_per_hire" && (
             <div className="grid grid-cols-2 gap-3">
-              <label>Recruitment cost (₹)<input required type="number" min="0" value={f.cost} onChange={(e) => setF({ ...f, cost: e.target.value })} className={input} /></label>
-              <label>Hires<input required type="number" min="0" step="1" value={f.hires} onChange={(e) => setF({ ...f, hires: e.target.value })} className={input} /></label>
+              <div className="space-y-1"><Label htmlFor="in-cost">Recruitment cost (₹)</Label><Input id="in-cost" required type="number" min="0" value={f.cost} onChange={(e) => setF({ ...f, cost: e.target.value })} /></div>
+              <div className="space-y-1"><Label htmlFor="in-hires">Hires</Label><Input id="in-hires" required type="number" min="0" step="1" value={f.hires} onChange={(e) => setF({ ...f, hires: e.target.value })} /></div>
             </div>
           )}
           {kpi === "top_talent_review" && (
             <div className="grid grid-cols-2 gap-3">
-              <label>Review held<select value={f.reviewed} onChange={(e) => setF({ ...f, reviewed: e.target.value })} className={input}><option value="true">Yes</option><option value="false">No</option></select></label>
-              <label>Date<input type="date" required={f.reviewed === "true"} value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} className={input} /></label>
+              <div className="space-y-1">
+                <Label htmlFor="in-held">Review held</Label>
+                <Select value={f.reviewed} onValueChange={(v) => { if (v) setF({ ...f, reviewed: v }); }}
+                  items={[{ value: "true", label: "Yes" }, { value: "false", label: "No" }]}>
+                  <SelectTrigger id="in-held" className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="true">Yes</SelectItem><SelectItem value="false">No</SelectItem></SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1"><Label htmlFor="in-date">Date</Label><Input id="in-date" type="date" required={f.reviewed === "true"} value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></div>
             </div>
           )}
           {(kpi === "idps_top_talent" || kpi === "gptw_score") && (
-            <label className="block">{kpi === "gptw_score" ? "Trust Index score" : "IDPs created (year to date)"}
-              <input required type="number" min="0" step="any" value={f.value} onChange={(e) => setF({ ...f, value: e.target.value })} className={input} />
-            </label>
+            <div className="space-y-1">
+              <Label htmlFor="in-value">{kpi === "gptw_score" ? "Trust Index score" : "IDPs created (year to date)"}</Label>
+              <Input id="in-value" required type="number" min="0" step="any" value={f.value} onChange={(e) => setF({ ...f, value: e.target.value })} />
+            </div>
           )}
-          {msg && <p role={msg.ok ? "status" : "alert"} className={msg.ok ? "text-emerald-700" : "text-red-700"}>{msg.text}</p>}
-          <button className="rounded bg-slate-900 px-4 py-2 text-white">Save</button>
+          {msg && <Alert variant={msg.ok ? "default" : "destructive"} role={msg.ok ? "status" : "alert"}><AlertDescription className={msg.ok ? "text-success" : undefined}>{msg.text}</AlertDescription></Alert>}
+          <Button type="submit" disabled={!companyId}>Save</Button>
         </form>
       </Card>
       {hist.data && hist.data.length > 0 && (
         <Card title="Change history">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs text-slate-500"><tr><th>When</th><th>KPI</th><th>Period</th><th>By</th><th>Old → New</th></tr></thead>
-            <tbody>
+          <Table>
+            <TableHeader><TableRow><TableHead>When</TableHead><TableHead>KPI</TableHead><TableHead>Period</TableHead><TableHead>By</TableHead><TableHead>Old → New</TableHead></TableRow></TableHeader>
+            <TableBody>
               {hist.data.map((h, i) => (
-                <tr key={i} className="border-t border-slate-100">
-                  <td>{new Date(h.at).toLocaleString()}</td><td>{label(h.kpi_key)}</td><td>{h.period}</td><td>{h.user}</td>
-                  <td className="tabular-nums">{h.old?.achievement ?? "—"} → {h.new.achievement ?? "—"}</td>
-                </tr>
+                <TableRow key={i}>
+                  <TableCell>{new Date(h.at).toLocaleString()}</TableCell><TableCell>{label(h.kpi_key)}</TableCell><TableCell>{h.period}</TableCell><TableCell>{h.user}</TableCell>
+                  <TableCell className="tabular-nums">{h.old?.achievement ?? "—"} → {h.new.achievement ?? "—"}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </Card>
       )}
     </div>

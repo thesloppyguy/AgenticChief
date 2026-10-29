@@ -100,3 +100,6 @@ The Copilot and AI paths are tested with scripted fake clients; nothing in the t
 - **Golden test against the Excel prototype**: needs the workbook (only its image is in the repo). `tests/unit/test_prototype_conformance.py` covers the stated rules instead.
 - Live source adapters are verified against the AI-generated endpoints and mocks, not real tenants.
 - SQLite means one API instance; moving to Postgres is possible (the migrations render for it) but is untested.
+
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYtYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJjb21wYW5pZXMiOm51bGx9.IyoI8D6wGN1llm_aJ4lqzVHwI_5ff105ho7iXotRzV8

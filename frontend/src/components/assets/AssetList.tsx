@@ -1,16 +1,22 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, Loading } from "@/components/ui";
 import { api, getClaims } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import { type AssetSummary, type Kind, TEMPLATES } from "./types";
 
 const LIFE: Record<string, string> = {
-  published: "bg-emerald-50 text-emerald-800 ring-emerald-200", validated: "bg-blue-50 text-blue-800 ring-blue-200",
-  draft: "bg-slate-50 text-slate-700 ring-slate-300", update_pending: "bg-amber-50 text-amber-800 ring-amber-200", deprecated: "bg-slate-100 text-slate-500 ring-slate-300",
+  published: "border-success/30 bg-success/10 text-success", validated: "border-primary/30 bg-primary/10 text-primary",
+  draft: "text-muted-foreground", update_pending: "border-warning/30 bg-warning/10 text-warning", deprecated: "bg-muted text-muted-foreground",
 };
-export const Life = ({ v }: { v: string }) => <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${LIFE[v] ?? ""}`}>{v.replace("_", " ")}</span>;
+export const Life = ({ v }: { v: string }) => <Badge variant="outline" className={LIFE[v] ?? ""}>{v.replace("_", " ")}</Badge>;
 
 export default function AssetList({ kind }: { kind: Kind }) {
   const me = getClaims();
@@ -29,11 +35,10 @@ export default function AssetList({ kind }: { kind: Kind }) {
       reload();
     } catch (err) { setMsg(err instanceof SyntaxError ? "The definition is not valid JSON." : err instanceof Error ? err.message : "Failed"); }
   }
-  const input = "mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm";
   return (
     <div className="max-w-4xl space-y-6">
       <h1 className="text-2xl font-semibold">{plural}</h1>
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-muted-foreground">
         {kind === "skill" ? "A skill is a reusable task: typed inputs, the tools it may use, and instructions. Run one with a few clicks."
           : "An agent is a specialist: its own instructions, tools and model. Pick one in Ask Copilot."}{" "}
         New ones start as drafts, are validated, and go live only after a second admin approves.
@@ -41,24 +46,24 @@ export default function AssetList({ kind }: { kind: Kind }) {
       <Loading error={error} loading={loading && !data} />
       <ul className="grid gap-3 md:grid-cols-2">
         {data?.map((a) => (
-          <li key={a.key} className="rounded-lg border border-slate-200 bg-white p-4">
+          <li key={a.key} className="rounded-lg border bg-card p-4">
             <div className="flex items-start justify-between gap-2"><Link href={`/${kind}s/${a.key}`} className="font-medium hover:underline">{a.name}</Link><Life v={a.lifecycle} /></div>
-            <p className="mt-1 text-sm text-slate-600">{a.description}</p>
-            <p className="mt-2 text-xs text-slate-500">{a.builtin ? "Built in · " : ""}tools: {a.tools.join(", ") || "none"}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{a.description}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{a.builtin ? "Built in · " : ""}tools: {a.tools.join(", ") || "none"}</p>
           </li>))}
-        {data?.length === 0 && <li className="text-sm text-slate-500">None yet.</li>}
+        {data?.length === 0 && <li className="text-sm text-muted-foreground">None yet.</li>}
       </ul>
       {canAuthor && (
         <Card title={`New ${kind}`}>
           <form onSubmit={create} className="space-y-3 text-sm">
             <div className="grid grid-cols-2 gap-3">
-              <label>Key (letters, digits, underscores)<input required value={f.key} onChange={(e) => setF({ ...f, key: e.target.value })} className={input} /></label>
-              <label>Name<input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} className={input} /></label>
+              <div className="flex flex-col items-start gap-1.5"><Label htmlFor="asset-key">Key (letters, digits, underscores)</Label><Input id="asset-key" required value={f.key} onChange={(e) => setF({ ...f, key: e.target.value })} /></div>
+              <div className="flex flex-col items-start gap-1.5"><Label htmlFor="asset-name">Name</Label><Input id="asset-name" required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
             </div>
-            <label className="block">Description<input value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} className={input} /></label>
-            <label className="block">Definition (JSON)<textarea rows={12} value={f.definition} onChange={(e) => setF({ ...f, definition: e.target.value })} className={`${input} font-mono text-xs`} /></label>
-            {msg && <p role="status" className="text-slate-700">{msg}</p>}
-            <button className="rounded bg-slate-900 px-3 py-1.5 text-white">Create draft</button>
+            <div className="flex flex-col items-start gap-1.5"><Label htmlFor="asset-desc">Description</Label><Input id="asset-desc" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></div>
+            <div className="flex flex-col items-start gap-1.5"><Label htmlFor="asset-def">Definition (JSON)</Label><Textarea id="asset-def" rows={12} value={f.definition} onChange={(e) => setF({ ...f, definition: e.target.value })} className="font-mono text-xs" /></div>
+            {msg && <Alert role="status"><AlertDescription>{msg}</AlertDescription></Alert>}
+            <Button type="submit">Create draft</Button>
           </form>
         </Card>)}
     </div>
