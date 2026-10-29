@@ -1,0 +1,38 @@
+{
+  "new_hire_retention_12m": {
+    "fields": {
+      "cohort": "cohort",
+      "retained": "retained"
+    },
+    "params": {
+      "company": "{company_code}",
+      "period": "{period}"
+    },
+    "path": "/mock-sources/peoplestrong/api/v1/recruitment/new-hire-retention-12m",
+    "result_path": "data"
+  },
+  "offer_to_joining": {
+    "fields": {
+      "joined": "joined",
+      "offers": "offers"
+    },
+    "params": {
+      "company": "{company_code}",
+      "period": "{period}"
+    },
+    "path": "/mock-sources/peoplestrong/api/v1/recruitment/offer-to-joining",
+    "result_path": "data"
+  },
+  "time_to_fill": {
+    "fields": {
+      "avg_days": "avg_days",
+      "positions_closed": "positions_closed"
+    },
+    "params": {
+      "company": "{company_code}",
+      "period": "{period}"
+    },
+    "path": "/mock-sources/peoplestrong/api/v1/recruitment/time-to-fill",
+    "result_path": "data"
+  }
+}

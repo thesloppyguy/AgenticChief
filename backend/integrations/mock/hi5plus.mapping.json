@@ -1,0 +1,14 @@
+{
+  "platform_adoption": {
+    "fields": {
+      "active_employees": "activeEmployees",
+      "unique_logins": "uniqueLogins"
+    },
+    "params": {
+      "entity": "{company_code}",
+      "ym": "{period}"
+    },
+    "path": "/mock-sources/hi5plus/engagement/adoption",
+    "result_path": "result.adoption"
+  }
+}

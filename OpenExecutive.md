@@ -1,0 +1,802 @@
+# Open Executive
+
+Project reference: [https://github.com/SenteLabsAI/OpenExecutive](https://github.com/SenteLabsAI/OpenExecutive)
+
+Open Executive is designed to transform leadership and management. Highly configurable, it can be deployed at any management level. Out of the box it supports spend approval thresholds, integration with corporate knowledge systems, and defined governance for how it interacts with human colleagues and other AI systems. Open Executive can also act as a busy leader's digital twin: with **Act as me** switched on, it drafts email in their own voice, from their own Gmail, for them to review and send—so leaders can truly scale their impact through AI without giving up the final say.
+
+It meets people where they already work, with integrations for Slack, Discord, Telegram, Google Chat, email, Google Workspace, Microsoft 365 (Outlook mail and calendar, OneDrive), Notion, Confluence and any MCP-compatible AI tool, with more on the roadmap. Open Executive will always be open source.
+
+## What It Does
+
+Developed by [sentelabs.ai](https://sentelabs.ai) Open Executive provides a single coherent executive voice backed by nine specialist AI agents:
+
+- **Chief Strategy Officer** — competitive analysis, M&A, market positioning, OKRs
+- **Chief Financial Officer** — financial modeling, fundraising, unit economics, cash flow
+- **Chief HR/People Officer** — hiring, compensation, performance, culture
+- **General Counsel** — contracts, IP, employment law basics, compliance
+- **Chief Operating Officer** — process design, vendor management, operational scaling
+- **Chief Marketing Officer** — GTM strategy, brand, communications, PR
+- **Chief Product Officer** — roadmap, prioritization, product strategy
+- **Head of Sales** — pipeline and qualification, founder-led sales, pricing conversations, proposals, forecasting
+- **Board Communications Director** — board decks, investor relations, governance
+
+All responses come from one consistent executive voice. The internal agent architecture is never exposed to the user. Beyond Q&A, the system maintains episodic memory of past decisions and initiatives across sessions, and a built-in scheduler can proactively surface follow-ups and time-sensitive actions.
+
+## Architecture
+
+```
+User message
+    ↓
+Executive Orchestrator (claude-sonnet-5-5)
+    ↓ tool use → parallel specialist calls
+CSO / CFO / CHRO / GC / COO / CMO / CPO / Board
+    ↓ each specialist retrieves relevant context from ChromaDB
+Built-in MBA knowledge + Your company documents
+    ↓
+Synthesized executive response
+```
+
+**Knowledge** — Two retrieval layers per specialist call: (1) built-in MBA-level Markdown (`knowledge/builtin/`, git-tracked) seeded into ChromaDB at startup, and (2) your uploaded company documents chunked and stored in a separate `company_docs` collection. RAG context is injected into the user turn, never the cached system prompt.
+
+**Episodic memory** — After every response, a background `claude-haiku-5-5` pass extracts key decisions, initiatives, and advice into SQLite. The next session opens with a `<past_decisions>` block so the Executive remembers what it recommended last month.
+
+**Always in the loop** — Each person can turn on "Keep track of what happens" (Settings → Memory). The Executive then keeps private, dated notes of what they said, in chat where it can confirm it's them (the web app signed in, their own Slack or Discord, Telegram with a webhook secret) and in Act as me replies they send. Every note rests on their own words, checked word for word. Only they see it, in Memories → History, where they can correct, pin or forget it. Notes are read back only to them, in a private chat, and expire after 90 days by default (the owner can change this). The owner's morning brief and evening digest include what the owner's own notes say is due, and anyone with notes on gets a short reminder on the day something they promised by email is due. It needs no setup and no extra service.
+
+**Scheduler** — A built-in job runner claims due actions via `UPDATE … RETURNING` to prevent double-firing. The API must run as a single instance; do not horizontally scale it without gating the scheduler first.
+
+**Prompt caching** — The system prompt is structured so the Executive persona, company profile, and knowledge index are cached separately (up to 85% cache hit rate after the first few turns). No dynamic content ever goes in a cached block.
+
+# Open Executive — Technical Architecture
+
+
+
+## Overview
+
+Open Executive is a multi-agent AI system that acts as a single coherent virtual executive team. The user always interacts with one voice — the Executive — which internally routes to domain specialist agents, retrieves relevant knowledge, and synthesizes everything into one response. The internal agent architecture is never exposed.
+
+Built on the Anthropic Claude API with native tool use. No LangGraph, no CrewAI — just Python, FastAPI, and direct Anthropic SDK calls.
+
+---
+
+
+
+## Repository Layout
+
+```
+openexecutive/
+├── packages/
+│   ├── core/                         # Python backend
+│   │   └── openexecutive/
+│   │       ├── orchestrator/         # Executive persona + routing loop
+│   │       ├── agents/               # 9 specialist agents + triage
+│   │       ├── knowledge/            # ChromaDB store + RAG pipeline
+│   │       ├── memory/               # Company profile + episodic memory
+│   │       ├── onboarding/           # Conversational interview + commit; wizard fallback
+│   │       ├── prompts/              # Persona + domain prompts + cache manager
+│   │       ├── api/                  # FastAPI app + routes
+│   │       ├── integrations/         # Slack, Email, Telegram, Google Chat
+│   │       ├── scheduler/            # Background job runner (single-instance)
+│   │       ├── alerts/               # Proactive alert triage + dispatch
+│   │       ├── workflows/            # Multi-step workflow engine
+│   │       ├── audit/                # SQLite-backed audit log
+│   │       ├── architecture/         # Self-documenting architecture module
+│   │       └── cli.py                # Click CLI
+│   └── ui/                           # Next.js 15 web UI
+├── evals/                            # Eval scenarios + LLM-as-judge runner
+├── docker/                           # Dockerfile + docker-compose.yml
+└── docs/                             # This file + deployment, setup guides
+```
+
+---
+
+
+
+## Tech Stack
+
+
+| Layer                | Choice                             | Reason                                                  |
+| -------------------- | ---------------------------------- | ------------------------------------------------------- |
+| LLM backbone         | Anthropic Claude API               | Native tool use, prompt caching, streaming              |
+| Default model        | `claude-sonnet-4-6`                | Best speed/quality ratio for most queries               |
+| Deep reasoning       | `claude-opus-4-7`                  | Strategy, finance, legal, board — high-stakes decisions |
+| Routing / extraction | `claude-haiku-5-5`                 | Intent routing and background memory extraction         |
+| Backend              | Python + FastAPI                   | Async-native, Pydantic models, auto OpenAPI docs        |
+| Package manager      | `uv`                               | Fast, reproducible                                      |
+| Vector store         | ChromaDB (local)                   | Zero-config embedded DB                                 |
+| Episodic memory      | SQLite                             | Decision continuity + alerts + audit in one file        |
+| Web UI               | Next.js 15 (App Router) + Tailwind | Streaming-ready, TypeScript                             |
+| License              | Apache 2.0                         | Permissive for commercial internal deployments          |
+
+
+---
+
+
+
+## Agent Architecture
+
+
+
+### The Executive (Orchestrator)
+
+`orchestrator/executive.py`
+
+The Executive is the only agent the user ever sees. Every user message goes through it. It decides which specialists to consult, runs them in parallel via Anthropic tool use, and synthesizes the results into one coherent executive response.
+
+The internal routing is implemented as a `consult_specialist` tool — the model decides when and which specialists to call, not hardcoded logic.
+
+### Specialist Agents
+
+`agents/`
+
+
+| Agent                   | Key           | Model               | Activates on                                                                              |
+| ----------------------- | ------------- | ------------------- | ----------------------------------------------------------------------------------------- |
+| Chief Strategy Officer  | `cso`         | `claude-opus-4-7`   | Competitive analysis, M&A, OKRs, scenario planning                                        |
+| Chief Financial Officer | `cfo`         | `claude-opus-4-7`   | Financial modeling, fundraising, unit economics                                           |
+| Chief HR/People Officer | `chro`        | `claude-sonnet-4-6` | Hiring, comp, performance, culture, org design                                            |
+| General Counsel         | `gc`          | `claude-opus-4-7`   | Contracts, IP, employment law, compliance                                                 |
+| Chief Operating Officer | `coo`         | `claude-sonnet-4-6` | Process, vendor management, operational scaling                                           |
+| Chief Marketing Officer | `cmo`         | `claude-sonnet-4-6` | GTM, brand, messaging, PR, crisis comms                                                   |
+| Chief Product Officer   | `cpo`         | `claude-sonnet-4-6` | Roadmap, prioritization, product strategy                                                 |
+| Head of Sales           | `sales`       | `DEFAULT_MODEL`     | Pipeline, qualification, founder-led sales, pricing conversations, proposals, forecasting |
+| Board Comms Director    | `board_comms` | `claude-opus-4-7`   | Board decks, investor relations, governance                                               |
+
+
+CSO, CFO, GC, and Board Comms use `extended-thinking` (`budget_tokens: 8000`) for deeper reasoning on high-stakes decisions.
+
+### Request Flow
+
+```
+User message
+    │
+    ▼
+Executive (_run_agent_loop)
+    │
+    ├── Anthropic streams response
+    │       │
+    │       └── stop_reason == "tool_use"?
+    │               │
+    │               ▼
+    │           Extract tool_use blocks
+    │               │
+    │               ▼
+    │           route_parallel(specialist_calls)
+    │               │
+    │               ├── StrategyAgent.analyze()  ─┐
+    │               ├── FinanceAgent.analyze()    ─┼── asyncio.gather (parallel)
+    │               └── ...                       ─┘
+    │               │
+    │               ▼
+    │           Inject tool_results → continue loop
+    │
+    └── stop_reason == "end_turn"
+            │
+            ▼
+        Yield full_response → SSE stream → UI
+```
+
+For cross-domain questions (e.g. "Should we raise a Series B?"), multiple specialists are called in parallel. `route_parallel` returns results as an ordered list matched to tool_use IDs — duplicate specialist calls are handled correctly.
+
+---
+
+
+
+## Prompt Caching Strategy
+
+Prompt caching is built in from the start. Cache misses on a busy session cost ~10x more per token.
+
+**Render order** (enforced in `prompts/cache_manager.py`):
+
+```
+[system]
+  1. Executive persona constant          ← cache_control: ephemeral (1h TTL)
+  2. Company profile block               ← cache_control: ephemeral (1h TTL)
+  3. Knowledge index summary             ← cache_control: ephemeral (1h TTL)
+
+[messages]
+  ... conversation history ...
+  penultimate assistant turn             ← cache_control: ephemeral (5m TTL, rolling)
+  current user turn:
+    <past_decisions>...</past_decisions>  ← NOT cached (fresh each turn)
+    <retrieved_context>...</retrieved_context>  ← NOT cached (fresh each turn)
+    user message
+```
+
+**Rules that must never be broken:**
+
+- No `datetime.now()` in any cached block — time is injected as a user message if needed
+- Tool list sorted by name before every API call
+- Company profile serialized with `sort_keys=True`
+- `EXECUTIVE_PERSONA_PROMPT` is a frozen constant — never f-stringed
+
+Expected cache hit rate: 70–85% of input tokens after the first few turns of a session.
+
+---
+
+
+
+## Knowledge Architecture
+
+Two-layer retrieval system. Both layers are queried per specialist call and injected into the **user turn** (never the system prompt, which would bust the cache).
+
+### Layer 1 — Built-in Executive Knowledge
+
+`knowledge/builtin/` (inside the Python package, shipped with the app)
+
+Curated MBA-level content seeded into ChromaDB at startup:
+
+
+| Domain     | Content                                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------------------- |
+| Strategy   | Competitive analysis frameworks, OKR methodology                                                              |
+| Finance    | Unit economics, LTV/CAC, fundraising playbooks, running a bootstrapped business on cash                       |
+| HR         | Hiring scorecards, comp philosophy, performance management, first contractor vs. first employee               |
+| Legal      | Startup legal basics, employment, IP, contracts, contractor agreements and IP assignment                      |
+| Operations | Scaling frameworks, vendor management                                                                         |
+| Marketing  | GTM playbooks, brand strategy, pricing a solo offer                                                           |
+| Sales      | Founder-led sales, qualification and pipeline, proposals and pricing conversations, follow-up and forecasting |
+| Board      | Board communication, investor relations, governance                                                           |
+
+
+Collection: `builtin_knowledge`. Seeded at startup: the whole tree on first boot, then on every later boot only the shipped docs (`knowledge/shipped_manifest.py`) that have no chunks yet, so docs added in a new release reach existing installs. Idempotent.
+
+Specialists also receive the company's stage (from `company/profile.yaml`) as a `<company_stage>` block in their user turn — never in their cached system prompt — so stage-sensitive advice (venture benchmarks vs. cash-first for a bootstrapped company) does not depend on the Executive restating it.
+
+### Layer 2 — Company-Specific Knowledge
+
+**Structured** (`company/profile.yaml`, gitignored):
+Loaded as a cached system prompt block. The Executive always has this context without a retrieval step — name, industry, stage, headcount, ARR, mission, competitors, priorities, values, financials.
+
+**Unstructured** (uploaded documents, `company/docs/`):
+PDFs, DOCX, and Markdown files ingested via `POST /documents`. Chunked at 512 words with 50-word overlap, embedded, and stored in the `company_docs` ChromaDB collection.
+
+### Retrieval at Runtime
+
+`knowledge/retriever.py`
+
+Each specialist call triggers a domain-filtered semantic search:
+
+```python
+# For a CSO query:
+retrieve(query=user_message, specialist_name="cso")
+
+# Internally:
+builtin_chunks = store.query(collection="builtin_knowledge",
+                              query=query,
+                              domain_filter=["strategy", "marketing"],
+                              n_results=5)
+company_chunks = store.query(collection="company_docs",
+                              query=query,
+                              domain_filter=["strategy", "marketing"],
+                              n_results=3)
+```
+
+Domain aliases per specialist (`DOMAIN_ALIASES` in `knowledge/retriever.py`):
+
+
+| Specialist  | Domain filter            |
+| ----------- | ------------------------ |
+| cso         | strategy, marketing      |
+| cfo         | finance, operations      |
+| chro        | hr, legal                |
+| gc          | legal, hr                |
+| coo         | operations, finance      |
+| cmo         | marketing, strategy      |
+| cpo         | product, strategy        |
+| sales       | sales, marketing         |
+| board_comms | board, finance, strategy |
+
+
+---
+
+
+
+## Memory System
+
+
+
+### Short-term (in-context)
+
+`orchestrator/session.py`
+
+Conversation history for the current session stored in `Session.conversation_history`. `get_recent_history(max_turns=20)` returns the last 40 messages, always starting on a user turn.
+
+### Episodic (SQLite)
+
+`memory/episodic.py`
+
+Persists key decisions, initiatives, advice, and scheduled actions across sessions. The same SQLite file (`episodic_memory.db`) also backs the alerts store and the audit log.
+
+```sql
+decisions         (id, timestamp, domain, summary, rationale, outcome, tags)
+initiatives       (id, title, status, created_at, updated_at, summary)
+advice_given      (id, timestamp, domain, query_summary, advice_summary)
+scheduled_actions (id, title, prompt, scheduled_for, status, channel_ref, ...)
+```
+
+**Read path:** `format_for_prompt()` returns the 8 most recent decisions and all active initiatives as a `<past_decisions>` block, injected into the user turn at session start.
+
+**Write path — LLM extraction:** After every Executive response, `schedule_extraction()` fires a background task that calls `claude-haiku-5-5` with a structured `store_memories` tool. Haiku decides whether the turn contains anything worth remembering and extracts it into typed fields. Results are written to SQLite without blocking the response stream.
+
+```
+User message + Executive response
+        │
+        ▼ (background, non-blocking)
+claude-haiku-5-5 (tool_choice: auto)
+        │
+        └── store_memories tool call (if anything worth keeping)
+                ├── decisions[]   → store_decision()
+                ├── initiatives[] → store_initiative()  (upserts by title)
+                └── advice[]      → store_advice()
+```
+
+Key design decisions:
+
+- `tool_choice: "auto"` — Haiku skips the tool entirely for idle turns (greetings, clarifying questions), avoiding noise in the DB
+- `asyncio.create_task()` in async context; daemon `threading.Thread` in sync/CLI context — never blocks
+- Strong task reference held in `_background_tasks` set to prevent GC cancellation mid-flight
+- Input capped at 20,000 chars per side to bound cost on long responses
+
+
+
+### Company Profile (structured long-term)
+
+`memory/company_profile.py`
+
+`CompanyProfile` is a Pydantic v2 model serialized to `company/profile.yaml`. Loaded at startup, cached in the system prompt. Updated through conversational onboarding, the `/company-profile` editor, or natural-language corrections.
+
+---
+
+
+
+## Scheduler
+
+`scheduler/runner.py`
+
+A background polling loop that wakes the Executive when a `scheduled_actions` row comes due.
+
+**Claim pattern:** `claim_due_actions()` uses `UPDATE … RETURNING` — the action transitions from `pending` to `running` atomically. This prevents double-firing if a stale loop somehow overlaps.
+
+**Startup sweep:** `requeue_orphaned_running()` resets any `running` rows left by a previous crash back to `pending`, so no action is permanently lost.
+
+**Single-instance constraint:** Do not run the scheduler in more than one process against the same database. Any deployment must pin the API to a single instance for exactly this reason.
+
+```
+SQLite scheduled_actions (status=pending, scheduled_for ≤ now)
+        │
+        ▼ claim_due_actions() UPDATE … RETURNING
+        │
+        ▼ asyncio.create_task(_execute_action)
+        │
+        ▼ Executive.chat(prompt=action.prompt, ...)
+        │
+        ▼ mark_action_done() / mark_action_failed_or_retry()
+```
+
+---
+
+
+
+## Alerts System
+
+`alerts/`
+
+A proactive event triage pipeline that routes incoming signals (emails, Slack messages, documents) through a `TriageAgent` before deciding whether to surface them as alerts.
+
+### Components
+
+
+| File             | Role                                                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `pipeline.py`    | Entry point — `evaluate_and_dispatch()`. Applies rate limiting (60 events/min), deduplication, runs triage                       |
+| `models.py`      | `AlertEvent`, `TriageDecision`, `Alert`, `AlertSeverity` (low/medium/high/urgent), `AlertChannel` (web/slack_dm/email/persisted) |
+| `store.py`       | SQLite read/write for alert records (same `episodic_memory.db`)                                                                  |
+| `dispatcher.py`  | Fans out to configured delivery channels                                                                                         |
+| `sse_bus.py`     | In-process SSE bus — pushes web-channel alerts to connected UI clients without polling                                           |
+| `preferences.py` | Per-channel user preferences (min severity, quiet hours)                                                                         |
+
+
+
+
+### Triage flow
+
+```
+AlertEvent (source, subject, body, external_id)
+        │
+        ▼ _rate_limited() → drop if > 60/min
+        │
+        ▼ store.is_duplicate(external_id) → skip if seen
+        │
+        ▼ TriageAgent.evaluate(event)  [claude-haiku-5-5]
+        │   → TriageDecision(alert=bool, severity, summary, suggested_action)
+        │
+        ▼ alert=True → store.create_alert() → dispatcher.send(channels)
+                                              └── sse_bus.publish() (web channel)
+```
+
+---
+
+
+
+## Workflows
+
+`workflows/`
+
+Pre-built multi-step executive deliverables. Each workflow is a subclass of `WorkflowBase` that streams `WorkflowEvent` objects — plan steps first, then intermediate summaries, then a final Markdown artifact.
+
+### Available workflows (19)
+
+
+| Workflow                                                                                                                                                                                                                                                 | Section                     |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `board_prep`                                                                                                                                                                                                                                             | Board                       |
+| `investor_update`                                                                                                                                                                                                                                        | Board / Capital & Investors |
+| `fundraising_prep`                                                                                                                                                                                                                                       | Capital & Investors         |
+| `ma_evaluation`                                                                                                                                                                                                                                          | Capital & Investors         |
+| `annual_plan`                                                                                                                                                                                                                                            | Operating Cadence           |
+| `quarterly_plan`                                                                                                                                                                                                                                         | Operating Cadence           |
+| `mbr` (monthly business review)                                                                                                                                                                                                                          | Operating Cadence           |
+| `weekly_review` (a system workflow: in solo mode the scheduler runs it every Friday afternoon and sends it to the principal — goals graded by area, what's due, quiet projects, the week's decisions, older decisions to revisit, next week's top three) | Operating Cadence           |
+| `competitive_teardown`                                                                                                                                                                                                                                   | Growth & GTM                |
+| `gtm_launch`                                                                                                                                                                                                                                             | Growth & GTM                |
+| `pricing_review`                                                                                                                                                                                                                                         | Growth & GTM                |
+| `product_strategy`                                                                                                                                                                                                                                       | Product                     |
+| `performance_review`                                                                                                                                                                                                                                     | People                      |
+| `comp_refresh`                                                                                                                                                                                                                                           | People                      |
+| `org_design`                                                                                                                                                                                                                                             | People                      |
+| `exec_search_brief`                                                                                                                                                                                                                                      | People                      |
+| `churn_deep_dive`                                                                                                                                                                                                                                        | Growth & GTM                |
+| `crisis_comms`                                                                                                                                                                                                                                           | Risk, Legal & Crisis        |
+| `risk_register`                                                                                                                                                                                                                                          | Risk, Legal & Crisis        |
+
+
+
+
+### Execution model
+
+```python
+class WorkflowBase(ABC):
+    @abstractmethod
+    async def run(self, ...) -> AsyncIterator[WorkflowEvent]: ...
+```
+
+Events are SSE-streamed to the UI. `persistence.py` stores run state in SQLite so partially-completed runs survive a server restart. The `WorkflowSection` enum drives the UI's section grouping and order.
+
+---
+
+
+
+## Audit Log
+
+`audit/logger.py`
+
+SQLite-backed append-only audit trail. Writes to the same `episodic_memory.db` file. Swallows exceptions — an audit failure must never break a chat turn.
+
+**Recorded event types:**
+
+
+| Type                  | When                                              |
+| --------------------- | ------------------------------------------------- |
+| `chat_turn`           | Every Executive response                          |
+| `specialist_consult`  | Each specialist agent called                      |
+| `tool_invocation`     | MCP tool calls                                    |
+| `scheduled_action`    | Scheduler fires an action                         |
+| `alert`               | Alert triaged and dispatched                      |
+| `integration_inbound` | Slack/Email/Telegram/Google Chat message received |
+
+
+`redaction.py` strips PII patterns (email addresses, phone numbers, credit card numbers) from summaries before storage.
+
+---
+
+
+
+## Onboarding
+
+Two paths to the same artifact — `company/profile.yaml` (gitignored) — plus
+the `people` and `departments` tables.
+
+### Conversational (default)
+
+`onboarding/interview.py`, `onboarding/commit.py`,
+`agents/onboarding_interviewer.py`
+
+The user describes their business in their own words at `/onboard`, optionally
+attaching a deck or one-pager. The `onboarding_interviewer` agent (Council-
+visible, outside `SPECIALIST_REGISTRY`) asks up to 8 clarifying questions, then
+emits a draft company profile, leadership roster, and department list. The user
+reviews and edits that draft inline — the same section editors `/company-profile`
+uses — and saves.
+
+Mechanics worth knowing:
+
+- A **constant, name-sorted two-tool array** (`ask_clarifying_question`,
+`emit_company_draft`) with `tool_choice: any`. Varying the array mid-
+conversation would invalidate the cached tool prefix on every turn.
+`tool_choice` flips to the forced emit tool exactly once, at the question or
+transcript budget, or when the user asks to draft now.
+- **The interview never writes.** State is an in-memory, TTL'd session; the
+single write is `POST /onboard/interview/commit`, ordered so a rejected save
+leaves the draft editable and retryable.
+- **Departments are reconciled additively** — matched by slug or title and
+updated in place, unmatched ones created, nothing ever deleted. Unlike the
+fixture loader, which wipes the table first and would destroy the eight
+defaults' `specialist_key` wiring.
+- **Errors never echo input.** Transcripts carry ARR, burn, and runway, so
+every failure detail is a fixed string and every log line carries an
+exception type only.
+
+
+
+### Step-by-step form (fallback)
+
+`onboarding/wizard.py` — reachable at `/onboard?mode=form` and used by the
+`openexecutive onboard` CLI.
+
+A 12-step state machine driven by regex parsing of free-text answers.
+
+
+| Step | Field                                    | Required |
+| ---- | ---------------------------------------- | -------- |
+| 0    | Company name                             | Yes      |
+| 1    | Industry & stage                         | Yes      |
+| 2    | Team size & founding year                | Yes      |
+| 3    | Business model & ARR                     | Yes      |
+| 4    | Competitors & advantages                 | Yes      |
+| 5    | Strategic priorities & north star metric | Yes      |
+| 6    | Culture & values                         | Optional |
+| 7    | Monthly burn & runway                    | Optional |
+| 8    | Mission & vision                         | Optional |
+| 9    | Your identity                            | Optional |
+| 10   | Team members                             | Optional |
+| 11   | Fractional executives                    | Optional |
+
+
+`WizardState` tracks `current_step`, `answers`, `completed`, and `skipped_steps`. `process_answer()` advances the state. `build_profile_from_answers()` parses free-text answers into structured fields.
+
+Output: `company/profile.yaml` (gitignored).
+
+---
+
+
+
+## API Endpoints
+
+`api/routes/`
+
+
+| Method                  | Path                                                        | Description                                                              |
+| ----------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `GET`                   | `/health`                                                   | Liveness check + ChromaDB status                                         |
+| `POST`                  | `/chat`                                                     | SSE streaming chat                                                       |
+| `POST/GET`              | `/onboard/interview/*`                                      | Conversational setup — start (multipart), message, draft, resume, commit |
+| `GET/POST`              | `/onboard/start`, `/onboard/answer`, `/onboard/status/{id}` | Step-by-step form fallback                                               |
+| `GET/PATCH`             | `/company-profile`                                          | Read / update company profile                                            |
+| `POST/GET/DELETE`       | `/documents`                                                | Upload, list, delete company documents                                   |
+| `GET/PATCH/DELETE`      | `/agents/*`                                                 | List agents, inspect or override model                                   |
+| `GET/POST/PATCH/DELETE` | `/memories/*`                                               | Episodic decisions and initiatives                                       |
+| `GET`                   | `/sessions/*`                                               | Session history and messages                                             |
+| `GET/POST/PUT`          | `/builtin`, `/external`                                     | Built-in knowledge management                                            |
+| `GET/PATCH/POST`        | `/workflows/*`                                              | List workflows, run, stream, manage runs                                 |
+| `GET/POST/DELETE`       | `/alerts/*`                                                 | Alert list, ack, feedback, preferences                                   |
+| `GET/POST/DELETE`       | `/scheduled/*`                                              | Scheduled actions                                                        |
+| `GET/PATCH/POST`        | `/items/*`                                                  | Knowledge review queue                                                   |
+| `GET`                   | `/audit/logs`                                               | Audit log read                                                           |
+| `GET/POST`              | `/architecture/sections/*`                                  | Self-documented architecture sections                                    |
+| `GET/POST/PUT`          | `/skills/*`                                                 | Skill registry                                                           |
+| `POST`                  | `/webhook/telegram`                                         | Telegram webhook receiver                                                |
+| `POST`                  | `/webhook/google-chat`                                      | Google Chat webhook receiver                                             |
+
+
+
+
+### Chat SSE format
+
+```
+data: {"type": "chunk", "content": "...", "session_id": "..."}
+data: {"type": "chunk", "content": "..."}
+...
+data: {"type": "done", "session_id": "..."}
+```
+
+On error:
+
+```
+data: {"type": "error", "message": "..."}
+```
+
+---
+
+
+
+## Integrations
+
+
+
+### Slack Bot
+
+`integrations/slack_bot.py`
+
+Async Bolt app in socket mode, embedded in the FastAPI lifespan (no separate process). Listens for `@OpenExecutive` mentions and direct messages, and awaits `Executive.chat()` on the application event loop. Started when both tokens are set: the lifespan connects the Socket Mode handler as a background task and closes it on shutdown.
+
+Required env vars: `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`
+
+Or events over HTTP: with `SLACK_SIGNING_SECRET` set and no `SLACK_APP_TOKEN`, the same Bolt app takes Slack's Events API at `POST /webhook/slack` (`integrations/slack_events.py`). The route checks each request's signature (and refuses one older than five minutes) before Bolt or any listener sees it, answers Slack's URL check, and acknowledges at once. The app subscribes to `app_mention`, `message.im`, `message.channels` and `message.groups`, with the scopes `app_mentions:read`, `im:history`, `channels:history` and `groups:history`. In either mode a repeated event id is dropped (Slack resends an event it thinks went unacknowledged) and so is an event delivered for another workspace.
+
+Files a rostered sender shares (PDFs, Word, spreadsheets, text, images) are read into the turn — scanned PDFs converted to text — which needs the bot's `files:read` scope. Without it the message still gets a reply, but its files come back unreadable.
+
+A thread follow-up the response gate decides wasn't meant for the bot gets an :eyes: reaction, which needs the `reactions:write` scope. Without it the skip is still recorded in the audit log, just with no reaction.
+
+The People and department pages pick Slack people and channels by name (`integrations/chat_directory.py`, `GET /chat-directory/*`). That needs `users:read` and `users:read.email` (people, and matching a person by work email) and `channels:read` / `groups:read` (public channels, and the private ones the bot is in). Without them the pickers show only the by-hand ID field. Discord's member list needs the bot's **Server Members** privileged intent (Developer Portal → Bot); without it Discord people are entered by ID. Telegram can't list chats, so the pickers offer the chats the bot has seen a message from (recorded only with `TELEGRAM_WEBHOOK_SECRET` set).
+
+### Email Poller
+
+`integrations/email_poller.py`
+
+Polls the configured Gmail inbox via Gmail MCP OAuth every `EMAIL_POLL_INTERVAL_SECONDS` (default 60s). Parses email threads and routes them through the triage pipeline before deciding whether to surface them as alerts or respond directly. Outbound replies are sent via Gmail MCP.
+
+For a sender the principal knows (the team, a contact, the principal), up to five document attachments per email (PDF, Word, Excel, CSV, text, 20 MB each) are downloaded and their text added to the turn, scanned PDFs converted. An unknown sender's attachments are only listed.
+
+Required env var: `EXEC_EMAIL_ADDRESS`  
+Optional: `EMAIL_POLL_INTERVAL_SECONDS`
+
+**Access control**: inbound is **not** roster-gated. Mail from a sender who isn't on the People roster still reaches the Executive — prefixed with a `[POLICY]` notice and audited as `integration_inbound` with `outcome=accepted_non_roster` — so it can be triaged, logged, or raised as an alert. What it cannot do is auto-reply: the outbound Gmail gate (`orchestrator.mcp_gateway._check_gmail_recipients`) refuses any send whose recipient isn't a non-archived Person's `email`. Self-sent mail and automated senders (noreply, mailer-daemon, postmaster) are skipped before routing. Manage the roster via the /people UI.
+
+### Telegram Bot
+
+`integrations/telegram_bot.py`
+
+Webhook-based bot registered via FastAPI (`POST /webhook/telegram`). When `TELEGRAM_WEBHOOK_SECRET` is set, rejects (401) any request whose `X-Telegram-Bot-Api-Secret-Token` header doesn't match it (constant-time comparison) — and every request while the secret has characters Telegram can't send (only 1–256 of `A-Z a-z 0-9 _ -`), since only a guess could match it. Splits long responses at paragraph boundaries to stay within Telegram's 4096-char limit.
+
+Required env vars: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`
+
+**Access control**: roster-driven. A sender's chat_id must match the `telegram_chat_id` field of a non-archived Person row to receive a response.
+
+Setup: register the webhook once with Telegram after the API is deployed, passing the same secret as `secret_token` — without it Telegram sends no header and every update gets a 401:
+
+```bash
+curl -F "url=https://your-api-host/webhook/telegram" \
+  -F "secret_token=$TELEGRAM_WEBHOOK_SECRET" \
+  "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook"
+```
+
+See [docs/telegram_setup.md](telegram_setup.md) for full setup instructions.
+
+### Google Chat
+
+`integrations/google_chat.py`
+
+Webhook-based integration registered via FastAPI (`POST /webhook/google-chat`). Verifies incoming JWT Bearer tokens from Google (issuer `chat@system.gserviceaccount.com`, audience = GCP project number). Authenticates outbound Chat REST API calls via a service account.
+
+Three auth modes (selected by which env vars are set):
+
+1. **Key file** (`GOOGLE_CHAT_SERVICE_ACCOUNT_FILE`) — standard SA JSON key; blocked by some org policies
+2. **Impersonation** (`GOOGLE_CHAT_SERVICE_ACCOUNT_EMAIL`, no key file) — uses ADC to impersonate the SA
+3. **ADC direct** — neither var set; ambient credential must already be the Chat bot SA. `_build_credentials` supports this, but the webhook currently rejects it: it returns 503 unless one of the two vars above is set.
+
+Required env vars: `GOOGLE_CHAT_PROJECT_NUMBER`, plus one of `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE` / `GOOGLE_CHAT_SERVICE_ACCOUNT_EMAIL`
+
+See [docs/google_chat_setup.md](google_chat_setup.md) for full setup instructions.
+
+---
+
+
+
+## Configuration
+
+All settings via environment variables (`.env` file in `packages/core/`).
+
+
+| Variable                                                                                  | Required | Default                           | Description                                                                                                                                                                    |
+| ----------------------------------------------------------------------------------------- | -------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ANTHROPIC_API_KEY`                                                                       | Yes      | —                                 | Anthropic API key                                                                                                                                                              |
+| `DEFAULT_MODEL`                                                                           | No       | `claude-sonnet-4-6`               | Model for Executive + most specialists                                                                                                                                         |
+| `DEEP_REASONING_MODEL`                                                                    | No       | `claude-sonnet-5-5`               | Model for CSO, CFO, GC, Board                                                                                                                                                  |
+| `ROUTING_MODEL`                                                                           | No       | `claude-haiku-5-5`                | Model for intent routing and memory extraction                                                                                                                                 |
+| `VECTOR_STORE_PATH`                                                                       | No       | `./chroma_db`                     | ChromaDB persistence directory                                                                                                                                                 |
+| `COMPANY_PROFILE_PATH`                                                                    | No       | `./company/profile.yaml`          | Company profile location                                                                                                                                                       |
+| `EPISODIC_DB_PATH`                                                                        | No       | `./episodic_memory.db`            | SQLite for episodic memory, alerts, audit, scheduler                                                                                                                           |
+| `ENABLE_CACHING`                                                                          | No       | `true`                            | Anthropic prompt caching                                                                                                                                                       |
+| `SCHEDULER_ENABLED`                                                                       | No       | `true`                            | Enable background scheduler                                                                                                                                                    |
+| `SCHEDULER_POLL_INTERVAL_SECONDS`                                                         | No       | `30`                              | Scheduler poll frequency                                                                                                                                                       |
+| `SLACK_BOT_TOKEN`                                                                         | No       | —                                 | Slack bot OAuth token                                                                                                                                                          |
+| `SLACK_APP_TOKEN`                                                                         | No       | —                                 | Slack socket mode token                                                                                                                                                        |
+| `SLACK_SIGNING_SECRET`                                                                    | No       | —                                 | Slack signing secret: hear Slack over HTTP at `/webhook/slack` instead of socket mode                                                                                          |
+| `EXEC_EMAIL_ADDRESS`                                                                      | Yes      | —                                 | Executive Gmail address (Gmail MCP OAuth)                                                                                                                                      |
+| `EMAIL_POLL_INTERVAL_SECONDS`                                                             | No       | `60`                              | Email poll frequency                                                                                                                                                           |
+| `EMAIL_TURN_TIMEOUT_S`                                                                    | No       | `300`                             | Ceiling on the Executive's answer to one inbound email; past it the message is marked read and skipped                                                                         |
+| `MCP_TOOL_TIMEOUT_S`                                                                      | No       | `120`                             | Ceiling on one MCP gateway call (Gmail, Calendar, Drive, Outlook, OneDrive)                                                                                                    |
+| `CHAT_STREAM_KEEPALIVE_S`                                                                 | No       | `15`                              | Interval of the SSE keepalive comment on a quiet chat stream; 0 turns it off                                                                                                   |
+| `TELEGRAM_BOT_TOKEN`                                                                      | No       | —                                 | Telegram bot token                                                                                                                                                             |
+| `TELEGRAM_WEBHOOK_SECRET`                                                                 | No       | —                                 | Must match the `secret_token` given to `setWebhook`; checked against `X-Telegram-Bot-Api-Secret-Token`                                                                         |
+| `GOOGLE_CHAT_PROJECT_NUMBER`                                                              | No       | —                                 | GCP project number                                                                                                                                                             |
+| `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE`                                                        | No       | —                                 | Path to SA JSON key (Google Chat needs this or `_EMAIL`)                                                                                                                       |
+| `GOOGLE_CHAT_SERVICE_ACCOUNT_EMAIL`                                                       | No       | —                                 | SA email for ADC impersonation (Google Chat needs this or `_FILE`)                                                                                                             |
+| `GOOGLE_OAUTH_CLIENT_ID`                                                                  | No       | —                                 | Google OAuth client ID (Gmail MCP)                                                                                                                                             |
+| `GOOGLE_OAUTH_CLIENT_SECRET`                                                              | No       | —                                 | Google OAuth client secret (Gmail MCP)                                                                                                                                         |
+| `MCP_ENABLED`                                                                             | No       | `false`                           | Enable MCP tool gateway                                                                                                                                                        |
+| `UI_BASE_URL`                                                                             | No       | `http://localhost:3000`           | Base URL for UI links in notifications                                                                                                                                         |
+| `USER_TIMEZONE`                                                                           | No       | `UTC`                             | Fallback IANA zone when the user has not set one through `PUT /workspace`: brief and reflection times, "tomorrow at 9" in chat, open-loop due dates, default alert quiet hours |
+| `PRINCIPAL_BRIEF_MORNING_TIME` / `PRINCIPAL_BRIEF_EOD_TIME` / `PRINCIPAL_REFLECTION_TIME` | No       | `08:00` / `18:00` / `07:30` local | Unset (or not a valid `HH:MM`): that time in the user's zone. Set to a valid `HH:MM`: read as **UTC**, as before zones existed                                                 |
+| `PRINCIPAL_WEEKLY_REVIEW_TIME`                                                            | No       | `weekly@fri@16:00` local          | Solo mode only. Unset (or not a valid `weekly@DOW@HH:MM`): Friday 16:00 in the user's zone. Set to a valid spec: read as **UTC**, like the times above                         |
+
+
+
+
+See [../.env.example](../.env.example) for the full list.
+
+---
+
+
+
+## Evaluation System
+
+`evals/`
+
+29 scenarios covering all 8 domains, scored by `claude-opus-4-7` as an LLM-as-judge.
+
+Each scenario YAML defines:
+
+- `query` — the question posed to the Executive
+- `company_context` — simulated company profile
+- `expected_topics` — topics the response must cover
+- `required_routing` — which specialists must be consulted
+- `quality_criteria` — domain-specific rubric
+
+Five scoring dimensions (1–5 scale each):
+
+1. **Persona coherence** — sounds like a seasoned exec, not a generic AI
+2. **Domain accuracy** — frameworks, numbers, and legal basics are correct
+3. **Company context utilization** — references the specific company situation
+4. **Routing quality** — correct specialists consulted; multi-specialist for cross-domain
+5. **Actionability** — concrete next steps with timelines
+
+CI gate: all evals must score ≥ 3.5/5 average. Any dimension dropping >10% vs `main` fails the PR.
+
+---
+
+
+
+## Adding a New Specialist Agent
+
+1. Create `packages/core/openexecutive/agents/your_agent.py`:
+
+```python
+from openexecutive.agents.base import BaseAgent
+
+class YourAgent(BaseAgent):
+    name = "your_agent"
+    domain = "your_domain"
+    model = "claude-sonnet-4-6"
+
+    def get_system_prompt(self) -> str:
+        from openexecutive.prompts.domain_prompts import YOUR_AGENT_PROMPT
+        return YOUR_AGENT_PROMPT
+```
+
+1. Add `YOUR_AGENT_PROMPT` to `prompts/domain_prompts.py`
+2. Register in `orchestrator/router.py`:
+  - Add to `SPECIALIST_REGISTRY`
+  - Add to the `specialist` enum in `SPECIALIST_TOOLS`
+3. Add domain alias to `DOMAIN_ALIASES` in `knowledge/retriever.py`
+4. Add knowledge docs to `knowledge/builtin/your_domain/`
+5. Add at least 2 eval scenarios to `packages/core/openexecutive/evals/_scenarios/`
+6. Submit PR — CI requires all of the above.
+
+---
+
+
+
+## Company Data Privacy
+
+Everything in `company/` is gitignored. This includes:
+
+- `company/profile.yaml` — structured company profile (wizard output)
+- `company/docs/` — uploaded documents
+- `chroma_db/` — the vector store (contains embeddings of company documents)
+- `episodic_memory.db` — decisions, initiatives, advice, alerts, audit log
+
+None of this leaves the local machine (or your own volume in cloud deployments) except as part of prompts sent to the Anthropic API. Anthropic does not train on API data.
+
+---
+

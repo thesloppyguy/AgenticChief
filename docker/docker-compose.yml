@@ -1,0 +1,15 @@
+# SQLite is a single-writer file database: run exactly ONE api container, and keep the file on the
+# named volume below. (Do not scale the api service or point two hosts at the same file.)
+services:
+  api:
+    build: { context: ../backend, dockerfile: ../docker/backend.Dockerfile }
+    env_file: ../backend/.env
+    environment: { DATABASE_URL: "sqlite:////data/chro.db" }
+    volumes: [chrodata:/data]
+    ports: ["8000:8000"]
+  web:
+    build: { context: ../frontend, dockerfile: ../docker/frontend.Dockerfile, args: { NEXT_PUBLIC_API_URL: "http://localhost:8000" } }
+    ports: ["3000:3000"]
+    depends_on: [api]
+volumes:
+  chrodata:

@@ -1,0 +1,166 @@
+{
+  "continuous_feedback": {
+    "fields": {
+      "avg_entries_per_employee": "AvgEntriesPerEmployee"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/ContinuousFeedback",
+    "result_path": "d.results.0"
+  },
+  "idp_creation_rate": {
+    "fields": {
+      "target_employees": "TargetEmployees",
+      "with_idp": "WithIdp"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/IdpCreationRate",
+    "result_path": "d.results.0"
+  },
+  "kra_submission": {
+    "fields": {
+      "eligible": "Eligible",
+      "submitted": "Submitted"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/KraSubmission",
+    "result_path": "d.results.0"
+  },
+  "l1_feedback": {
+    "fields": {
+      "avg_rating_5": "AvgRating5"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/L1Feedback",
+    "result_path": "d.results.0"
+  },
+  "mid_term_review": {
+    "fields": {
+      "completed": "Completed",
+      "eligible": "Eligible"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/MidTermReview",
+    "result_path": "d.results.0"
+  },
+  "overall_retention": {
+    "fields": {
+      "avg_headcount": "AvgHeadcount",
+      "retentions": "Retentions"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/OverallRetention",
+    "result_path": "d.results.0"
+  },
+  "pli_assessment": {
+    "fields": {
+      "completed": "Completed",
+      "total": "Total"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/PliAssessment",
+    "result_path": "d.results.0"
+  },
+  "ppw_on_time": {
+    "fields": {
+      "value": "Value"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/PpwOnTime",
+    "result_path": "d.results.0"
+  },
+  "role_skill_coverage": {
+    "fields": {
+      "in_scope": "InScope",
+      "mapped": "Mapped"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/RoleSkillCoverage",
+    "result_path": "d.results.0"
+  },
+  "tni_employees": {
+    "fields": {
+      "completed": "Completed",
+      "eligible": "Eligible"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/TniEmployees",
+    "result_path": "d.results.0"
+  },
+  "tni_fulfilment": {
+    "fields": {
+      "fulfilled": "Fulfilled",
+      "identified": "Identified"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/TniFulfilment",
+    "result_path": "d.results.0"
+  },
+  "top_talent_retention": {
+    "fields": {
+      "avg_headcount_cpr7": "AvgHeadcountCpr7",
+      "regrettable_exits": "RegrettableExits"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/TopTalentRetention",
+    "result_path": "d.results.0"
+  },
+  "trainee_retention": {
+    "fields": {
+      "onboarded": "Onboarded",
+      "remaining": "Remaining"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/TraineeRetention",
+    "result_path": "d.results.0"
+  },
+  "training_calendar": {
+    "fields": {
+      "value": "Value"
+    },
+    "params": {
+      "$filter": "companyCode eq '{company_code}' and period eq '{period}'",
+      "$format": "json"
+    },
+    "path": "/mock-sources/successfactors/odata/v2/TrainingCalendar",
+    "result_path": "d.results.0"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "ahc_completion": {
+    "fields": {
+      "completed": "completed",
+      "eligible": "eligible"
+    },
+    "params": {
+      "month": "{period}",
+      "orgCode": "{company_code}"
+    },
+    "path": "/mock-sources/myhealth/v2/ahc/summary",
+    "result_path": ""
+  }
+}

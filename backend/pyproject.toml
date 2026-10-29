@@ -1,0 +1,45 @@
+[project]
+name = "agenticchief-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.20.1",
+    "anthropic>=2.3.0",
+    "fastapi>=0.162.0",
+    "httpx>=0.28.1",
+    "jsonschema>=4.26.0",
+    "mcp>=2.3.0",
+    "openpyxl>=3.1.5",
+    "pydantic-settings>=2.16.2",
+    "pyjwt>=2.15.1",
+    "pypdf>=6.21.4",
+    "python-docx>=1.2.0",
+    "pyyaml>=6.0.3",
+    "reportlab>=5.1.0",
+    "sqlalchemy>=2",
+    "sse-starlette>=3.6.0",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff",
+    "mypy",
+    "pytest-asyncio>=1.4.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["B", "S110", "RUF015"]
+ignore = ["B008"]  # FastAPI Depends() in defaults is the idiom
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["F811", "F841", "C408"]  # pytest fixture re-imports; unused vars in test setup
+"app/audit/logger.py" = ["S110"]  # audit failures must never break a request (intentional)
