@@ -13,7 +13,8 @@ def _visible(who: Principal):
     q = select(Alert)
     if who.company_ids is not None:  # scoped users see only their companies' alerts, never group-wide ones
         q = q.where(Alert.company_id.in_(list(who.company_ids)))
-    return q
+    # A private alert (someone's own watch) reaches only them, however wide their colleagues' scope is.
+    return q.where((Alert.audience_user_id.is_(None)) | (Alert.audience_user_id == who.user_id))
 
 
 def _read_by(who: Principal):

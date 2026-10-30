@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.api.workflows import get_llm, get_session_factory
+from app.api.workflows import get_async_llm, get_llm, get_session_factory
 from app.core.security import Role, make_token
 from app.db import models  # noqa: F401
 from app.db.models import Company
@@ -31,6 +31,7 @@ def client():
     app.dependency_overrides[get_db] = _db
     app.dependency_overrides[get_session_factory] = lambda: S  # background workflows use the test database
     app.dependency_overrides[get_llm] = lambda: None  # never call a real model from tests
+    app.dependency_overrides[get_async_llm] = lambda: None
     yield TestClient(app)
     app.dependency_overrides.clear()
 

@@ -50,10 +50,10 @@ async def lifespan(_: FastAPI):
     if settings.scheduler_enabled:
         import asyncio
 
-        from app.api.workflows import get_llm
+        from app.api.workflows import get_async_llm, get_llm
         from app.scheduler.runner import loop
 
-        task = asyncio.create_task(loop(SessionLocal, lambda: {"factory": SessionLocal, "llm": get_llm()}))
+        task = asyncio.create_task(loop(SessionLocal, lambda: {"factory": SessionLocal, "llm": get_llm(), "allm": get_async_llm()}))
     try:
         yield
     finally:

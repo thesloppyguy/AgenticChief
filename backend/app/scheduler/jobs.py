@@ -48,10 +48,69 @@ def job_monthly_review(db: Session, params: dict, now: datetime, deps: dict[str,
     period = resolve_period(params.get("period", "previous"), now)
     run = wf_engine.create_run(db, SCHEDULER, monthly_review.WORKFLOW, period)
     factory: sessionmaker = deps["factory"]
-    status = wf_engine.execute(factory, monthly_review.WORKFLOW, run.id, {"llm": deps.get("llm")})
+    status = wf_engine.execute(factory, monthly_review.WORKFLOW, run.id,
+                               {"llm": deps.get("llm"), "allm": deps.get("allm")})
     if status != "succeeded":
         raise JobFailed(f"{period}: review run #{run.id} {status}")
     return f"{period}: review run #{run.id} completed (publishing still needs approval)"
 
 
-JOBS = {"ingest": job_ingest, "monthly_review": job_monthly_review}
+def job_watch(db: Session, params: dict, now: datetime, deps: dict[str, Any]) -> str:
+    """Check one user-defined watch. A watch that never fires is as suspicious as one that fires
+    constantly, so the detail string always records what was observed."""
+    from app.alerts import watches
+    from app.db.models import Watch
+
+    period = resolve_period(params.get("period", "current"), now)
+    w = db.get(Watch, params.get("watch_id"))
+    if w is None:
+        raise JobFailed("the watch no longer exists")
+    if not w.enabled:
+        return f"{period}: watch disabled"
+    seen = watches.observe(db, w, period)
+    alert = watches.evaluate(db, w, period)
+    db.commit()  # evaluate() leaves the transaction to its caller, as alerts.engine._raise does
+    # "Still breaching, already alerted" must not read as "no breach", or an operator scanning the
+    # schedule log would think the condition had cleared.
+    if alert:
+        outcome = "fired"
+    elif seen["would_fire"]:
+        outcome = "still breaching (already alerted this period)"
+    else:
+        outcome = "no breach"
+    return f"{period}: {outcome} (observed {seen['observed']})"
+
+
+def job_workflow(db: Session, params: dict, now: datetime, deps: dict[str, Any]) -> str:
+    """Run a published, prompt-authored workflow unattended.
+
+    The published version is resolved at run time, so a rollback takes effect on the next run and a
+    deprecation stops the schedule outright. Anything the workflow proposes is filed as "scheduler",
+    which means no human can ever approve something they themselves set in motion.
+    """
+    from app.assets import service as asset_service
+    from app.assets.service import AssetError
+    from app.workflows.compiler import compile_spec
+    from app.workflows.spec import WorkflowSpec
+
+    period = resolve_period(params.get("period", "previous"), now)
+    try:
+        a = asset_service.get(db, "workflow", params.get("workflow_key", ""))
+    except AssetError as e:
+        raise JobFailed(e.message) from e
+    if a.deprecated or a.published_version is None:
+        raise JobFailed("the workflow is no longer published")
+    row = asset_service.version_row(db, a, a.published_version)
+    wf = compile_spec(a.key, WorkflowSpec(**row.definition))
+    run = wf_engine.create_run(db, SCHEDULER, wf, period,
+                               {"asset_id": a.id, "asset_version": a.published_version})
+    factory: sessionmaker = deps["factory"]
+    status = wf_engine.execute(factory, wf, run.id,
+                               {"llm": deps.get("llm"), "allm": deps.get("allm")})
+    if status != "succeeded":
+        raise JobFailed(f"{period}: run #{run.id} {status}")
+    return f"{period}: {a.key} run #{run.id} completed"
+
+
+JOBS = {"ingest": job_ingest, "monthly_review": job_monthly_review, "watch": job_watch,
+        "workflow": job_workflow}

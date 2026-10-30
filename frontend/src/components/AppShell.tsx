@@ -19,16 +19,39 @@ import {
 import { AppSidebar } from "@/components/shared/app-sidebar";
 import { SettingsDialog } from "@/components/shared/settings-dialog";
 
+const PERIOD_KEY = "chro_period";
+const PERIOD_EVENT = "chro:period";
+
+function subscribePeriod(onChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === PERIOD_KEY || e.key === null) onChange();
+  };
+  window.addEventListener(PERIOD_EVENT, onChange);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(PERIOD_EVENT, onChange);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+/** The reporting period every page shares.
+ *
+ *  Read through useSyncExternalStore, not a useState initializer: pages are prerendered on the
+ *  server, where localStorage does not exist, and the server snapshot has to be a stable default.
+ *  This also keeps two tabs in step. Same shape as the token store in lib/api.
+ */
 export function usePeriod() {
-  // Pages render only after AppShell mounts on the client, so reading localStorage here is safe.
-  const [period, setPeriod] = useState(
-    () => localStorage.getItem("chro_period") ?? currentPeriod(),
+  const period = useSyncExternalStore(
+    subscribePeriod,
+    () => localStorage.getItem(PERIOD_KEY) ?? currentPeriod(),
+    () => currentPeriod(),
   );
   return [
     period,
     (p: string) => {
-      localStorage.setItem("chro_period", p);
-      setPeriod(p);
+      localStorage.setItem(PERIOD_KEY, p);
+      window.dispatchEvent(new Event(PERIOD_EVENT));
     },
   ] as const;
 }

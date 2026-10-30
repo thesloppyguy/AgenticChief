@@ -1,5 +1,6 @@
-from app.core.security import Role, get_principal
 from fastapi.security import HTTPAuthorizationCredentials
+
+from app.core.security import Role, get_principal
 
 from .conftest import client  # noqa: F401
 

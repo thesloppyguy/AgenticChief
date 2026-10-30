@@ -18,6 +18,8 @@ dependencies = [
     "reportlab>=5.1.0",
     "sqlalchemy>=2",
     "sse-starlette>=3.6.0",
+    # Windows ships no system zoneinfo database, so ZoneInfo (alert quiet hours) needs this.
+    "tzdata>=2025.1; sys_platform == 'win32'",
     "uvicorn[standard]>=0.54.0",
 ]
 

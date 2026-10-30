@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, type LucideIcon } from "lucide-react";
@@ -71,13 +71,13 @@ function NavMainItem({
   const childActive =
     item.items?.some((sub) => isRouteActive(pathname, sub.url)) ?? false;
   const selfActive = isRouteActive(pathname, item.url);
-  const [open, setOpen] = useState(
-    () => Boolean(item.isActive) || childActive || selfActive,
-  );
-
-  useEffect(() => {
-    if (childActive || selfActive) setOpen(true);
-  }, [childActive, selfActive]);
+  // A group opens itself when the route moves into it, and the user can still toggle it. Derived
+  // rather than set from an effect: the override is remembered against the route state it was made
+  // in, so navigating somewhere new makes it stale and the group opens again on its own.
+  const shouldOpen = Boolean(item.isActive) || childActive || selfActive;
+  const [override, setOverride] = useState<{ at: boolean; open: boolean } | null>(null);
+  const open = override?.at === shouldOpen ? override.open : shouldOpen;
+  const setOpen = (next: boolean) => setOverride({ at: shouldOpen, open: next });
 
   return (
     <Collapsible

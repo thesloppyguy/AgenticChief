@@ -18,6 +18,7 @@ from app.reports.integrity import canonical_hash
 from app.reports.markdown import render_markdown
 from app.reports.pdf import render_pdf
 from app.services import scorecard as sc
+from app.services import timeline
 from app.services.manual_inputs import MANUAL_KPIS, ManualInput, save_manual_input
 
 router = APIRouter()
@@ -170,3 +171,16 @@ def snapshot_markdown(snap_id: int, db: Session = Depends(get_db), who: Principa
 def audit_log(limit: int = 100, db: Session = Depends(get_db), _: Principal = Depends(require_admin)):
     rows = db.scalars(select(AuditEvent).order_by(AuditEvent.id.desc()).limit(min(limit, 500)))
     return [{"at": r.at, "actor": r.actor, "role": r.role, "action": r.action, "target": r.target} for r in rows]
+
+
+@router.get("/timeline")
+def activity_timeline(limit: int = 50, cursor: str | None = None, kinds: str | None = None,
+                      company_id: int | None = None, db: Session = Depends(get_db),
+                      who: Principal = Depends(get_principal)):
+    """What the platform did, newest first. Unlike /audit (the raw compliance log, admins only) this
+    is a product surface: each source is scoped to the caller, so it works for a scoped editor too."""
+    if company_id is not None:
+        who.require_company(company_id)
+    return timeline.fetch(db, who, limit=limit, cursor=cursor,
+                          kinds=[k for k in kinds.split(",") if k] if kinds else None,
+                          company_id=company_id)

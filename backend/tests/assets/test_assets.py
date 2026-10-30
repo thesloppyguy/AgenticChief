@@ -242,13 +242,15 @@ def test_ordinary_chat_is_unchanged_by_skills(client):
 # --- the built-in skills and agent ---
 
 def test_builtin_assets_are_published_valid_idempotent_and_read_only(client, db):
-    assert builtin.seed_builtin(db) == 5 and builtin.seed_builtin(db) == 0
-    assert {a.key for a in db.scalars(select(Asset).where(Asset.builtin.is_(True)))} == {
-        "missing_submissions", "compare_companies", "pillar_investigation", "monthly_review_brief", "hr_analyst"}
+    expected = len(builtin.SKILLS) + len(builtin.AGENTS)
+    assert builtin.seed_builtin(db) == expected and builtin.seed_builtin(db) == 0
+    assert {a.key for a in db.scalars(select(Asset).where(Asset.builtin.is_(True)))} == \
+        set(builtin.SKILLS) | set(builtin.AGENTS)
     assert all(a.lifecycle == "published" and a.validated_version == 1 for a in db.scalars(select(Asset)))
-    assert {s["key"] for s in client.get("/skills", headers=VIEWER).json()} == {
-        "missing_submissions", "compare_companies", "pillar_investigation", "monthly_review_brief"}
-    assert [a["key"] for a in client.get("/agents", headers=VIEWER).json()] == ["hr_analyst"]
+    assert {s["key"] for s in client.get("/skills", headers=VIEWER).json()} == set(builtin.SKILLS)
+    # The supervisor is for admins and editors, so a viewer is not offered it.
+    assert {a["key"] for a in client.get("/agents", headers=VIEWER).json()} == \
+        set(builtin.AGENTS) - {"chro_supervisor"}
     assert client.post("/skills/compare_companies/versions", json={"definition": SKILL}, headers=EDITOR).status_code == 403
     assert client.post("/skills/compare_companies/deprecate", headers=ALICE).status_code == 403
     for a in db.scalars(select(Asset)):
@@ -326,3 +328,65 @@ def test_an_author_sees_the_drafts_inputs_and_tools_but_a_published_skill_still_
     shown = client.get("/skills/score_brief", headers=EDITOR).json()
     assert shown["tools"] == ["get_group_score", "rank_ics"] and shown["version"] == 2               # users still get v1's contract
     assert client.get("/skills/score_brief", headers=VIEWER).json()["tools"] == ["get_group_score", "rank_ics"]
+
+
+# --- supervisors and rosters --------------------------------------------------------------------
+# The roster is the real control on delegation: a declared, reviewable graph rather than a runtime
+# depth count. Validation is what enforces that it stays one level deep and cycle-free.
+
+AGENT = {"instructions": "Answer carefully about the scorecard and cite your evidence.",
+         "tools": ["get_group_score"]}
+
+
+def agent(client, key, **extra):
+    return mk(client, "agent", key, {**AGENT, **extra}, name=key)
+
+
+def test_an_agent_with_delegate_but_no_supervisor_flag_fails_validation(client):
+    agent(client, "sneaky", tools=["delegate", "get_group_score"])
+    checks = {c["name"]: c for c in validate(client, "sneaky", "agent")["validation"]["checks"]}
+    assert checks["delegate_requires_supervisor"]["ok"] is False
+
+
+def test_a_supervisor_with_an_empty_roster_fails_validation(client):
+    agent(client, "bare_boss", tools=["delegate", "get_group_score"], supervisor=True)
+    checks = {c["name"]: c for c in validate(client, "bare_boss", "agent")["validation"]["checks"]}
+    assert checks["a_supervisor_has_a_roster"]["ok"] is False
+
+
+def test_naming_specialists_without_the_supervisor_flag_fails_validation(client):
+    agent(client, "pretender", delegates_to=["hr_analyst"])
+    checks = {c["name"]: c for c in validate(client, "pretender", "agent")["validation"]["checks"]}
+    assert checks["a_roster_needs_the_supervisor_flag"]["ok"] is False
+
+
+def test_a_roster_entry_that_is_not_published_fails_validation(client, db):
+    builtin.seed_builtin(db)
+    agent(client, "boss", tools=["delegate"], supervisor=True, delegates_to=["no_such_agent"])
+    checks = {c["name"]: c for c in validate(client, "boss", "agent")["validation"]["checks"]}
+    assert checks["specialist:no_such_agent"]["ok"] is False
+    assert "no published agent" in checks["specialist:no_such_agent"]["detail"]
+
+
+def test_a_supervisor_cannot_be_someone_elses_specialist(client, db):
+    """This is what makes the delegation graph one level deep by construction."""
+    builtin.seed_builtin(db)
+    agent(client, "boss_of_bosses", tools=["delegate"], supervisor=True, delegates_to=["chro_supervisor"])
+    checks = {c["name"]: c for c in validate(client, "boss_of_bosses", "agent")["validation"]["checks"]}
+    assert checks["specialist:chro_supervisor"]["ok"] is False
+    assert "cannot be someone else's specialist" in checks["specialist:chro_supervisor"]["detail"]
+
+
+def test_a_well_formed_supervisor_validates(client, db):
+    builtin.seed_builtin(db)
+    agent(client, "good_boss", tools=["delegate", "get_group_score"], supervisor=True,
+          delegates_to=["talent_acquisition_analyst", "org_effectiveness_analyst"])
+    assert validate(client, "good_boss", "agent")["validation"]["ok"] is True
+
+
+def test_a_duplicated_specialist_fails_validation(client, db):
+    builtin.seed_builtin(db)
+    agent(client, "dupe_boss", tools=["delegate"], supervisor=True,
+          delegates_to=["talent_acquisition_analyst", "talent_acquisition_analyst"])
+    checks = {c["name"]: c for c in validate(client, "dupe_boss", "agent")["validation"]["checks"]}
+    assert checks["roster_has_no_duplicates"]["ok"] is False

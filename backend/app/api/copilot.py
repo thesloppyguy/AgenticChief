@@ -15,6 +15,7 @@ from app.api.workflows import get_session_factory
 from app.assets import service as asset_service
 from app.assets.service import AssetError
 from app.capabilities.copilot_tools import eligible_tools
+from app.copilot import delegate as delegate_mod
 from app.copilot.orchestrator import chat_turn
 from app.core.config import settings
 from app.core.security import Principal, get_principal
@@ -86,6 +87,8 @@ async def chat(req: ChatRequest, db: Session = Depends(get_db), who: Principal =
     outcome: dict = {"ok": False, "text": ""}
     # Registry capabilities an admin has allowed for this user's role. Scripted skills and agents keep their own tool lists.
     cap_tools = eligible_tools(db, who) if spec is None else {}
+    # Only a supervisor may delegate, and only to the roster it declared and an admin approved.
+    budget = delegate_mod.new_budget(spec.delegates_to) if spec and spec.supervisor else None
 
     async def remember() -> None:
         """Runs after the response has been sent, so it can never slow or break the chat."""
@@ -103,7 +106,8 @@ async def chat(req: ChatRequest, db: Session = Depends(get_db), who: Principal =
         try:
             async for ev in chat_turn(client, db, who, history, message, req.period or current_period(), sid,
                                       spec.extra_system if spec else None, spec.tool_names if spec else None,
-                                      spec.model if spec else None, memory_block, cap_tools):
+                                      spec.model if spec else None, memory_block, cap_tools,
+                                      delegation=budget):
                 if ev["type"] == "chunk":
                     text.append(ev["content"])
                     yield {"data": json.dumps({**ev, "session_id": sid})}

@@ -31,6 +31,29 @@ class AgentDef(BaseModel):
     model: Literal["default", "deep", "fast"] = "default"
     permissions: list[Role] = Field(default_factory=lambda: list(ALL_ROLES), min_length=1)
     eval_cases: list[EvalCase] = Field(default_factory=list, max_length=20)
+    # A supervisor may hand work to the specialists it names, and only those. The roster is a declared,
+    # reviewable graph rather than a runtime depth counter: because a roster entry may not itself be a
+    # supervisor (checked in service.validate), the graph is one level deep and cannot contain a cycle.
+    supervisor: bool = False
+    delegates_to: list[str] = Field(default_factory=list, max_length=8)
 
 
-MODELS = {"skill": SkillDef, "agent": AgentDef}
+def _workflow_spec():
+    """Imported late: app.workflows.spec imports this module for EvalCase and Role."""
+    from app.workflows.spec import WorkflowSpec
+
+    return WorkflowSpec
+
+
+class _Models(dict):
+    """`asset` carries three kinds. "workflow" resolves lazily to break the import cycle, but behaves
+    like an ordinary entry everywhere else (approvals, the API, service.validate)."""
+
+    def __missing__(self, kind: str):
+        if kind == "workflow":
+            self["workflow"] = _workflow_spec()
+            return self["workflow"]
+        raise KeyError(kind)
+
+
+MODELS = _Models({"skill": SkillDef, "agent": AgentDef})

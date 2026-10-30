@@ -79,7 +79,7 @@ def test_tools_run_off_the_event_loop(client, monkeypatch):
 
     seen = {}
 
-    def spy(db, who, name, args, session_id=None):
+    def spy(db, who, name, args, session_id=None, **kw):
         seen["thread"] = threading.current_thread().name
         return {"ok": True}
 

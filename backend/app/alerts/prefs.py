@@ -11,7 +11,8 @@ from sqlalchemy.orm import Session
 from app.db.models import UserPrefs
 
 SEVERITIES = ("low", "medium", "high", "urgent")
-KINDS = ("status_red", "ingestion_failed", "capability_changed", "workflow_failed", "scheduled_job_failed")
+KINDS = ("status_red", "ingestion_failed", "capability_changed", "workflow_failed", "scheduled_job_failed",
+         "watch_fired")
 
 
 class PrefsError(ValueError):

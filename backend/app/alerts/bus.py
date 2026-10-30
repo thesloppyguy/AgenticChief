@@ -59,7 +59,9 @@ def subscriber_count() -> int:
         return len(_subs)
 
 
-def _may_see(who: Principal, company_id: int | None) -> bool:
+def _may_see(who: Principal, company_id: int | None, audience_user_id: str | None = None) -> bool:
+    if audience_user_id is not None and audience_user_id != who.user_id:
+        return False  # a private alert (someone's own watch) is never pushed to anyone else
     return who.company_ids is None if company_id is None else who.can_see(company_id)
 
 
@@ -76,7 +78,8 @@ def publish(alert: dict, now: datetime | None = None) -> int:
         targets = list(_subs)
     sent = 0
     for s in targets:
-        if _may_see(s.who, alert.get("company_id")) and should_push(s.prefs, alert["severity"], alert["kind"], now):
+        if _may_see(s.who, alert.get("company_id"), alert.get("audience_user_id")) \
+                and should_push(s.prefs, alert["severity"], alert["kind"], now):
             try:
                 s.loop.call_soon_threadsafe(_put, s, alert)
                 sent += 1
@@ -87,7 +90,7 @@ def publish(alert: dict, now: datetime | None = None) -> int:
 
 def serialize(a: Any) -> dict:
     return {"id": a.id, "kind": a.kind, "severity": a.severity, "title": a.title, "entity": a.entity,
-            "company_id": a.company_id, "period": a.period}
+            "company_id": a.company_id, "period": a.period, "audience_user_id": a.audience_user_id}
 
 
 def queue_for_publish(db: Session, alert: Any) -> None:

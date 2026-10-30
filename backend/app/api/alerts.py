@@ -8,11 +8,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, sessionmaker
 from sse_starlette.sse import EventSourceResponse
 
-from app.alerts import bus, prefs, store
+from app.alerts import bus, prefs, store, watches
 from app.api.workflows import get_session_factory
 from app.approvals.service import pending_count
+from app.audit.logger import audit
 from app.core.security import Principal, get_principal
 from app.db.session import get_db
+from app.services.scorecard import current_period
 
 router = APIRouter()
 
@@ -86,3 +88,77 @@ def put_prefs(body: PrefsIn, db: Session = Depends(get_db), who: Principal = Dep
         raise HTTPException(422, str(e)) from e
     bus.prefs_changed(who.user_id, saved)
     return get_prefs(db, who)
+
+
+# --- watches ------------------------------------------------------------------------------------
+# A watch is personal: its owner defines the condition and only its owner is alerted. It lives here,
+# not on /schedules, because that router is admin + group-wide and a scoped viewer may own a watch.
+
+
+class WatchIn(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    company_code: str | None = None  # None = the Group, which needs group-wide access
+    condition: dict
+    cadence: dict
+    enabled: bool = True
+
+
+class WatchPatch(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    condition: dict | None = None
+    cadence: dict | None = None
+    enabled: bool | None = None
+
+
+def _watch_http(e: watches.WatchError) -> HTTPException:
+    return HTTPException(e.status, e.message)
+
+
+@router.get("/watches")
+def list_watches(db: Session = Depends(get_db), who: Principal = Depends(get_principal)):
+    return [watches.out(db, w) for w in watches.listing(db, who)]
+
+
+@router.post("/watches", status_code=201)
+def create_watch(body: WatchIn, db: Session = Depends(get_db), who: Principal = Depends(get_principal)):
+    try:
+        w = watches.create(db, who, body.name, body.company_code, body.condition, body.cadence, body.enabled)
+    except watches.WatchError as e:
+        raise _watch_http(e) from e
+    audit(db, who, "watch_created", f"{w.id}:{w.name}")
+    db.commit()
+    return watches.out(db, w)
+
+
+@router.patch("/watches/{watch_id}")
+def update_watch(watch_id: int, body: WatchPatch, db: Session = Depends(get_db),
+                 who: Principal = Depends(get_principal)):
+    try:
+        w = watches.update(db, who, watch_id, body.name, body.condition, body.cadence, body.enabled)
+    except watches.WatchError as e:
+        raise _watch_http(e) from e
+    audit(db, who, "watch_updated", str(watch_id))
+    db.commit()
+    return watches.out(db, w)
+
+
+@router.delete("/watches/{watch_id}", status_code=204)
+def delete_watch(watch_id: int, db: Session = Depends(get_db), who: Principal = Depends(get_principal)):
+    try:
+        watches.delete(db, who, watch_id)
+    except watches.WatchError as e:
+        raise _watch_http(e) from e
+    audit(db, who, "watch_deleted", str(watch_id))
+    db.commit()
+
+
+@router.post("/watches/{watch_id}/test")
+def test_watch(watch_id: int, period: str | None = None, db: Session = Depends(get_db),
+               who: Principal = Depends(get_principal)):
+    """Evaluate now without raising anything. A watch's failure mode is silence, so being able to
+    see what it currently observes is what makes one trustworthy."""
+    try:
+        w = watches.owned(db, who, watch_id)
+        return watches.observe(db, w, period or current_period())
+    except watches.WatchError as e:
+        raise _watch_http(e) from e

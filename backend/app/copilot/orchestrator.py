@@ -39,9 +39,11 @@ def _tools(names: list[str] | None = None, cap_tools: dict[str, CapTool] | None 
     return chosen
 
 
-def _run_one(db: Session, who: Principal, name: str, args: dict, session_id: int | None) -> dict:
-    out = run_tool(db, who, name, args, session_id)
-    audit(db, who, "copilot_tool", name, {"input": args})
+def _run_one(db: Session, who: Principal, name: str, args: dict, session_id: int | None,
+             client: Any = None, delegation: dict | None = None) -> dict:
+    out = run_tool(db, who, name, args, session_id, client=client, delegation=delegation)
+    if name != "delegate":  # delegate audits itself, with the sub-agent it reached
+        audit(db, who, "copilot_tool", name, {"input": args})
     return out
 
 
@@ -53,15 +55,20 @@ async def chat_turn(
     client: Any, db: Session, who: Principal, history: list[dict], user_message: str, period: str,
     session_id: int | None = None, extra_system: str | None = None,
     tool_names: list[str] | None = None, model: str | None = None, memory_block: str | None = None,
-    cap_tools: dict[str, CapTool] | None = None,
+    cap_tools: dict[str, CapTool] | None = None, delegation: dict | None = None,
+    max_rounds: int | None = None,
 ) -> AsyncIterator[dict]:
-    """Yields {'type': 'chunk'|'tool', ...} events; caller persists and emits 'done'."""
+    """Yields {'type': 'chunk'|'tool', ...} events; caller persists and emits 'done'.
+
+    `delegation` carries a supervisor's remaining budget and its roster; a sub-agent run gets a
+    deeper, smaller one. None means this turn may not delegate at all.
+    """
     # Dynamic context goes in the user turn, never the cached system prompt.
     messages = history[-HISTORY_TURNS * 2:] + [
         {"role": "user", "content": (f"{memory_block}\n" if memory_block else "")
                                     + f"<context>Default period: {period}</context>\n{user_message}"}
     ]
-    for _ in range(MAX_TOOL_ROUNDS):
+    for _ in range(max_rounds or MAX_TOOL_ROUNDS):
         async with client.messages.stream(
             model=model or settings.default_model, max_tokens=2048, system=_system(extra_system),
             tools=_tools(tool_names, cap_tools), messages=messages,
@@ -80,7 +87,8 @@ async def chat_turn(
                 out = {"error": "that tool is not available here"}
             else:
                 # Tools hit the database (scorecards for 88 companies): keep that off the event loop.
-                out = await asyncio.to_thread(_run_one, db, who, block.name, dict(block.input), session_id)
+                out = await asyncio.to_thread(_run_one, db, who, block.name, dict(block.input), session_id,
+                                              client, delegation)
             yield {"type": "tool", "name": block.name}
             results.append({"type": "tool_result", "tool_use_id": block.id, "content": json.dumps(out, default=str)})
         messages.append({"role": "user", "content": results})

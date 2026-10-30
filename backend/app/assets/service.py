@@ -112,17 +112,97 @@ def get(db: Session, kind: str, key: str) -> Asset:
 
 # --- validation ----------------------------------------------------------------------------
 
+def workflow_checks(spec) -> list[dict]:
+    """The pure half of a workflow's validation. What needs the database (are the skills, agents and
+    capabilities it names actually published?) lives in reference_checks."""
+    from app.approvals.actions import ACTIONS, Risk
+    from app.workflows.spec import references
+
+    out: list[dict] = []
+
+    def add(name: str, ok: bool, detail: str = "") -> None:
+        out.append({"name": name, "ok": ok, "detail": detail})
+
+    seen: set[str] = set()
+    backwards, forwards = True, []
+    for s in spec.steps:
+        for ref in references(s.args):
+            if ref not in seen:
+                backwards, _ = False, forwards.append(f"{s.key} -> {ref}")
+        seen.add(s.key)
+    add("references_are_backwards", backwards,
+        f"a step may only read earlier steps: {', '.join(forwards)}" if forwards else "")
+
+    bare = {t for t in spec.tools if ":" not in t}
+    # propose_action and delegate are never reachable as a plain tool step: proposing has its own
+    # typed step (so a reviewer reads the action by name), and a workflow may not reach a sub-agent.
+    forbidden = sorted(bare & {"delegate"})
+    add("no_delegation_from_a_workflow", not forbidden,
+        "a workflow cannot delegate to a sub-agent" if forbidden else "")
+    unknown_tools = sorted(bare - tool_names() - {"propose_action"})
+    add("workflow_tools_exist", not unknown_tools,
+        f"unknown tools: {', '.join(unknown_tools)}" if unknown_tools else "")
+
+    actions = [s.args.get("action") for s in spec.steps if s.type == "propose"]
+    unknown_actions = sorted({a for a in actions if a not in ACTIONS})
+    add("actions_exist", not unknown_actions,
+        f"unknown actions: {', '.join(unknown_actions)}" if unknown_actions else "")
+    destructive = sorted({a for a in actions if a in ACTIONS and ACTIONS[a].risk is Risk.DESTRUCTIVE})
+    add("actions_are_not_destructive", not destructive,
+        f"destructive actions are denied by policy: {', '.join(destructive)}" if destructive else "")
+
+    keys = {s.key for s in spec.steps}
+    missing = sorted({i for s in spec.steps if s.type == "summarize"
+                      for i in s.args.get("inputs", []) if i not in keys})
+    add("summarize_inputs_exist", not missing,
+        f"no such step: {', '.join(missing)}" if missing else "")
+    return out
+
+
+def reference_checks(db: Session, spec) -> list[dict]:
+    """Every skill or agent a workflow names must be published right now. Re-run at publication, so a
+    workflow validated last month whose skill was since deprecated cannot go live."""
+    out = []
+    for ref in spec.tools:
+        if ":" not in ref:
+            continue
+        kind, key = ref.split(":", 1)
+        row = db.scalar(select(Asset).where(Asset.kind == kind, Asset.key == key))
+        ok = row is not None and row.published_version is not None and not row.deprecated
+        out.append({"name": f"uses:{ref}", "ok": ok,
+                    "detail": "" if ok else f"no published {kind} with the key '{key}'"})
+    return out
+
+
 def static_checks(kind: str, d: SkillDef | AgentDef) -> list[dict]:
     checks: list[dict] = []
 
     def add(name: str, ok: bool, detail: str = "") -> None:
         checks.append({"name": name, "ok": ok, "detail": detail})
 
+    # A workflow is checked on its own terms: its `tools` is a derived list of what the plan reaches,
+    # and a plan of scorecard and summarize steps legitimately reaches no tool at all.
+    if kind == "workflow":
+        return workflow_checks(d)
+
     unknown = sorted(set(d.tools) - tool_names())
     add("tools_exist", not unknown, f"unknown tools: {', '.join(unknown)}" if unknown else "")
     add("has_tools", bool(d.tools), "" if d.tools else "with no tools it can only talk; give it the tools it needs")
     if "propose_action" in d.tools:
         add("action_proposals_are_gated", True, "can file requests, which still need a human's approval")
+    if isinstance(d, AgentDef):
+        # Delegation and the supervisor flag must agree, in both directions: the roster is what the
+        # approver reviews, so it must never be possible to delegate without declaring to whom.
+        add("delegate_requires_supervisor", "delegate" not in d.tools or d.supervisor,
+            "" if "delegate" not in d.tools or d.supervisor
+            else "it has the delegate tool but is not marked as a supervisor")
+        add("a_supervisor_has_a_roster", not d.supervisor or (bool(d.delegates_to) and "delegate" in d.tools),
+            "" if not d.supervisor or (d.delegates_to and "delegate" in d.tools)
+            else "a supervisor needs the delegate tool and at least one specialist")
+        add("a_roster_needs_the_supervisor_flag", not d.delegates_to or d.supervisor,
+            "" if not d.delegates_to or d.supervisor else "it names specialists but is not a supervisor")
+        dupes = len(d.delegates_to) != len(set(d.delegates_to))
+        add("roster_has_no_duplicates", not dupes, "the same specialist is listed twice" if dupes else "")
     if isinstance(d, SkillDef):
         try:
             Draft202012Validator.check_schema(d.inputs)
@@ -145,9 +225,34 @@ def static_checks(kind: str, d: SkillDef | AgentDef) -> list[dict]:
     return checks
 
 
+def roster_checks(db: Session, d: SkillDef | AgentDef) -> list[dict]:
+    """The part of a roster that needs the database. Kept out of static_checks so that stays pure.
+
+    A specialist may not itself be a supervisor: that is what keeps the delegation graph one level
+    deep and free of cycles, without a runtime depth count having to be correct.
+    """
+    if not isinstance(d, AgentDef) or not d.delegates_to:
+        return []
+    checks = []
+    for key in d.delegates_to:
+        target = db.scalar(select(Asset).where(Asset.kind == "agent", Asset.key == key))
+        if target is None or target.published_version is None or target.deprecated:
+            checks.append({"name": f"specialist:{key}", "ok": False,
+                           "detail": "no published agent with that key"})
+            continue
+        row = version_row(db, target, target.published_version)
+        nested = AgentDef(**row.definition)
+        checks.append({"name": f"specialist:{key}", "ok": not nested.supervisor,
+                       "detail": "a supervisor cannot be someone else's specialist" if nested.supervisor else ""})
+    return checks
+
+
 def validate(db: Session, who: Principal, a: Asset) -> dict:
     row = latest(db, a)
-    checks = static_checks(a.kind, MODELS[a.kind](**row.definition))
+    d = MODELS[a.kind](**row.definition)
+    checks = static_checks(a.kind, d) + roster_checks(db, d)
+    if a.kind == "workflow":
+        checks += reference_checks(db, d)
     ok = all(c["ok"] for c in checks)
     a.validation = {"checked_at": _now().isoformat(timespec="seconds"), "ok": ok, "version": a.version, "checks": checks}
     if ok:
@@ -184,6 +289,8 @@ class RunSpec:
     tool_names: list[str]
     model: str
     version: int
+    supervisor: bool = False
+    delegates_to: tuple[str, ...] = ()
 
 
 def _fill(template: str, values: dict) -> str:
@@ -208,6 +315,8 @@ def _inputs(schema: dict, supplied: dict) -> dict:
 
 def resolve(db: Session, who: Principal, kind: str, key: str, inputs: dict | None = None,
             allow_draft: bool = False) -> RunSpec:
+    if kind == "workflow":  # a workflow is compiled and run, never turned into a prompt
+        raise AssetError(422, "a workflow is run, not resolved")
     a = get(db, kind, key)
     admin = who.role is Role.ADMIN
     version = a.version if (allow_draft and admin) else a.published_version  # only admins may try a draft
@@ -228,21 +337,36 @@ def resolve(db: Session, who: Principal, kind: str, key: str, inputs: dict | Non
                 "Use only the tools you have been given; if the data you need is not available, say so.")
         return RunSpec(a.name, text, allowed, settings.default_model, version)
     text = f"You are acting as the specialist \"{a.name}\".\n\n{d.instructions}"
-    return RunSpec(a.name, text, allowed, MODEL_FOR[d.model](), version)
+    if d.supervisor and d.delegates_to:
+        text += "\n\nYour specialists: " + ", ".join(d.delegates_to) + \
+                ". Delegate pillar work to them rather than deriving it yourself, and name which " \
+                "specialist each finding came from."
+    return RunSpec(a.name, text, allowed, MODEL_FOR[d.model](), version,
+                   supervisor=d.supervisor, delegates_to=tuple(d.delegates_to))
 
 
-# --- evals ---------------------------------------------------------------------------------
+# --- running headlessly ----------------------------------------------------------------------
 
-async def _run_case(client, db: Session, who: Principal, spec: RunSpec, message: str, period: str) -> tuple[str, set[str]]:
+async def run_headless(client, db: Session, who: Principal, spec: RunSpec, message: str, period: str,
+                       *, delegation: dict | None = None, max_rounds: int | None = None) -> tuple[str, set[str]]:
+    """One self-contained run of a skill or agent: no session, no history, nothing persisted.
+
+    Shared by evals and by delegation, so a sub-agent runs through exactly the path its evals proved.
+    `who` is passed straight through, so a sub-agent can never see more than its caller.
+    """
     from app.copilot.orchestrator import chat_turn
 
     text, called = [], set()
-    async for ev in chat_turn(client, db, who, [], message, period, None, spec.extra_system, spec.tool_names, spec.model):
+    async for ev in chat_turn(client, db, who, [], message, period, None, spec.extra_system, spec.tool_names,
+                              spec.model, delegation=delegation, max_rounds=max_rounds):
         if ev["type"] == "chunk":
             text.append(ev["content"])
         elif ev["type"] == "tool":
             called.add(ev["name"])
     return "".join(text), called
+
+
+# --- evals ---------------------------------------------------------------------------------
 
 
 def run_evals(db: Session, who: Principal, a: Asset, client, period: str) -> dict:
@@ -262,7 +386,7 @@ def run_evals(db: Session, who: Principal, a: Asset, client, period: str) -> dic
             else:
                 spec = RunSpec(a.name, d.instructions, sorted(set(d.tools) & tool_names()), MODEL_FOR[d.model](), a.version)
                 message = str(case.inputs.get("message", ""))
-            text, called = asyncio.run(_run_case(client, db, who, spec, message, period))
+            text, called = asyncio.run(run_headless(client, db, who, spec, message, period))
         except AssetError as e:
             results.append({"case": case.name, "passed": False, "problems": [e.message]})
             continue

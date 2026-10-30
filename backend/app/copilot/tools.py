@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.approvals import service as approvals
 from app.approvals.actions import ACTIONS
+from app.copilot.delegate import DEFINITION as DELEGATE
 from app.core.security import Principal
 from app.db.models import ReportSnapshot, WorkflowRun
 from app.knowledge import store as knowledge
@@ -19,6 +20,7 @@ PERIOD_PROP = {"type": "string", "description": "Fiscal period as YYYY-MM. Defau
 # Sorted by name: a stable tool array keeps the prompt cache valid.
 TOOLS: list[dict[str, Any]] = sorted(
     [
+        DELEGATE,
         {
             "name": "get_group_score",
             "description": "Group HR score, status, pillar scores and company coverage for a period.",
@@ -89,7 +91,8 @@ TOOLS: list[dict[str, Any]] = sorted(
 )
 
 
-def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int | None = None) -> dict:
+def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int | None = None,
+             *, client: Any = None, delegation: dict | None = None) -> dict:
     period = args.get("period") or sc.current_period()
     try:
         if name == "get_group_score":
@@ -146,6 +149,10 @@ def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int
             return {"verdict": res.verdict, "reason": res.reason, "approval_id": res.approval.id,
                     "status": res.approval.status,
                     "note": "Not executed. A human must approve it first." if res.verdict != "deny" else None}
+        if name == "delegate":
+            from app.copilot import delegate as delegate_mod
+
+            return delegate_mod.run(db, who, args, period, client, delegation)
         if name == "rank_ics":
             card = sc.build_scorecard(db, who, period)
             scored = [c for c in card["companies"] if c["score"] is not None]

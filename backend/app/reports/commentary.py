@@ -133,3 +133,44 @@ def generate(client: Any | None, report: dict) -> dict:
     if bad:  # reject the whole draft rather than publish a figure nobody computed
         return {**fallback, "issues": [f"rejected_ungrounded_numbers:{','.join(bad[:5])}"]}
     return {"text": text, "method": "ai", "grounded": True, "issues": []}
+
+
+def _fact_lines(facts: dict) -> str:
+    """A plain rendering of the facts, used when the model cannot be trusted with them."""
+    out = []
+    for key, value in sorted(facts.items()):
+        if isinstance(value, dict) and "text" in value:
+            out.append(f"- {_label(key)}: {str(value['text'])[:400]}")
+        else:
+            out.append(f"- {_label(key)}: {json.dumps(value, default=str, sort_keys=True)[:400]}")
+    return "\n".join(out) or "- (nothing to summarise)"
+
+
+def summarize(client: Any | None, facts: dict, instructions: str) -> dict:
+    """Narrative over a workflow's earlier steps, held to the same rule as the monthly review: the
+    model may phrase the facts but may not state a number that is not in them. Never raises.
+
+    This is why a prompt-authored workflow is safe to publish: whatever a planner dreams up, any
+    sentence it produces about numbers has been checked against what the deterministic steps computed.
+    """
+    fallback = {"text": _fact_lines(facts), "method": "template", "grounded": True, "issues": []}
+    if client is None:
+        return {**fallback, "issues": ["no_llm_configured"]}
+    try:
+        resp = client.messages.create(
+            model=settings.default_model, max_tokens=1500, system=SYSTEM,
+            messages=[{"role": "user", "content":
+                       f"<instructions>{instructions[:2000]}</instructions>\n"
+                       "<facts>\n" + json.dumps(facts, sort_keys=True, default=str) + "\n</facts>"}],
+        )
+    except Exception as e:  # noqa: BLE001 - a step must not fail because the model was unavailable
+        return {**fallback, "issues": [f"llm_error:{type(e).__name__}"]}
+    if getattr(resp, "stop_reason", None) == "refusal":
+        return {**fallback, "issues": ["llm_refusal"]}
+    text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text").strip()
+    if not text:
+        return {**fallback, "issues": ["llm_empty"]}
+    bad = ungrounded_numbers(text, facts)
+    if bad:  # one invented figure rejects the whole draft
+        return {**fallback, "issues": [f"rejected_ungrounded_numbers:{','.join(bad[:5])}"]}
+    return {"text": text, "method": "ai", "grounded": True, "issues": []}

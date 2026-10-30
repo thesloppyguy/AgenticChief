@@ -107,3 +107,62 @@ export interface MockStatus {
   companies: number; generated: number; ai: number; fallback: number; model: string; token_configured: boolean; ai_configured: boolean; fallback_allowed: boolean;
   job: { running: boolean; started_at: string | null; finished_at: string | null; done: number; result: { ai?: number; fallback?: number; failed?: string[]; notes?: string[]; error?: string } | null };
 }
+
+// --- watches ---------------------------------------------------------------------------------
+export type WatchSubject = "overall" | "pillar" | "kpi" | "status";
+export type WatchComparator = "below" | "above" | "equals" | "changes_to";
+export interface WatchCondition {
+  subject: WatchSubject; pillar: string | null; kpi_key: string | null;
+  comparator: WatchComparator; threshold: number | null; value: "red" | "amber" | "green" | null;
+}
+export interface Watch {
+  id: number; name: string; user_id: string; company_id: number | null; company_code: string | null;
+  condition: WatchCondition; describes: string; enabled: boolean;
+  cadence: Cadence | null; next_run_at: string | null; last_run_at: string | null; last_status: string | null;
+  schedule_id: number | null; created_at: string;
+}
+export interface WatchTest { would_fire: boolean; observed: number | string | null; previous: number | string | null; condition: string }
+export interface Cadence { type: "daily" | "weekly" | "monthly"; time: string; weekday?: number; day?: number }
+
+// --- workflow definitions --------------------------------------------------------------------
+export type StepType = "scorecard" | "tool" | "skill" | "agent" | "summarize" | "propose";
+export interface WorkflowStep { key: string; label: string; type: StepType; args: Record<string, unknown> }
+export interface WorkflowDef {
+  id: number; key: string; name: string; description: string; lifecycle: string;
+  version: number; published_version: number | null; title: string | null;
+  steps: WorkflowStep[]; uses: string[]; permissions: string[];
+  definition?: { title: string; steps: WorkflowStep[] };
+  validation?: { ok: boolean; checked_at: string; checks: { name: string; ok: boolean; detail: string }[] } | null;
+}
+export interface WorkflowDraft {
+  spec: { title: string; steps: WorkflowStep[] } | null; problems: string[]; raw: string | null;
+}
+
+// --- activity timeline -----------------------------------------------------------------------
+export interface TimelineItem {
+  id: string; at: string; source: string; kind: string; actor: string; title: string;
+  status: "ok" | "failed" | "pending" | "running" | "skipped";
+  entity: string | null; company_id: number | null; period: string | null;
+  ref: { type: string; id: number } | null; detail: Record<string, unknown> | null;
+}
+export interface TimelinePage { items: TimelineItem[]; next_cursor: string | null }
+
+// --- chat ------------------------------------------------------------------------------------
+export interface SessionRow { id: number; title: string; created_at: string; message_count: number; last_at: string }
+export interface SessionDetail {
+  id: number; title: string;
+  created_at: string;
+  messages: { role: string; content: string; tools: string[] | null; at: string }[];
+  approvals?: { id: number; action: string; summary: string; status: string }[];
+}
+export interface AssetRow {
+  key: string; name: string; description: string; lifecycle: string; published_version: number | null;
+  tools: string[]; permissions: string[]; model?: string | null;
+  inputs?: { type: string; properties: Record<string, { type?: string; enum?: string[]; default?: unknown; description?: string; minimum?: number; maximum?: number }>; required?: string[] } | null;
+}
+
+// --- documents and memory ----------------------------------------------------------------------
+export interface DocumentRow { id: number; title: string; filename: string; domain: string; builtin: boolean; size_bytes: number; chunk_count: number; uploaded_by: string; created_at: string }
+export interface DocumentHit { document_id: number; title: string; domain: string; chunk: number; snippet: string; score: number }
+export interface MemoryList { enabled: boolean; memories: MemoryRow[] }
+export interface MemoryRow { id: number; kind: string; domain: string; summary: string; session_id: number | null; pinned: boolean; created_at: string }

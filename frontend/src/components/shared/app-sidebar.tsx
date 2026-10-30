@@ -12,6 +12,7 @@ import {
   Brain,
   Box,
   Cloud,
+  FileBarChart,
 } from "lucide-react";
 
 import { NavMain } from "@/components/shared/nav-main";
@@ -37,7 +38,7 @@ const data = {
   navMain: [
     {
       title: "Home",
-      url: "/",
+      url: "/home",
       icon: Home,
     },
     {
@@ -57,36 +58,40 @@ const data = {
       items: [
         {
           title: "Actions",
-          url: "/work/actions",
+          url: "/actions",
           icon: ListChecks,
         },
         {
           title: "Workflows",
-          url: "/work/workflows",
+          url: "/workflows",
           icon: Workflow,
         },
         {
-          title: "Documents",
-          url: "/work/documents",
-          icon: FileText,
+          title: "Reports",
+          url: "/reports",
+          icon: FileBarChart,
         },
       ],
     },
-
     {
       title: "Knowledge",
-      url: "/knowledge",
+      url: "#",
       icon: Brain,
       items: [
         {
           title: "Documents",
-          url: "/knowledge/documents",
+          url: "/documents",
           icon: FileText,
         },
         {
           title: "Memory Store",
-          url: "/knowledge/memory-store",
+          url: "/memory",
           icon: Box,
+        },
+        {
+          title: "Scorecard",
+          url: "/knowledge",
+          icon: Brain,
         },
       ],
     },
@@ -111,7 +116,7 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/" prefetch />}>
+            <SidebarMenuButton size="lg" render={<Link href="/home" prefetch />}>
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg border border-sidebar-primary text-sidebar-primary-foreground">
                 <Logo label={false} className="p-1" />
               </div>

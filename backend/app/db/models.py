@@ -58,8 +58,9 @@ class ManualInputHistory(Base):
 class AuditEvent(Base):
     __tablename__ = "audit_event"
     id: Mapped[int] = mapped_column(primary_key=True)
-    at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
-    actor: Mapped[str] = mapped_column(String(128))
+    # Indexed for the activity timeline, which orders by `at` and filters by `actor`.
+    at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now(), index=True)
+    actor: Mapped[str] = mapped_column(String(128), index=True)
     role: Mapped[str] = mapped_column(String(32))
     action: Mapped[str] = mapped_column(String(64), index=True)
     target: Mapped[str | None] = mapped_column(String(200))
@@ -211,7 +212,7 @@ class OutboundMessage(Base):
 class Alert(Base):
     __tablename__ = "alert"
     id: Mapped[int] = mapped_column(primary_key=True)
-    kind: Mapped[str] = mapped_column(String(32), index=True)  # status_red | ingestion_failed
+    kind: Mapped[str] = mapped_column(String(32), index=True)  # status_red | ingestion_failed | watch_fired
     severity: Mapped[str] = mapped_column(String(12))  # low | medium | high | urgent
     company_id: Mapped[int | None] = mapped_column(ForeignKey("company.id"), index=True)  # None = group-wide
     entity: Mapped[str] = mapped_column(String(64))  # company code, "group", or a source name
@@ -219,6 +220,9 @@ class Alert(Base):
     title: Mapped[str] = mapped_column(String(200))
     detail: Mapped[dict | None] = mapped_column(JSON)
     dedupe_key: Mapped[str] = mapped_column(String(160), unique=True)
+    # None = anyone whose scope covers it. Set for a private alert (a user's own watch), so one
+    # person's watch does not notify everyone who happens to see that company.
+    audience_user_id: Mapped[str | None] = mapped_column(String(128), index=True)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
 
 
@@ -418,6 +422,22 @@ class JobSchedule(Base):
     last_detail: Mapped[str | None] = mapped_column(String(200))
     claimed_at: Mapped[datetime | None] = mapped_column(UtcDateTime())  # set while a run is in flight
     created_by: Mapped[str] = mapped_column(String(128))
+
+
+class Watch(Base):
+    """A user-defined condition checked on a cadence. `condition` is validated by app.alerts.watches;
+    the cadence lives on the paired JobSchedule, so watches reuse the scheduler's claiming and
+    crash recovery rather than growing their own."""
+
+    __tablename__ = "watch"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(128), index=True)  # the owner; alerts go only to them
+    name: Mapped[str] = mapped_column(String(120))
+    company_id: Mapped[int | None] = mapped_column(ForeignKey("company.id"), index=True)  # None = group
+    condition: Mapped[dict] = mapped_column(JSON)
+    enabled: Mapped[bool] = mapped_column(default=True)
+    schedule_id: Mapped[int | None] = mapped_column(ForeignKey("job_schedule.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
 
 
 class MockCompanyData(Base):
