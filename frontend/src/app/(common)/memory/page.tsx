@@ -1,6 +1,6 @@
 "use client";
 import { toast } from "sonner";
-import { Card, Loading } from "@/components/ui";
+import { Card, Loading, PageHeader } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,19 +23,16 @@ export default function MemoryPage() {
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Memory store</h1>
-        <p className="text-sm text-muted-foreground">
-          What the Copilot remembers from your earlier sessions. Private to you, and treated as
-          possibly out of date: it never quotes a figure from here as current.
-        </p>
-      </div>
+    <div className="space-y-4">
+      <PageHeader
+        title="Memory store"
+        subtitle="What the Copilot remembers from your earlier sessions. Private to you, and treated as possibly out of date: it never quotes a figure from here as current."
+      />
 
       <Loading error={error} loading={loading && !data} />
 
       {data && (
-        <>
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <Card title="Settings">
             <div className="flex items-start gap-3">
               <Checkbox id="enabled" checked={data.enabled}
@@ -92,7 +89,7 @@ export default function MemoryPage() {
               ))}
             </ul>
           </Card>
-        </>
+        </div>
       )}
     </div>
   );

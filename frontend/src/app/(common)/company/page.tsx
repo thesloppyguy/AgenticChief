@@ -2,7 +2,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePeriod } from "@/components/AppShell";
-import { Card, Loading, ScoreTile, StatusBadge } from "@/components/ui";
+import { Card, Loading, PageHeader, ScoreTile, StatusBadge } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -32,20 +32,21 @@ function Companies({ period }: { period: string }) {
   const [picked, setPicked] = useState<number | null>(
     params.get("company") ? Number(params.get("company")) : null,
   );
+  const selected = picked ?? card.data?.companies[0]?.company_id ?? null;
   const detail = useApi<CompanyDetail>(
-    picked ? `/scorecard/companies/${picked}?period=${period}` : null,
+    selected ? `/scorecard/companies/${selected}?period=${period}` : null,
   );
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-      <Card title="Companies">
+    <div className="grid items-start gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <Card title={`Companies${card.data ? ` (${card.data.companies.length})` : ""}`}>
         <Loading error={card.error} loading={card.loading && !card.data} />
-        <ul className="max-h-[32rem] space-y-1 overflow-y-auto">
+        <ul className="max-h-[calc(100vh-14rem)] space-y-0.5 overflow-y-auto pr-1">
           {card.data?.companies.map((c) => (
             <li key={c.company_id}>
               <button onClick={() => setPicked(c.company_id)}
-                className={cn("flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted/50",
-                  picked === c.company_id && "bg-muted")}>
+                className={cn("flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-muted",
+                  selected === c.company_id && "bg-secondary font-medium")}>
                 <span className="truncate">{c.code}</span>
                 <span className="flex items-center gap-2">
                   <span className="tabular-nums">{fmt(c.score)}</span>
@@ -58,26 +59,25 @@ function Companies({ period }: { period: string }) {
       </Card>
 
       <div className="space-y-4">
-        {!picked && <p className="text-sm text-muted-foreground">Pick a company to drill in.</p>}
-        {picked && <Loading error={detail.error} loading={detail.loading && !detail.data} />}
+        {selected && <Loading error={detail.error} loading={detail.loading && !detail.data} />}
         {detail.data && (
           <>
             <div>
-              <h2 className="text-lg font-semibold">{detail.data.company.name}</h2>
+              <h2 className="text-lg font-semibold tracking-tight">{detail.data.company.name}</h2>
               <p className="text-sm text-muted-foreground">
                 {detail.data.company.code} · scored on{" "}
                 {Math.round(detail.data.pillar_coverage * 100)}% of the scorecard&apos;s weight
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <ScoreTile title="Overall" score={detail.data.score} status={detail.data.status}
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <ScoreTile accent title="Overall" score={detail.data.score} status={detail.data.status}
                 withheld={detail.data.status_withheld} />
-              {detail.data.pillars.slice(0, 3).map((p) => (
+              {detail.data.pillars.map((p) => (
                 <ScoreTile key={p.pillar} title={label(p.pillar)} score={p.score} status={p.status} />
               ))}
             </div>
-            <Card title="Every KPI">
-              <div className="overflow-x-auto">
+            <Card title="Every KPI" contentClassName="[&_[data-slot=table-container]]:max-h-[28rem] [&_[data-slot=table-container]]:overflow-y-auto [&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-muted">
+              <div>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -193,19 +193,19 @@ function CompanyView() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold">Companies</h1>
-        <p className="text-sm text-muted-foreground">
-          Drill from the Group number into one company, or into one pillar across every company.
-        </p>
-      </div>
-      <Tabs value={tab} onValueChange={(v) => setTab(String(v))}>
-        <TabsList>
-          <TabsTrigger value="companies">By company</TabsTrigger>
-          <TabsTrigger value="pillars">By pillar</TabsTrigger>
-        </TabsList>
-        <TabsContent value="companies" className="mt-4"><Companies period={period} /></TabsContent>
-        <TabsContent value="pillars" className="mt-4"><Pillars period={period} /></TabsContent>
+      <Tabs value={tab} onValueChange={(v) => setTab(String(v))} className="gap-4">
+        <PageHeader
+          title="Companies"
+          subtitle="Drill from the Group number into one company, or into one pillar across every company."
+          actions={
+            <TabsList>
+              <TabsTrigger value="companies">By company</TabsTrigger>
+              <TabsTrigger value="pillars">By pillar</TabsTrigger>
+            </TabsList>
+          }
+        />
+        <TabsContent value="companies"><Companies period={period} /></TabsContent>
+        <TabsContent value="pillars"><Pillars period={period} /></TabsContent>
       </Tabs>
     </div>
   );

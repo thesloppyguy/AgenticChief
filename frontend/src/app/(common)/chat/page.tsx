@@ -1,11 +1,9 @@
 "use client";
 import { Suspense, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowUp, Bot, Plus, Terminal, Users } from "lucide-react";
 import { usePeriod } from "@/components/AppShell";
-import { Loading } from "@/components/ui";
-import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +23,14 @@ import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
 import { streamChat } from "@/lib/chat";
 import { label } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
-import type { AssetRow, SessionRow } from "@/lib/types";
+import { SESSIONS_CHANGED, type AssetRow } from "@/lib/types";
+
+const EXAMPLES = [
+  { title: "Group score", body: "What is the Group score this month, and what moved?" },
+  { title: "Missing data", body: "Which companies are missing Learning & Development data?" },
+  { title: "Off-track companies", body: "Which companies are off track, and what is driving it?" },
+  { title: "Weakest pillar", body: "Summarise the weakest pillar and its lowest-scoring KPIs." },
+];
 
 interface Msg { role: "user" | "assistant"; content: string; tools: string[]; done: boolean }
 
@@ -60,13 +65,12 @@ function Chat() {
   const [sid, setSid] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const agents = useApi<AssetRow[]>("/agents");
-  const sessions = useApi<SessionRow[]>("/copilot/sessions");
 
   const patch = (fn: (m: Msg) => Msg) =>
     setMsgs((all) => all.map((m, i) => (i === all.length - 1 ? fn(m) : m)));
 
-  async function send() {
-    const body = text.trim();
+  async function send(prompt?: string) {
+    const body = (prompt ?? text).trim();
     if (!body || busy) return;
     setText("");
     setBusy(true);
@@ -79,7 +83,11 @@ function Chat() {
         onChunk: (c) => patch((m) => ({ ...m, content: m.content + c })),
         onTool: (n) => patch((m) => ({ ...m, tools: [...m.tools, n] })),
         onError: (e) => patch((m) => ({ ...m, content: e, done: true })),
-        onDone: (id) => { setSid(id); patch((m) => ({ ...m, done: true })); sessions.reload(); },
+        onDone: (id) => {
+          setSid(id);
+          patch((m) => ({ ...m, done: true }));
+          window.dispatchEvent(new Event(SESSIONS_CHANGED));
+        },
       },
     );
     setBusy(false);
@@ -87,113 +95,120 @@ function Chat() {
 
   const options = [{ value: "", label: "Copilot (default)" },
     ...(agents.data ?? []).map((a) => ({ value: a.key, label: a.name }))];
+  const hasSupervisor = agents.data?.some((a) => a.key === "chro_supervisor");
+
+  const composer = (
+    <InputGroup className="rounded-xl border-transparent bg-muted/60">
+      <InputGroupTextarea rows={2} value={text} placeholder="Ask about the scorecard…"
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
+        }} />
+      <InputGroupAddon align="block-end">
+        <span className="text-xs text-muted-foreground">Period {period}</span>
+        <InputGroupButton variant="default" size="icon-sm" className="ml-auto rounded-full bg-accent text-accent-foreground hover:bg-accent/85"
+          disabled={busy || !text.trim()} onClick={() => void send()} aria-label="Send">
+          <ArrowUp className="size-4" />
+        </InputGroupButton>
+      </InputGroupAddon>
+    </InputGroup>
+  );
 
   return (
-    <div className="grid h-[calc(100vh-6rem)] gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
-      <div className="flex min-h-0 flex-col">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h1 className="text-xl font-semibold">Ask</h1>
-            <p className="text-sm text-muted-foreground">
-              Every number comes from a tool result. Nothing here is calculated by the model.
-            </p>
-          </div>
-          <Select items={options} value={agent} onValueChange={(v) => setAgent(String(v))}>
-            <SelectTrigger size="sm" className="w-56"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="flex h-[calc(100svh-5.5rem)] min-h-0 flex-col gap-3">
+      <PageHeader
+        title="Ask"
+        subtitle="Every number comes from a tool result. Nothing here is calculated by the model."
+        actions={
+          <>
+            <Select items={options} value={agent} onValueChange={(v) => setAgent(String(v))}>
+              <SelectTrigger size="sm" className="w-56"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm"
+              onClick={() => { setSid(null); setMsgs([]); }}>
+              <Plus className="size-4" />New session
+            </Button>
+          </>
+        }
+      />
 
-        <MessageScrollerProvider>
-          <MessageScroller className="min-h-0 flex-1 rounded-lg border">
-            <MessageScrollerViewport className="p-4">
-              <MessageScrollerContent>
-                {msgs.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    Try “What is the Group score this month, and what moved?” or
-                    “Which companies are missing Learning &amp; Development data?”
-                  </p>
-                )}
-                <MessageGroup>
-                  {msgs.map((m, i) => (
-                    <MessageScrollerItem key={i} scrollAnchor={i === msgs.length - 1}>
-                      <Message align={m.role === "user" ? "end" : "start"}>
-                        <MessageContent>
-                          {m.role === "assistant" && (
-                            <>
-                              <MessageHeader>
-                                {agent ? options.find((o) => o.value === agent)?.label : "Copilot"}
-                              </MessageHeader>
-                              <ToolTrace tools={m.tools} live={!m.done} />
-                            </>
-                          )}
-                          <Bubble variant={m.role === "user" ? "default" : "muted"}
-                            align={m.role === "user" ? "end" : "start"}>
-                            <BubbleContent className="whitespace-pre-wrap">
-                              {m.content || (m.done ? "" : "Thinking…")}
-                            </BubbleContent>
-                          </Bubble>
-                        </MessageContent>
-                      </Message>
-                    </MessageScrollerItem>
+      {hasSupervisor && (
+        <p className="flex gap-2 text-xs text-muted-foreground">
+          <Bot className="size-4 shrink-0" />
+          Pick <strong>CHRO Supervisor</strong> for a question spanning several pillars: it asks the
+          specialists and says which one each finding came from.
+        </p>
+      )}
+
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-card shadow-xs ring-1 ring-border">
+        {msgs.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto p-6">
+            <div className="w-full max-w-3xl space-y-6">
+              <div className="space-y-2 text-center">
+                <div className="mx-auto size-16 rounded-full bg-[radial-gradient(circle_at_30%_30%,#e4f9d2,#9FE870_45%,#062F28)]" />
+                <p className="text-muted-foreground">Good to see you!</p>
+                <h2 className="text-2xl font-semibold tracking-tight">How can I help with your HR scorecard?</h2>
+                <p className="text-sm text-muted-foreground">
+                  Ask about scores, companies and pillars. Answers come straight from the scorecard data.
+                </p>
+              </div>
+              {composer}
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Get started with an example below</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {EXAMPLES.map((ex) => (
+                    <button key={ex.title} type="button" disabled={busy} onClick={() => void send(ex.body)}
+                      className="rounded-xl border bg-muted/30 p-4 text-left transition-colors hover:bg-secondary">
+                      <div className="font-medium">{ex.title}</div>
+                      <div className="mt-1 text-sm text-muted-foreground">{ex.body}</div>
+                    </button>
                   ))}
-                </MessageGroup>
-              </MessageScrollerContent>
-            </MessageScrollerViewport>
-            <MessageScrollerButton direction="end" />
-          </MessageScroller>
-        </MessageScrollerProvider>
-
-        <div className="mt-3">
-          <InputGroup>
-            <InputGroupTextarea rows={2} value={text} placeholder="Ask about the scorecard…"
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
-              }} />
-            <InputGroupAddon align="block-end">
-              <span className="text-xs text-muted-foreground">Period {period}</span>
-              <InputGroupButton size="icon-sm" className="ml-auto" disabled={busy || !text.trim()}
-                onClick={() => void send()} aria-label="Send">
-                <ArrowUp className="size-4" />
-              </InputGroupButton>
-            </InputGroupAddon>
-          </InputGroup>
-        </div>
-      </div>
-
-      <aside className="hidden min-h-0 flex-col lg:flex">
-        <Button variant="outline" size="sm" className="mb-2"
-          onClick={() => { setSid(null); setMsgs([]); }}>
-          <Plus className="size-4" />New session
-        </Button>
-        <Loading error={sessions.error} loading={sessions.loading && !sessions.data} />
-        <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto">
-          {sessions.data?.map((s) => (
-            <li key={s.id}>
-              <Link href={`/chat/${s.id}`}
-                className="block rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted/50">
-                <span className="line-clamp-1">{s.title}</span>
-                <span className="text-xs text-muted-foreground">
-                  {s.message_count} messages · {new Date(s.last_at).toLocaleDateString()}
-                </span>
-              </Link>
-            </li>
-          ))}
-          {sessions.data?.length === 0 && (
-            <li className="px-2 text-sm text-muted-foreground">No sessions yet.</li>
-          )}
-        </ul>
-        {agents.data?.some((a) => a.key === "chro_supervisor") && (
-          <p className="mt-3 flex gap-2 rounded-lg border p-2 text-xs text-muted-foreground">
-            <Bot className="size-4 shrink-0" />
-            Pick <strong>CHRO Supervisor</strong> for a question spanning several pillars: it asks the
-            specialists and says which one each finding came from.
-          </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <MessageScrollerProvider>
+              <MessageScroller className="min-h-0 flex-1">
+                <MessageScrollerViewport className="p-4">
+                  <MessageScrollerContent>
+                    <MessageGroup>
+                      {msgs.map((m, i) => (
+                        <MessageScrollerItem key={i} scrollAnchor={i === msgs.length - 1}>
+                          <Message align={m.role === "user" ? "end" : "start"}>
+                            <MessageContent>
+                              {m.role === "assistant" && (
+                                <>
+                                  <MessageHeader>
+                                    {agent ? options.find((o) => o.value === agent)?.label : "Copilot"}
+                                  </MessageHeader>
+                                  <ToolTrace tools={m.tools} live={!m.done} />
+                                </>
+                              )}
+                              <Bubble variant={m.role === "user" ? "default" : "muted"}
+                                align={m.role === "user" ? "end" : "start"}>
+                                <BubbleContent className="whitespace-pre-wrap">
+                                  {m.content || (m.done ? "" : "Thinking…")}
+                                </BubbleContent>
+                              </Bubble>
+                            </MessageContent>
+                          </Message>
+                        </MessageScrollerItem>
+                      ))}
+                    </MessageGroup>
+                  </MessageScrollerContent>
+                </MessageScrollerViewport>
+                <MessageScrollerButton direction="end" />
+              </MessageScroller>
+            </MessageScrollerProvider>
+            <div className="border-t p-3">{composer}</div>
+          </>
         )}
-      </aside>
+      </div>
     </div>
   );
 }

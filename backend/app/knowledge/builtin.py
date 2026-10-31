@@ -4,6 +4,8 @@ The KPI formula wording is the PRD's Appendix A.6 ("Scoring notes").
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -100,14 +102,24 @@ def scoring_rules() -> str:
 BUILTIN = {"scorecard-kpi-definitions.md": ("Scorecard KPI definitions", kpi_definitions),
            "scorecard-scoring-rules.md": ("How scorecard scores are calculated", scoring_rules)}
 
+# Static reference playbooks shipped with the app, one folder per domain (docs/<domain>/<file>.md).
+DOCS_DIR = Path(__file__).parent / "docs"
+
+
+def _static_docs():
+    for path in sorted(DOCS_DIR.glob("*/*.md")):
+        yield path.name, path.read_bytes(), path.parent.name
+
 
 def seed_builtin(db: Session, commit: bool = True) -> int:
     """Idempotent: add what is missing, refresh what changed in the code. Returns documents written."""
     from app.services.scorecard import active_kpis  # lazy: scorecard imports the ingestion registry
 
+    docs = [(filename, title, (make(active_kpis(db)) if make is kpi_definitions else make()).encode(), "scorecard")
+            for filename, (title, make) in BUILTIN.items()]
+    docs += [(name, name, body, domain) for name, body, domain in _static_docs()]
     written = 0
-    for filename, (title, make) in BUILTIN.items():
-        body = (make(active_kpis(db)) if make is kpi_definitions else make()).encode()
+    for filename, title, body, domain in docs:
         existing = db.scalar(select(Document).where(Document.builtin.is_(True), Document.filename == filename))
         if existing is not None:
             text = store.extract_text(filename, body)
@@ -116,6 +128,6 @@ def seed_builtin(db: Session, commit: bool = True) -> int:
             if existing.content_hash == fresh and existing.chunk_count == len(chunk_text(text)):
                 continue
             store.delete_document(db, SYSTEM, existing, commit=commit)
-        store.add_document(db, SYSTEM, title, filename, body, domain="scorecard", builtin=True, commit=commit)
+        store.add_document(db, SYSTEM, title, filename, body, domain=domain, builtin=True, commit=commit)
         written += 1
     return written

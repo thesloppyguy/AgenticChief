@@ -15,6 +15,7 @@ import {
   FileBarChart,
 } from "lucide-react";
 
+import { NavConversations } from "@/components/shared/nav-conversations";
 import { NavMain } from "@/components/shared/nav-main";
 import { NavLists } from "@/components/shared/nav-project";
 import { NavUser } from "@/components/shared/nav-user";
@@ -117,12 +118,12 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/home" prefetch />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg border border-sidebar-primary text-sidebar-primary-foreground">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-full bg-accent text-accent-foreground">
                 <Logo label={false} className="p-1" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">Lokibots</span>
-                <span className="truncate text-xs">CHRO Copilot</span>
+                <span className="truncate text-base font-semibold">Lokibots</span>
+                <span className="truncate text-xs text-muted-foreground">CHRO Copilot</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -131,7 +132,7 @@ export function AppSidebar({
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavLists title="Reports & Analytics" lists="reports" />
-        <NavLists title="Conversations" lists="conversations" />
+        <NavConversations />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} open={open} onOpenChange={onOpenChange} />

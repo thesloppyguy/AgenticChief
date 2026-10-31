@@ -16,6 +16,7 @@ import { api } from "@/lib/api";
 import { label } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { TimelineItem, TimelinePage } from "@/lib/types";
+import { Card, PageHeader } from "@/components/ui";
 
 const KIND_ICON: Record<string, typeof Bot> = {
   tool: Terminal, capability: Download, delegate: Bot, workflow_step: Workflow,
@@ -115,22 +116,20 @@ export default function DreamPage() {
   }, [req]);
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">Dream</h1>
-          <p className="text-sm text-muted-foreground">
-            Everything the agent did, newest first — whether you asked for it or a schedule set it off.
-          </p>
-        </div>
-        <Select items={FILTERS} value={req.kinds}
-          onValueChange={(v) => { setLoading(true); setReq({ cursor: null, kinds: String(v), append: false }); }}>
-          <SelectTrigger size="sm" className="w-44"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {FILTERS.map((f) => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
+    <div className="space-y-4">
+      <PageHeader
+        title="Dream"
+        subtitle="Everything the agent did, newest first — whether you asked for it or a schedule set it off."
+        actions={
+          <Select items={FILTERS} value={req.kinds}
+            onValueChange={(v) => { setLoading(true); setReq({ cursor: null, kinds: String(v), append: false }); }}>
+            <SelectTrigger size="sm" className="w-44"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {FILTERS.map((f) => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        }
+      />
 
       {loading && items.length === 0 && (
         <div className="space-y-4">
@@ -144,7 +143,11 @@ export default function DreamPage() {
         </p>
       )}
 
-      <div>{items.map((i) => <Row key={i.id} item={i} />)}</div>
+      {items.length > 0 && (
+        <Card contentClassName="max-h-[calc(100svh-13rem)] overflow-y-auto">
+          {items.map((i) => <Row key={i.id} item={i} />)}
+        </Card>
+      )}
 
       {!done && items.length > 0 && (
         <Button variant="outline" disabled={loading}

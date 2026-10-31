@@ -1,39 +1,211 @@
 "use client";
 import Link from "next/link";
-import { Box, FileText } from "lucide-react";
-import { Card, Loading } from "@/components/ui";
+import { useRef, useState } from "react";
+import { Box, FileText, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Card, Loading, PageHeader } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api, API_URL, getClaims, getToken } from "@/lib/api";
 import { fmt, label } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
-import type { KpiCatalog } from "@/lib/types";
+import type { DocumentDetail, DocumentRow, KpiCatalog } from "@/lib/types";
+
+const ACCEPT = ".pdf,.doc,.docx,.xls,.xlsx,.csv,.md,.txt";
+const size = (n: number) => (n < 1024 * 1024 ? `${(n / 1024).toFixed(1)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
+const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB");
+
+export default function KnowledgePage() {
+  const docs = useApi<DocumentRow[]>("/documents");
+
+  return (
+    <div className="space-y-4">
+      <PageHeader
+        title="Knowledge"
+        subtitle="Everything here is read by the Copilot when it answers questions about your company."
+      />
+
+      <Tabs defaultValue="documents">
+        <TabsList>
+          <TabsTrigger value="documents">
+            Company documents
+            {docs.data && (
+              <span className="ml-1.5 rounded-md bg-muted px-1.5 text-xs tabular-nums">{docs.data.length}</span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="advanced">Advanced</TabsTrigger>
+        </TabsList>
+        <TabsContent value="documents" className="mt-6">
+          <Documents {...docs} />
+        </TabsContent>
+        <TabsContent value="advanced" className="mt-6">
+          <Advanced />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function Documents({ data, error, loading, reload }: ReturnType<typeof useApi<DocumentRow[]>>) {
+  const picker = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [over, setOver] = useState(false);
+  const [viewing, setViewing] = useState<DocumentDetail | null>(null);
+  const me = getClaims();
+  const canEdit = me?.role === "admin" || me?.role === "editor";
+
+  async function upload(files: FileList | null) {
+    if (!files?.length) return;
+    setBusy(true);
+    let added = 0;
+    for (const f of Array.from(files)) {
+      const body = new FormData();
+      body.append("file", f);
+      body.append("title", f.name);
+      try {
+        // multipart: the shared api() helper always sets a JSON content type, so this one posts directly.
+        const res = await fetch(`${API_URL}/documents`, {
+          method: "POST", headers: { Authorization: `Bearer ${getToken()}` }, body,
+        });
+        if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+        added++;
+      } catch (err) {
+        toast.error(`${f.name}: ${err instanceof Error ? err.message : "Upload failed"}`);
+      }
+    }
+    if (added) toast.success(`Added ${added} document${added === 1 ? "" : "s"}.`);
+    if (picker.current) picker.current.value = "";
+    setBusy(false);
+    reload();
+  }
+
+  async function view(d: DocumentRow) {
+    try {
+      setViewing(await api<DocumentDetail>(`/documents/${d.id}`));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not open document");
+    }
+  }
+
+  async function remove(d: DocumentRow) {
+    if (!window.confirm(`Delete "${d.title}"?`)) return;
+    try {
+      await api(`/documents/${d.id}`, { method: "DELETE" });
+      toast.success("Deleted.");
+      reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-muted-foreground">Your own files, plus the built-in reference playbooks.</p>
+        {canEdit && (
+          <Button onClick={() => picker.current?.click()} disabled={busy}>
+            <Plus />{busy ? "Uploading…" : "Add documents"}
+          </Button>
+        )}
+        <input ref={picker} type="file" multiple accept={ACCEPT} className="hidden"
+          onChange={(e) => upload(e.target.files)} />
+      </div>
+
+      {canEdit && (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+          onDragLeave={() => setOver(false)}
+          onDrop={(e) => { e.preventDefault(); setOver(false); upload(e.dataTransfer.files); }}
+          onClick={() => picker.current?.click()}
+          className={`cursor-pointer rounded-xl border border-dashed p-6 text-center transition-colors ${
+            over ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
+          <p className="text-sm text-muted-foreground">Drop files here to add them</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">
+            PDF, Word, Excel, CSV, Markdown or text, up to 50 MB each
+          </p>
+        </div>
+      )}
+
+      <Loading error={error} loading={loading && !data} />
+      {data?.length === 0 && <p className="text-sm text-muted-foreground">No documents yet.</p>}
+      {!!data?.length && (
+        <ul className="divide-y overflow-hidden rounded-xl border">
+          {data.map((d) => (
+            <li key={d.id} className="flex items-center gap-4 px-4 py-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                <FileText className="size-4 text-muted-foreground" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-sm font-semibold">{d.title}</span>
+                  {d.domain !== "general" && <Badge variant="secondary" className="uppercase">{d.domain}</Badge>}
+                </div>
+                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="size-1.5 rounded-full bg-muted-foreground" />
+                  {d.builtin ? "Built in" : "Uploaded"} · Added {day(d.created_at)} · {size(d.size_bytes)}
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => view(d)}>View</Button>
+              {canEdit && !d.builtin ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
+                    <MoreHorizontal /><span className="sr-only">More</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem variant="destructive" onClick={() => remove(d)}>
+                      <Trash2 />Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : <span className="w-8" />}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{viewing?.title}</DialogTitle>
+            <DialogDescription>
+              {viewing && `${viewing.chunk_count} indexed passages · ${size(viewing.size_bytes)}`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[65vh] overflow-y-auto whitespace-pre-wrap text-sm text-muted-foreground">
+            {viewing?.text}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
 
 const ENTRY = [
-  { href: "/documents", icon: FileText, title: "Documents",
-    body: "Policies and reference material the Copilot can search and cite." },
+  { href: "/documents", icon: FileText, title: "Document search",
+    body: "Search every passage the Copilot can cite." },
   { href: "/memory", icon: Box, title: "Memory store",
     body: "What the Copilot remembers from your earlier sessions." },
 ];
 
-export default function KnowledgePage() {
+function Advanced() {
   const { data, error, loading } = useApi<KpiCatalog>("/kpis");
 
   return (
-    <div className="max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Knowledge</h1>
-        <p className="text-sm text-muted-foreground">
-          What the platform knows: the KPI register that defines every score, plus the documents and
-          memories the Copilot draws on.
-        </p>
-      </div>
-
+    <div className="space-y-6">
       <div className="grid gap-3 sm:grid-cols-2">
         {ENTRY.map((e) => (
           <Link key={e.href} href={e.href}
-            className="rounded-lg border p-4 transition-colors hover:bg-muted/50">
+            className="rounded-xl border p-4 transition-colors hover:bg-muted/50">
             <div className="flex items-center gap-2 font-medium">
               <e.icon className="size-4 text-muted-foreground" />{e.title}
             </div>

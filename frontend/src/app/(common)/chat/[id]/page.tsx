@@ -2,7 +2,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { Terminal } from "lucide-react";
-import { Card, Loading } from "@/components/ui";
+import { Card, Loading, PageHeader } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
@@ -19,18 +19,17 @@ export default function ChatSessionPage({ params }: { params: Promise<{ id: stri
   const { data, error, loading } = useApi<SessionDetail>(`/copilot/sessions/${id}`);
 
   return (
-    <div className="max-w-3xl space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h1 className="text-xl font-semibold">{data?.title ?? "Session"}</h1>
-          <p className="text-sm text-muted-foreground">A past conversation, exactly as it ran.</p>
-        </div>
-        <Button variant="outline" size="sm" render={<Link href="/chat" />}>New question</Button>
-      </div>
+    <div className="space-y-4">
+      <PageHeader
+        title={data?.title ?? "Session"}
+        subtitle="A past conversation, exactly as it ran."
+        actions={<Button variant="outline" size="sm" render={<Link href="/chat" />}>New question</Button>}
+      />
 
       <Loading error={error} loading={loading && !data} />
 
       {data && (
+        <Card>
         <MessageGroup>
           {data.messages.map((m, i) => (
             <Message key={i} align={m.role === "user" ? "end" : "start"}>
@@ -58,6 +57,7 @@ export default function ChatSessionPage({ params }: { params: Promise<{ id: stri
             </Message>
           ))}
         </MessageGroup>
+        </Card>
       )}
 
       {data?.approvals && data.approvals.length > 0 && (

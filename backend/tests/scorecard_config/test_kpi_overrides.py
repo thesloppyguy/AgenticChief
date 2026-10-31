@@ -132,7 +132,7 @@ def test_the_builtin_kpi_document_is_refreshed_atomically_with_the_activation(cl
     data.expire_all()
     text = doc_text()
     assert "Target: 85" in text and "Target: 100. Higher is better. Source: SAP SuccessFactors.\nEmployees who submitted" not in text
-    assert data.query(Document).filter_by(builtin=True).count() == 2                                            # replaced, not duplicated
+    assert data.query(Document).filter_by(builtin=True, domain="scorecard").count() == 2                                            # replaced, not duplicated
 
 
 def test_invalid_kpi_changes_are_rejected_at_draft_time_with_the_reason(client, data):

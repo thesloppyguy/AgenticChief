@@ -2,7 +2,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Card, Loading } from "@/components/ui";
+import { Card, Loading, PageHeader } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -166,25 +166,24 @@ function Queue() {
   const { data, error, loading, reload } = useApi<Approval[]>(
     tab === "all" ? "/approvals" : `/approvals?status=${tab}`,
   );
+  const sel = selected ?? data?.[0]?.id ?? null;
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold">Actions</h1>
-        <p className="text-sm text-muted-foreground">
-          Nothing consequential happens without a second admin approving it. The Copilot and workflows
-          can only propose.
-        </p>
-      </div>
-
-      <Tabs value={tab} onValueChange={(v) => { setTab(String(v)); setSelected(null); }}>
-        <TabsList>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="executed">Done</TabsTrigger>
-          <TabsTrigger value="all">All</TabsTrigger>
-        </TabsList>
+      <Tabs value={tab} onValueChange={(v) => { setTab(String(v)); setSelected(null); }} className="gap-4">
+        <PageHeader
+          title="Actions"
+          subtitle="Nothing consequential happens without a second admin approving it. The Copilot and workflows can only propose."
+          actions={
+            <TabsList>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="executed">Done</TabsTrigger>
+              <TabsTrigger value="all">All</TabsTrigger>
+            </TabsList>
+          }
+        />
         <TabsContent value={tab} className="mt-4">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <div className="space-y-2">
               <Loading error={error} loading={loading && !data} />
               {data?.length === 0 && (
@@ -192,8 +191,8 @@ function Queue() {
               )}
               {data?.map((a) => (
                 <button key={a.id} onClick={() => setSelected(a.id)}
-                  className={cn("w-full rounded-lg border p-3 text-left text-sm transition-colors hover:bg-muted/50",
-                    selected === a.id && "border-primary bg-muted/50")}>
+                  className={cn("w-full rounded-xl border bg-card p-3 text-left text-sm transition-colors hover:bg-muted/50",
+                    sel === a.id && "border-accent bg-secondary")}>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium">{a.summary}</span>
                     <Badge variant="outline" className={cn("shrink-0", STATUS_STYLE[a.status])}>
@@ -207,8 +206,8 @@ function Queue() {
               ))}
             </div>
             <div>
-              {selected ? (
-                <Detail id={selected} onDecided={reload} />
+              {sel ? (
+                <Detail id={sel} onDecided={reload} />
               ) : (
                 <p className="text-sm text-muted-foreground">Pick a request to see what it would do.</p>
               )}

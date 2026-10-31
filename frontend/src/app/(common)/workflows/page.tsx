@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { usePeriod } from "@/components/AppShell";
-import { Card, Loading } from "@/components/ui";
+import { Card, Loading, PageHeader } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -339,7 +339,8 @@ function Definitions() {
   const me = getClaims();
 
   return (
-    <div className="space-y-4">
+    <div className="grid items-start gap-4 lg:grid-cols-12">
+      <div className="min-w-0 lg:col-span-7">
       <Card title="Saved workflows">
         <Loading error={error} loading={loading && !data} />
         {data?.length === 0 && (
@@ -392,7 +393,8 @@ function Definitions() {
           ))}
         </ul>
       </Card>
-      <Builder onSaved={reload} />
+      </div>
+      <div className="min-w-0 lg:col-span-5"><Builder onSaved={reload} /></div>
     </div>
   );
 }
@@ -401,19 +403,19 @@ function Definitions() {
 
 export default function WorkflowsPage() {
   return (
-    <div className="max-w-5xl space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold">Workflows</h1>
-        <p className="text-sm text-muted-foreground">
-          Repeatable work the platform runs for you. Anything consequential is still only ever proposed.
-        </p>
-      </div>
-      <Tabs defaultValue="workflows">
-        <TabsList>
-          <TabsTrigger value="workflows">Workflows</TabsTrigger>
-          <TabsTrigger value="watches">Watches</TabsTrigger>
-          <TabsTrigger value="runs">Runs</TabsTrigger>
-        </TabsList>
+    <div className="space-y-4">
+      <Tabs defaultValue="workflows" className="gap-4">
+        <PageHeader
+          title="Workflows"
+          subtitle="Repeatable work the platform runs for you. Anything consequential is still only ever proposed."
+          actions={
+            <TabsList>
+              <TabsTrigger value="workflows">Workflows</TabsTrigger>
+              <TabsTrigger value="watches">Watches</TabsTrigger>
+              <TabsTrigger value="runs">Runs</TabsTrigger>
+            </TabsList>
+          }
+        />
         <TabsContent value="workflows" className="mt-4"><Definitions /></TabsContent>
         <TabsContent value="watches" className="mt-4"><Watches /></TabsContent>
         <TabsContent value="runs" className="mt-4">

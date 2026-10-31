@@ -164,9 +164,9 @@ def test_long_documents_are_split_and_each_part_is_findable(db):
 # --- built-in reference documents ---
 
 def test_builtin_docs_are_generated_idempotent_and_refresh_when_the_code_changes(db, monkeypatch):
-    assert builtin.seed_builtin(db) == 2 and builtin.seed_builtin(db) == 0
+    assert builtin.seed_builtin(db) == 2 + len(list(builtin._static_docs())) and builtin.seed_builtin(db) == 0
     docs = {d.filename: d for d in db.query(Document)}
-    assert all(d.builtin and d.domain == "scorecard" for d in docs.values())
+    assert all(d.builtin and d.domain == ("scorecard" if d.filename in builtin.BUILTIN else "hr") for d in docs.values())
     kpi = extract_text("k.md", builtin.kpi_definitions().encode())
     for title in ("Offer To Joining", "Cost Per Hire", "Gptw Score", "Trainee Retention", "Role Skill Coverage"):
         assert title in kpi                                                           # all 23 are described

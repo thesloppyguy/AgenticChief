@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/shared/app-sidebar";
 import { SettingsDialog } from "@/components/shared/settings-dialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const PERIOD_KEY = "chro_period";
 const PERIOD_EVENT = "chro:period";
@@ -151,12 +152,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <SidebarProvider>
         <AppSidebar open={open} onOpenChange={setOpen} />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2">
-            <div className="flex items-center gap-2 px-4">
-              <SidebarTrigger className="-ml-1" />
-            </div>
+          <header className="flex h-12 shrink-0 items-center justify-between gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <ThemeToggle />
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 px-5 pb-5">{children}</div>
         </SidebarInset>
       </SidebarProvider>
       <SettingsDialog open={open} onOpenChange={setOpen} />

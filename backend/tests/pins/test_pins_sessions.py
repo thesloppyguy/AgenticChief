@@ -72,12 +72,22 @@ def test_sessions_are_searchable_by_title_and_by_what_was_said(client, db):
     a = session(db, "alice", "Retention deep dive", "Why did retention fall?", "Regrettable exits rose.")
     b = session(db, "alice", "Monthly review prep", "Prepare the review", "Done.")
     session(db, "bob", "Retention (bob's)", "bob only")
-    ids = lambda q: [s["id"] for s in client.get("/copilot/sessions", params={"q": q}, headers=ALICE).json()]
+    ids = lambda q: [s["id"] for s in client.get("/copilot/sessions", params={"q": q}, headers=ALICE).json()["items"]]
     assert sorted(ids("")) == sorted([a, b])
     assert ids("retention") == [a]                                               # title and message text; never bob's
     assert ids("REGRETTABLE") == [a] and ids("prepare") == [b] and ids("nonsense") == []
-    row = next(s for s in client.get("/copilot/sessions", headers=ALICE).json() if s["id"] == a)
+    row = next(s for s in client.get("/copilot/sessions", headers=ALICE).json()["items"] if s["id"] == a)
     assert row["message_count"] == 2 and row["last_at"] is not None
+
+
+def test_sessions_paginate_newest_first(client, db):
+    ids = [session(db, "alice", f"S{i}", f"msg {i}") for i in range(5)]
+    page = client.get("/copilot/sessions", params={"limit": 2}, headers=ALICE).json()
+    assert [s["id"] for s in page["items"]] == [ids[4], ids[3]] and page["next_cursor"] == str(ids[3])
+    page2 = client.get("/copilot/sessions", params={"limit": 2, "cursor": page["next_cursor"]}, headers=ALICE).json()
+    assert [s["id"] for s in page2["items"]] == [ids[2], ids[1]] and page2["next_cursor"] == str(ids[1])
+    last = client.get("/copilot/sessions", params={"limit": 2, "cursor": page2["next_cursor"]}, headers=ALICE).json()
+    assert [s["id"] for s in last["items"]] == [ids[0]] and last["next_cursor"] is None
 
 
 def test_session_detail_lists_the_approvals_filed_from_it_and_stays_private(client, db):

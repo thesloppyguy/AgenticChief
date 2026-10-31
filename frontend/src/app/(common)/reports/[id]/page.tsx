@@ -46,7 +46,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="space-y-4">
       <Loading error={error} loading={loading && !data} />
       {data && (
         <>

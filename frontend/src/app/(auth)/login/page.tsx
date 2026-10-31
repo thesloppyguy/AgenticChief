@@ -19,6 +19,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import Logo from "@/components/Logo";
 import { Input } from "@/components/ui/input";
 import { api, ApiError, clearToken, setToken } from "@/lib/api";
 
@@ -120,7 +121,14 @@ function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
 export default function LoginPage() {
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md space-y-6">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <div className="flex size-12 items-center justify-center rounded-full bg-accent">
+            <Logo label={false} className="p-2" />
+          </div>
+          <div className="text-xl font-semibold tracking-tight">Lokibots</div>
+          <div className="text-sm text-muted-foreground">CHRO Copilot</div>
+        </div>
         <LoginForm />
       </div>
     </div>

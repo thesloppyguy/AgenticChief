@@ -125,20 +125,29 @@ async def chat(req: ChatRequest, db: Session = Depends(get_db), who: Principal =
 
 
 @router.get("/sessions")
-def sessions(q: str | None = None, db: Session = Depends(get_db), who: Principal = Depends(get_principal)):
-    """Your sessions, newest first. `q` matches the title or any message in the conversation."""
+def sessions(q: str | None = None, limit: int = 30, cursor: str | None = None,
+             db: Session = Depends(get_db), who: Principal = Depends(get_principal)):
+    """Your sessions, newest first. `q` matches the title or any message in the conversation.
+    Paginate with `cursor` (the last session id from the previous page) and `limit` (max 100)."""
+    limit = min(max(limit, 1), 100)
     stmt = select(ChatSession).where(ChatSession.user_id == who.user_id)
     if q and q.strip():
         like = f"%{q.strip().lower()}%"
         in_msgs = select(ChatMessage.session_id).where(func.lower(ChatMessage.content).like(like))
         stmt = stmt.where(func.lower(ChatSession.title).like(like) | ChatSession.id.in_(in_msgs))
-    rows = list(db.scalars(stmt.order_by(ChatSession.id.desc()).limit(100)))
+    if cursor and cursor.isdigit():
+        stmt = stmt.where(ChatSession.id < int(cursor))
+    rows = list(db.scalars(stmt.order_by(ChatSession.id.desc()).limit(limit + 1)))
+    more = len(rows) > limit
+    rows = rows[:limit]
     stats = {sid: (n, last) for sid, n, last in db.execute(
         select(ChatMessage.session_id, func.count(ChatMessage.id), func.max(ChatMessage.created_at))
         .where(ChatMessage.session_id.in_([s.id for s in rows])).group_by(ChatMessage.session_id))} if rows else {}
-    return [{"id": s.id, "title": s.title, "created_at": s.created_at,
-             "message_count": stats.get(s.id, (0, None))[0], "last_at": stats.get(s.id, (0, s.created_at))[1] or s.created_at}
-            for s in rows]
+    items = [{"id": s.id, "title": s.title, "created_at": s.created_at,
+              "message_count": stats.get(s.id, (0, None))[0],
+              "last_at": stats.get(s.id, (0, s.created_at))[1] or s.created_at}
+             for s in rows]
+    return {"items": items, "next_cursor": str(rows[-1].id) if more else None}
 
 
 @router.get("/sessions/{session_id}")

@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.security import Principal, get_principal, require_editor
-from app.db.models import Document
+from app.db.models import Document, DocumentChunk
 from app.db.session import get_db
 from app.knowledge import store
 from app.knowledge.parsers import MAX_BYTES, ParseError, UnsupportedType
@@ -31,6 +31,24 @@ def search(q: str, domain: str | None = None, limit: int = 5, db: Session = Depe
         raise HTTPException(422, f"domain must be one of {', '.join(store.DOMAINS)}")
     return [{"document_id": h.document_id, "title": h.title, "domain": h.domain, "chunk": h.chunk,
              "snippet": h.snippet, "score": round(h.score, 3)} for h in store.search(db, q, limit, domain)]
+
+
+@router.get("/{doc_id}")
+def read(doc_id: int, db: Session = Depends(get_db), _: Principal = Depends(get_principal)):
+    """The indexed text, rebuilt from its passages (overlapping words between windows are dropped once)."""
+    d = db.get(Document, doc_id)
+    if d is None:
+        raise HTTPException(404, "Document not found")
+    passages = db.scalars(select(DocumentChunk.text).where(DocumentChunk.document_id == doc_id)
+                          .order_by(DocumentChunk.ord)).all()
+    out: list[str] = []
+    for p in passages:
+        if out:
+            prev, words = out[-1].split(" "), p.split(" ")
+            n = next((k for k in range(min(len(prev), len(words), 60), 0, -1) if prev[-k:] == words[:k]), 0)
+            p = " ".join(words[n:])
+        out.append(p)
+    return {**_out(d), "text": "\n\n".join(out)}
 
 
 @router.post("", status_code=201)

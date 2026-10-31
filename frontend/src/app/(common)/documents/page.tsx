@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Card, Loading } from "@/components/ui";
+import { Card, Loading, PageHeader } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -70,14 +70,11 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Documents</h1>
-        <p className="text-sm text-muted-foreground">
-          Reference material the Copilot can search and cite. Document text is treated as data to quote,
-          never as instructions to follow.
-        </p>
-      </div>
+    <div className="space-y-4">
+      <PageHeader
+        title="Documents"
+        subtitle="Reference material the Copilot can search and cite. Document text is treated as data to quote, never as instructions to follow."
+      />
 
       <form onSubmit={search}>
         <InputGroup>
@@ -104,6 +101,8 @@ export default function DocumentsPage() {
         </Card>
       )}
 
+      <div className="grid items-start gap-4 lg:grid-cols-12">
+      <div className={canEdit ? "min-w-0 lg:col-span-8" : "min-w-0 lg:col-span-12"}>
       <Card title="Library">
         <Loading error={error} loading={loading && !data} />
         {data?.length === 0 && <p className="text-sm text-muted-foreground">No documents yet.</p>}
@@ -127,8 +126,10 @@ export default function DocumentsPage() {
           ))}
         </ul>
       </Card>
+      </div>
 
       {canEdit && (
+        <div className="lg:col-span-4">
         <Card title="Upload">
           <form onSubmit={upload}>
             <FieldGroup>
@@ -145,7 +146,9 @@ export default function DocumentsPage() {
             </FieldGroup>
           </form>
         </Card>
+        </div>
       )}
+      </div>
     </div>
   );
 }

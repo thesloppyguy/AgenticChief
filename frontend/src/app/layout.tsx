@@ -5,9 +5,9 @@ import AppShell from "@/components/AppShell";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Geist } from "next/font/google";
+import { Urbanist } from "next/font/google";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
+const urbanist = Urbanist({ subsets: ["latin"], variable: "--font-urbanist" });
 
 export const metadata: Metadata = {
   title: "Lokibots | CHRO Copilot",
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={geist.variable} suppressHydrationWarning>
+    <html lang="en" className={urbanist.variable} suppressHydrationWarning>
       <head>
         <link
           rel="icon"
@@ -31,8 +31,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
           disableTransitionOnChange
         >
           <TooltipProvider>

@@ -149,6 +149,10 @@ export interface TimelinePage { items: TimelineItem[]; next_cursor: string | nul
 
 // --- chat ------------------------------------------------------------------------------------
 export interface SessionRow { id: number; title: string; created_at: string; message_count: number; last_at: string }
+export interface SessionPage { items: SessionRow[]; next_cursor: string | null }
+
+/** Fired when a chat session is created or updated so the sidebar Conversations list can refresh. */
+export const SESSIONS_CHANGED = "chro:sessions-changed";
 export interface SessionDetail {
   id: number; title: string;
   created_at: string;
@@ -163,6 +167,7 @@ export interface AssetRow {
 
 // --- documents and memory ----------------------------------------------------------------------
 export interface DocumentRow { id: number; title: string; filename: string; domain: string; builtin: boolean; size_bytes: number; chunk_count: number; uploaded_by: string; created_at: string }
+export interface DocumentDetail extends DocumentRow { text: string }
 export interface DocumentHit { document_id: number; title: string; domain: string; chunk: number; snippet: string; score: number }
 export interface MemoryList { enabled: boolean; memories: MemoryRow[] }
 export interface MemoryRow { id: number; kind: string; domain: string; summary: string; session_id: number | null; pinned: boolean; created_at: string }

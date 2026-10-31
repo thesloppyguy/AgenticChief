@@ -9,3 +9,6 @@ node_modules/
 backend/data/
 *.db-wal
 *.db-shm
+
+# screenshots from e2e/shots.py
+e2e/shots/

@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { usePeriod } from "@/components/AppShell";
-import { Card, Loading } from "@/components/ui";
+import { Card, Loading, PageHeader } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,20 +46,16 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="max-w-5xl space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">Reports</h1>
-          <p className="text-sm text-muted-foreground">
-            The monthly leadership review, and the immutable snapshots published from it.
-          </p>
-        </div>
-        {me?.companies === null && (
+    <div className="space-y-4">
+      <PageHeader
+        title="Reports"
+        subtitle="The monthly leadership review, and the immutable snapshots published from it."
+        actions={me?.companies === null && (
           <Button onClick={generate} disabled={busy}>
             {busy ? "Starting…" : `Generate review for ${period}`}
           </Button>
         )}
-      </div>
+      />
 
       <Tabs defaultValue="runs">
         <TabsList>
