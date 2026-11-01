@@ -27,7 +27,7 @@ docker compose -f docker/docker-compose.yml up --build
 - Env:
   - `JWT_SECRET`
   - `ANTHROPIC_API_KEY`
-  - `CORS_ORIGINS=["https://chro.lokibots.ai"]`
+  - `CORS_ORIGINS=https://chro.lokibots.ai` (optional; already the app default)
   - optional `SEED_ON_START=auto|true|false`
 
 If web and API share the host, set the API app **path** to `/api` (strip prefix) in Dokploy, and web build arg `NEXT_PUBLIC_API_URL=https://chro.lokibots.ai/api`.

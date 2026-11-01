@@ -1,12 +1,33 @@
+import json
 import os
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, SecretStr
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel, Field, SecretStr, field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 # The database lives in backend/data/ by default, whatever directory the process starts from.
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
+
+
+def _parse_cors_origins(value: object) -> list[str]:
+    """Accept JSON list, comma-separated hosts, or a single URL (Dokploy-friendly)."""
+    if value is None or value == "":
+        return ["http://localhost:3000", "https://chro.lokibots.ai"]
+    if isinstance(value, list):
+        return [str(v).strip() for v in value if str(v).strip()]
+    raw = str(value).strip()
+    if raw.startswith("["):
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            # Docker ENV often drops quotes → [https://example.com]
+            inner = raw.strip().removeprefix("[").removesuffix("]").strip()
+            return [p.strip().strip("\"'") for p in inner.split(",") if p.strip()]
+        if not isinstance(parsed, list):
+            raise ValueError("CORS_ORIGINS JSON must be a list of strings")
+        return [str(v).strip() for v in parsed if str(v).strip()]
+    return [part.strip() for part in raw.split(",") if part.strip()]
 
 
 class IntegrationConfig(BaseModel):
@@ -33,7 +54,10 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{DATA_DIR / 'chro.db'}"
     jwt_secret: str = "dev-secret-change-me-dev-secret-change-me"
     jwt_algorithm: str = "HS256"
-    cors_origins: list[str] = ["http://localhost:3000", "https://chro.lokibots.ai"]
+    cors_origins: Annotated[list[str], NoDecode] = [
+        "http://localhost:3000",
+        "https://chro.lokibots.ai",
+    ]
     anthropic_api_key: str | None = None
     default_model: str = "claude-sonnet-5-5"
     routing_model: str = "claude-haiku-5-5"
@@ -87,6 +111,11 @@ class Settings(BaseSettings):
     eod_digest_hour: int = 18
     history_retention_days: int = 90
     reminder_max_pending: int = 25
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def _cors_origins(cls, value: object) -> list[str]:
+        return _parse_cors_origins(value)
 
     def integration(self, source: str) -> IntegrationConfig:
         return self.integrations.get(source, IntegrationConfig())
