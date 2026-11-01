@@ -105,6 +105,8 @@ def build_scorecard(db: Session, who: Principal, period: str, cfg: ScoringConfig
         ics.append({"company_id": c.id, "code": c.code, "name": c.name, **_overall(res, cfg)})
     group = score_group(kpis, values, month, cfg)
     with_data = sum(1 for c in companies if any(v.achievement is not None for v in values[c.id].values()))
+    from app.services import sources_status as src_status
+
     return {
         "period": period,
         "calc_version": cfg.version,
@@ -112,6 +114,7 @@ def build_scorecard(db: Session, who: Principal, period: str, cfg: ScoringConfig
         "scope": "group" if who.company_ids is None else "restricted",
         "synthetic_data": has_synthetic_data(db, period, [c.id for c in companies]),
         "no_source_kpis": sorted(cfg.no_source),
+        "freshness": src_status.freshness_summary(db),
         "group": {**_overall(group, cfg), "companies_in_scope": len(companies), "companies_with_data": with_data},
         "companies": ics,
     }
@@ -123,11 +126,14 @@ def build_company_scorecard(db: Session, who: Principal, company_id: int, period
     values = load_values(db, period, [company_id])[company_id]
     cfg, kpis = active_config(db), active_kpis(db)
     res = score_ic(kpis, values, period_month(period), cfg)
+    from app.services import sources_status as src_status
+
     return {
         "period": period,
         "company": {"id": company_id, "code": company.code, "name": company.name},
         "values": {k: asdict(v) for k, v in values.items()},
         "thresholds": _thresholds(cfg),
+        "freshness": src_status.freshness_summary(db),
         **_overall(res, cfg),
     }
 

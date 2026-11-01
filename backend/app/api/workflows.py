@@ -83,12 +83,19 @@ def _summary(r: WorkflowRun) -> dict:
 def _workflow_for(db: Session, run: WorkflowRun):
     """The definition a run belongs to. A prompt-authored run pins the asset version it started with,
     so republishing the workflow mid-run cannot swap the steps under a run that is resuming."""
-    if not run.workflow.startswith("def:"):
+    key = run.workflow[4:] if run.workflow.startswith("def:") else run.workflow
+    if key == monthly_review.KEY or run.workflow == monthly_review.KEY:
         return monthly_review.WORKFLOW
-    key = run.workflow[4:]
+
     asset = db.scalar(select(Asset).where(Asset.kind == "workflow", Asset.key == key))
-    version = (run.params or {}).get("asset_version")
-    row = asset_service.version_row(db, asset, version) if asset and version else None
+    if asset is None:
+        # Legacy / unknown keys must not silently render as the monthly review.
+        if run.workflow.startswith("def:"):
+            raise HTTPException(409, "the version this run started with is no longer available")
+        return monthly_review.WORKFLOW
+
+    version = (run.params or {}).get("asset_version") or asset.published_version or asset.version
+    row = asset_service.version_row(db, asset, version) if version else None
     if row is None:
         raise HTTPException(409, "the version this run started with is no longer available")
     return compile_spec(key, WorkflowSpec(**row.definition))

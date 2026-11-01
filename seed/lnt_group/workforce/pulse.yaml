@@ -5,7 +5,14 @@ narrative: >
   semiconductor programmes; external market can sustainably supply ~1,000. 34 critical roles
   have thin succession. Hiring volume is high (78k applications for 1,540 engineering roles)
   but future-skill fit is only ~9%. Early-career attrition ties to learning & growth, not pay.
+  Retention at Group is near target overall, but L&T Semiconductor Technologies (retention 52)
+  is the IC exception — career stagnation, manager quality and learning gaps, not compensation.
 synthesized_by: Executive Analytics
+insights:
+  - Overall the Group is close to target — Retention (score 73) is the weak spot holding it back.
+  - Of the 1,300 future-skill roles we need, about 70% can be filled by retraining and moving people we already have.
+  - Fewer critical roles have a ready backup than last year (down 5 points); green energy and semiconductors are thinnest.
+  - The weakest managers drive most of the regrettable exits — better pay alone will not fix that.
 cells:
   - key: core_headcount
     label: Core staff headcount
@@ -14,6 +21,7 @@ cells:
     delta_pct: 3.1
     delta_direction: up
     note: YoY
+    tone: good
   - key: future_skill_gap
     label: Future-skill gap · 24mo
     value: 1300
@@ -21,6 +29,7 @@ cells:
     delta_pct: null
     delta_direction: flat
     note: unmet at current supply
+    tone: alert
   - key: internal_fill_rate
     label: Internal fill rate
     value: 41
@@ -28,6 +37,7 @@ cells:
     delta_pct: null
     delta_direction: flat
     note: target 60%
+    tone: alert
   - key: weak_successors
     label: Weak / no successor
     value: 34
@@ -35,6 +45,7 @@ cells:
     delta_pct: null
     delta_direction: flat
     note: of 130 critical roles
+    tone: alert
   - key: ex_index
     label: Employee experience index
     value: 74
@@ -42,24 +53,72 @@ cells:
     delta_pct: -3
     delta_direction: down
     note: pts vs prior
+    tone: alert
 top_issues:
   - rank: 1
     title: Capability gap in green hydrogen & electrolysers
-    summary: Build internally ~70%; decision package ready for approval.
+    priority_label: Defines the next 24 months
+    summary: >
+      Demand for specialised engineers is outpacing supply. External hiring can meet less
+      than a third at a sustainable cost — and buying scarce skills at a premium doesn't build depth.
     severity: high
+    tags: [New-business ramp, Scarce external supply, Premium cost]
+    recommendation: >
+      build internally — reskill + mobility closes ~70% of the gap. Action is ready for your approval.
+    flagged_by: [Future Skills, Capability & Learning, Workforce Strategy]
   - rank: 2
-    title: Thin succession in new businesses
-    summary: 34 of 130 critical roles have weak or no ready successor.
+    title: Thin succession in the new businesses
+    priority_label: High
+    summary: >
+      34 of 130 critical roles have a weak or no ready successor, concentrated in green energy
+      and semiconductors — weak career architecture, not compensation, is the root cause.
     severity: high
+    tags: [Weak career architecture, Limited internal mobility, New-business depth]
+    recommendation: >
+      Continuity risk in green energy and semiconductor leadership within 12–18 months.
+      Open senior search where needed and start internal development plans.
+    flagged_by: [Internal Mobility & Succession]
   - rank: 3
     title: Hiring quality, not volume
-    summary: 9% future-skill fit across 78k applications for 1,540 engineering roles.
+    priority_label: Medium
+    summary: >
+      78,000 applications for 1,540 engineering roles — the constraint is finding the right,
+      future-ready skills, not attracting applicants. Only 9% clear the future-skill bar.
     severity: medium
+    tags: [Skill-fit 9%, Changing job requirements, Time-to-productivity]
+    recommendation: >
+      Raise the skill bar and prioritise adjacent internal moves over volume hiring.
+    flagged_by: [Talent Acquisition & Quality-of-Hire]
   - rank: 4
     title: Early-career attrition where growth stalls
-    summary: EX layer 3 (learning & growth) drives exits more than pay.
+    priority_label: Medium
+    summary: >
+      Attrition concentrates among 0–3 year engineers in units with the weakest
+      learning-and-growth signals — the third layer of the employee-experience framework.
     severity: medium
+    tags: [Learning & growth, Career visibility, Manager quality]
+    recommendation: >
+      Career pathways and manager coaching on growth conversations — not pay adjustments.
+    flagged_by: [Employee Experience & Retention]
   - rank: 5
     title: Manager effectiveness varies widely
-    summary: Bottom-quartile managers concentrate regrettable exits.
+    priority_label: Medium
+    summary: >
+      Goal-setting, feedback frequency and fairness scores vary sharply by manager cohort.
+      The bottom quartile of managers accounts for a disproportionate share of disengagement
+      and regretted exits — a capability gap higher pay won't close.
     severity: medium
+    tags: [Bottom quartile, Feedback gaps, Goal-setting variance]
+    recommendation: >
+      Targeted coaching & feedback enablement for bottom-quartile managers.
+    flagged_by: [Manager Effectiveness & Performance, Employee Experience]
+scorecard_exception:
+  pillar: Retention
+  score: 73
+  status: red
+  title: Scorecard exception — Retention is off track (73, Red)
+  detail: >
+    The copilot traced it to L&T Semiconductor Technologies (retention 52) — driven by
+    career stagnation, manager quality and learning gaps, not pay. A career-led corrective
+    action is drafted and ready for your approval.
+  action_key: retention_semi

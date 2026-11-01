@@ -265,54 +265,76 @@ def _seed_workforce_schedule(db: Session, who: Principal) -> int:
     return 1
 
 
+def _seed_source_freshness_schedule(db: Session, who: Principal) -> int:
+    """Daily demo schedule: source freshness SLA → inbox alerts (AI mock / stub connectors)."""
+    from app.db.models import JobSchedule
+    from app.scheduler.cadence import next_after, validate
+
+    exists = db.scalar(
+        select(JobSchedule.id).where(
+            JobSchedule.job == "source_freshness",
+            JobSchedule.name == "Source freshness SLA",
+        )
+    )
+    if exists:
+        return 0
+    cadence = validate({"type": "daily", "time": "08:00"})
+    db.add(
+        JobSchedule(
+            job="source_freshness",
+            name="Source freshness SLA",
+            cadence=cadence,
+            params={"period": "current"},
+            enabled=True,
+            next_run_at=next_after(cadence, datetime.now(UTC)),
+            created_by=who.user_id,
+        )
+    )
+    db.commit()
+    return 1
+
+
 def _seed_approvals(db: Session, who: Principal, period: str) -> int:
+    """Seed pending CHRO action drafts (capability, retention, leadership, managers)."""
+    from app.db.models import ApprovalRequest
     from app.workforce import loader as wf_loader
 
+    del who, period  # drafts are period-agnostic workforce fixtures
     n = 0
     # Second identity as requester so four-eyes still allows admin to approve later.
     requester = Principal("chro-ops", Role.EDITOR, None)
-    payloads: list[tuple[str, dict, dict]] = [
-        ("send_kpi_reminder", {
-            "company_codes": ["LTMR"],
-            "period": period,
-            "kpi_key": "overall_retention",
-            "note": "Retention pillar off track — please confirm headcount and regrettable exits.",
-        }, {"reason": "LTMR retention initiative"}),
-        ("send_kpi_reminder", {
-            "company_codes": ["LTF", "LTR"],
-            "period": period,
-            "kpi_key": None,
-            "note": "Amber-adjacent ICs — confirm sourced KPI freshness before Group review.",
-        }, {"reason": "Pre-monthly hygiene"}),
-        ("create_snapshot", {"period": period}, {"reason": "Freeze mid-month view for CHRO brief"}),
-    ]
     for draft in (wf_loader.draft_actions().get("drafts") or []):
         action = draft.get("action")
         args = draft.get("propose_args") or {}
-        if action and args:
-            payloads.append(
-                (action, args, {"reason": draft.get("title") or draft.get("key"), "draft_key": draft.get("key")})
-            )
-    for action, args, ctx in payloads:
+        title = (draft.get("title") or draft.get("key") or "").strip()
+        blurb = " ".join(str(draft.get("summary") or "").split())
+        detail = " ".join(str(draft.get("detail") or "").split())
+        if not action or not args or not title:
+            continue
+        ctx = {
+            "reason": detail or title,
+            "title": title,
+            "blurb": blurb,
+            "detail": detail or None,
+            "sla": draft.get("sla"),
+            "sla_style": draft.get("sla_style") or "pill",
+            "draft_key": draft.get("key"),
+            "severity": draft.get("severity"),
+            "routes_to": draft.get("routes_to") or [],
+            "insights": draft.get("insights") or [],
+            "roi": draft.get("roi"),
+            "drivers": draft.get("drivers") or [],
+        }
         try:
             with db.begin_nested():
-                approvals.submit(db, requester, action, args, via="api", context=ctx)
+                res = approvals.submit(db, requester, action, args, via="api", context=ctx)
+                # Prefer the human title over the technical action.summarize() line.
+                row = db.get(ApprovalRequest, res.approval.id)
+                if row is not None:
+                    row.summary = title[:300]
             n += 1
         except Exception:
             continue
-    try:
-        with db.begin_nested():
-            approvals.submit(
-                db,
-                who,
-                "create_snapshot",
-                {"period": period},
-                via="api",
-                context={"reason": "Group CHRO requested snapshot"},
-            )
-        n += 1
-    except Exception:
-        pass
     db.commit()
     return n
 
@@ -345,6 +367,173 @@ def _ingest_kpis(db: Session, through: str) -> dict[str, Any]:
         seed_manual(db, period, profiles(db) or load_fixture(settings.stub_data_path))
         alerts_engine.evaluate_period(db, period)
     return {"periods": periods, "records": records, "fixture": settings.stub_data_path}
+
+
+def _demo_morning_brief_result(db: Session, who: Principal, period: str) -> dict[str, Any]:
+    """Rich CHRO morning-brief payload for the seeded demo run (no LLM)."""
+    from app.copilot.tools import _scorecard_summary_artifact
+    from app.services import scorecard as sc
+    from app.workforce import loader as wf_loader
+
+    pulse = wf_loader.pulse()
+    actions = wf_loader.draft_actions()
+    pulse_art = wf_loader.artifact_for("pulse", pulse)
+    actions_art = wf_loader.artifact_for("actions", actions)
+
+    group: dict[str, Any] = {}
+    card_step: dict[str, Any] = {"scope": "group", "period": period}
+    scorecard_art = None
+    try:
+        card = sc.build_scorecard(db, who, period)
+        group = card.get("group") or {}
+        card_step = {
+            "scope": card.get("scope") or "group",
+            "period": period,
+            "score": group.get("score"),
+            "status": group.get("status"),
+            "pillars": [
+                {
+                    "pillar": p.get("pillar"),
+                    "score": p.get("score"),
+                    "status": p.get("status"),
+                }
+                for p in (group.get("pillars") or [])
+            ],
+            "companies_with_data": group.get("companies_with_data"),
+            "companies_in_scope": group.get("companies_in_scope"),
+        }
+        scorecard_art = _scorecard_summary_artifact(
+            period, {**group, "no_source_kpis": card.get("no_source_kpis") or []}
+        )
+    except Exception:
+        pass
+
+    issues = pulse.get("top_issues") or []
+    reds = [
+        p for p in (group.get("pillars") or [])
+        if p.get("status") == "red"
+    ]
+    score_txt = (
+        f"{round(group['score'], 1)}"
+        if isinstance(group.get("score"), (int, float))
+        else "—"
+    )
+    red_line = (
+        f"{reds[0]['pillar'].replace('_', ' ').title()} is off track at "
+        f"{round(reds[0]['score'], 0):.0f}."
+        if reds and isinstance(reds[0].get("score"), (int, float))
+        else "No pillar is currently red."
+    )
+    issue_lines = "\n".join(
+        f"{i.get('rank', idx + 1)}. **{i.get('title')}** — {(i.get('summary') or '').strip()}"
+        for idx, i in enumerate(issues[:5])
+    )
+    draft_lines = "\n".join(
+        f"- **{d.get('title')}** ({d.get('sla') or 'pending'})"
+        for d in (actions.get("drafts") or [])[:3]
+    )
+    brief_md = "\n".join(
+        [
+            f"## Morning brief — {period}",
+            "",
+            f"Group scorecard is **{score_txt}** ({group.get('status') or 'n/a'}). {red_line}",
+            "",
+            "### Attention this morning",
+            issue_lines or "- Quiet on fixture pulse.",
+            "",
+            "### Ready for your decision",
+            draft_lines or "- No draft actions queued.",
+            "",
+            "_Seeded demo brief — numbers from scorecard + workforce fixtures._",
+        ]
+    )
+
+    artifacts = [a for a in (pulse_art, scorecard_art, actions_art) if a]
+    return {
+        "workflow": "chro_morning_brief",
+        "title": "CHRO morning brief",
+        "period": period,
+        "summary": (pulse.get("narrative") or "").strip()
+        or "Group people signals and scorecard exceptions for this briefing window.",
+        "steps": {
+            "card": card_step,
+            "chro": {"text": brief_md, "ran": "agent:chro", "seeded": True},
+        },
+        "artifacts": artifacts,
+        "skipped": [],
+    }
+
+
+def _seed_sample_workflow_runs(db: Session, who: Principal, period: str) -> int:
+    """Ensure demo workflow runs exist with a rich morning-brief result (not raw JSON)."""
+    from app.db.models import Asset, WorkflowRun
+
+    asset = db.scalar(
+        select(Asset).where(Asset.kind == "workflow", Asset.key == "chro_morning_brief")
+    )
+    params: dict[str, Any] = {}
+    if asset is not None:
+        params = {
+            "asset_id": asset.id,
+            "asset_version": asset.published_version or asset.version,
+        }
+
+    result = _demo_morning_brief_result(db, who, period)
+    state = {
+        "card": result["steps"]["card"],
+        "chro": result["steps"]["chro"],
+    }
+
+    existing = db.scalar(
+        select(WorkflowRun)
+        .where(
+            WorkflowRun.workflow.in_(("chro_morning_brief", "def:chro_morning_brief"))
+        )
+        .order_by(WorkflowRun.id.asc())
+    )
+    n = 0
+    if existing is None:
+        db.add(
+            WorkflowRun(
+                workflow="def:chro_morning_brief",
+                period=period,
+                status="succeeded",
+                params=params,
+                requested_by=who.user_id,
+                role="admin",
+                state=state,
+                result=result,
+            )
+        )
+        n += 1
+    else:
+        existing.workflow = "def:chro_morning_brief"
+        existing.period = period
+        existing.status = "succeeded"
+        existing.params = params or existing.params or {}
+        existing.state = state
+        existing.result = result
+        existing.error = None
+        n += 1
+
+    if not db.scalar(
+        select(WorkflowRun.id).where(WorkflowRun.workflow == "performance_review")
+    ):
+        db.add(
+            WorkflowRun(
+                workflow="performance_review",
+                period=period,
+                status="queued",
+                params={},
+                requested_by=who.user_id,
+                role="admin",
+                state={},
+            )
+        )
+        n += 1
+
+    db.commit()
+    return n
 
 
 def load_lnt(*, db: Session, reset: bool = True, ingest: bool = True,
@@ -396,38 +585,15 @@ def load_lnt(*, db: Session, reset: bool = True, ingest: bool = True,
         summary["kpi"] = _ingest_kpis(db, through)
 
     summary["workflows"] = seed_chro_workflows(db, who)
-    # Sample run rows so /workflows is non-empty without executing LLM steps.
-    from app.db.models import WorkflowRun
-
-    if not db.scalar(select(WorkflowRun.id).where(WorkflowRun.workflow == "chro_morning_brief")):
-        db.add(
-            WorkflowRun(
-                workflow="chro_morning_brief",
-                period=through,
-                status="succeeded",
-                params={},
-                requested_by=who.user_id,
-                role="admin",
-                state={"card": {"note": "seeded demo"}},
-                result={"summary": "Seeded CHRO morning brief placeholder"},
-            )
-        )
-        db.add(
-            WorkflowRun(
-                workflow="performance_review",
-                period=through,
-                status="queued",
-                params={},
-                requested_by=who.user_id,
-                role="admin",
-                state={},
-            )
-        )
-        db.commit()
-        summary["sample_runs"] = 2
+    summary["sample_runs"] = _seed_sample_workflow_runs(db, who, through)
     summary["watches"] = _seed_watches(db, who, through)
     summary["approvals"] = _seed_approvals(db, who, through)
     summary["workforce_schedule"] = _seed_workforce_schedule(db, who)
+    summary["freshness_schedule"] = _seed_source_freshness_schedule(db, who)
+    if ingest:
+        from app.alerts import engine as alerts_engine
+
+        summary["freshness_alerts"] = len(alerts_engine.check_source_freshness(db, period=through))
 
     # Copy group docs into company knowledge folder for RAG remirror (best-effort).
     docs_dest = Path(settings.company_dir) / "docs"

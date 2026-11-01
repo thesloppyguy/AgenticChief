@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -22,6 +23,7 @@ from app.orchestrator.executive import chat_turn
 from app.services.scorecard import current_period
 
 router = APIRouter(prefix="/copilot")
+log = logging.getLogger(__name__)
 
 
 def get_anthropic():
@@ -154,7 +156,8 @@ async def chat(
             db.commit()
             outcome.update(ok=True, text="".join(text))
             yield {"data": json.dumps({"type": "done", "session_id": sid})}
-        except Exception:  # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
+            log.exception("copilot chat_turn failed: %s", exc)
             yield {"data": json.dumps({"type": "error", "message": "The Copilot hit an error."})}
 
     async def after_chat() -> None:

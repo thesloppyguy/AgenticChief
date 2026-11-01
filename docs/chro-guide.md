@@ -247,6 +247,13 @@ Separately, **workforce fixtures** (`/workforce/*`) give glanceable pulse, skill
 numbers for demos and chat charts. Those are deterministic YAML — not the live 23-KPI scorecard engine.
 The Copilot must not mix the two sources without saying which is which.
 
+**Succession vs Talent Management.** A succession report needs critical roles, nominated successors with
+readiness (`ready_now` / `ready_1_2y` / `no_ready`), 9-box, and incumbent flight-risk / vacancy exposure —
+via `get_succession_coverage(company_code, period)` (fixture-backed, per-IC under `by_ic`). Top Talent
+Review, IDP, and PLI completion live on the Talent Management pillar and only say whether talent
+*processes* ran; the workflow planner must not substitute them for succession coverage. The
+`succession-ic-report` skill is the report template.
+
 Approvers see a prepared briefing before they decide — what changes, what depends on it, whether it is a
 rollback — and requests that could never succeed are rejected before anyone is asked. Every decision is
 recorded permanently, alongside a full audit log of who did what.

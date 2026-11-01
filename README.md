@@ -58,6 +58,22 @@ Architecture reference: [OpenExecutive.md](OpenExecutive.md).
 | `VECTOR_STORE_PATH` | Chroma persist directory. |
 | `STUB_DATA_ENABLED` | Stub ingestion + `/demo/rng/*` (default true). |
 | `DEMO_RNG_ENABLED` | Force-enable RNG endpoints even if stub data is off. |
+| `MOCK_SOURCES_ENABLED` | Serve AI-backed stand-in HR APIs at `/mock-sources/*` (default false). |
+| `SOURCE_FRESHNESS_SLA_HOURS` | Hours before a source is marked stale (default 72). |
+
+## AI-backed live sources (optional)
+
+Offline default uses the stub fixture. To exercise the live adapters without real SuccessFactors / PeopleStrong / MyHealth / Hi5Plus tenants:
+
+```bash
+cd backend
+uv run python -m scripts.setup_mock_sources --write-env   # mappings + .env INTEGRATIONS__* → localhost
+# restart the API, then as admin:
+#   POST /mock-sources/admin/generate   # Claude builds company profiles once (costs tokens)
+#   POST /sources/sync  {"period":"2026-10"}   # or Settings → Connectors → HR Sources → Sync
+```
+
+`GET /sources/status` reports mode (`live`|`stub`|`disabled`), freshness (`fresh`|`stale`|`never`), and `data_origin` (`ai` when mock profiles supplied the numbers).
 
 ## Scorecard
 

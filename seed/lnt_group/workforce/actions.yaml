@@ -6,8 +6,16 @@ drafts:
     severity: high
     sla: Decide this week
     summary: >
-      Reskill 40 engineers (12-week electrolyser certification); 12 internal mobility moves;
-      8 mentors + technical career pathway; fast-track 3 successors.
+      Reskill 40 · 12 mobility moves · 3 successors · 8 mentors · routes to L&D, BU heads, HRMS
+    detail: >
+      Reskill 40 mechanical & chemical engineers into electrolyser systems (12-week certification),
+      open 12 internal mobility moves into the green energy business, assign 8 senior mentors on a
+      technical career pathway, and fast-track 3 successors for critical leadership roles.
+      Build the capability instead of buying it at a premium.
+    insights:
+      - Programme closes ~70% of the Green H₂ / electrolyser gap without premium external hiring.
+      - 46 EPC adjacency candidates are the strongest feed into the 12-week certification.
+      - Avoided hiring premium ≈ ₹41 Cr vs programme cost ≈ ₹9.2 Cr.
     roi:
       programme_cost_cr: 9.2
       avoided_hiring_premium_cr: 41
@@ -15,7 +23,6 @@ drafts:
       time_to_productivity_mo: 4
       buy_time_to_productivity_mo: 8
     recipients:
-      # Resolved by role/email at approve time against People roster
       - email: rohan.iyer@example.com
         role_hint: Group HR Operations
       - email: daniel.joseph@example.com
@@ -23,6 +30,7 @@ drafts:
       - email: kavitha.rao@example.com
         role_hint: LTIM CHRO
     channels: [email, teams]
+    routes_to: [L&D, BU heads, HRMS]
     steps:
       - GOV validation
       - Enrol 40 in Learning (LRN-4821…4860)
@@ -55,12 +63,20 @@ drafts:
 
   - key: retention_semi
     action: launch_retention_corrective
-    title: Retention corrective — L&T Semiconductor Technologies focus
+    title: Retention corrective action — L&T Semiconductor Technologies
     severity: high
     sla: Scorecard exception
     summary: >
-      Retention pillar red at Group; traced to semiconductor / new-business pressure.
-      Scope 58 at-risk engineers: career paths, growth tracks, manager coaching — not pay.
+      Retention pillar below 75 · career paths + manager coaching · routes to IC HR, L&D, HRMS
+    detail: >
+      Group Retention is at 73 (Red). The exception traces to L&T Semiconductor Technologies
+      (IC retention 52) — driven by career stagnation, manager quality and learning gaps, not pay.
+      Activate career pathways for 58 at-risk engineers, enrol growth tracks, and start manager
+      coaching cohort COACH-Q3-SEMI.
+    insights:
+      - Drivers are career, manager quality and learning — not compensation.
+      - Top-talent retention (66) and trainee retention (56 vs 80 target) are the weakest sub-KPIs.
+      - Career-led corrective is drafted and ready for approval.
     drivers: [career stagnation, manager quality, learning]
     recipients:
       - email: kavitha.rao@example.com
@@ -68,6 +84,7 @@ drafts:
       - email: rohan.iyer@example.com
         role_hint: Group HR Operations
     channels: [email, teams]
+    routes_to: [IC HR, L&D, HRMS]
     steps:
       - GOV validation
       - Driver analysis (engagement + SF)
@@ -95,3 +112,78 @@ drafts:
         manager coaching COACH-Q3-SEMI. Audit AUDIT-7742. Confirm within 48h.
       channel: email
       company_codes: [LTIM]
+
+  - key: atmp_leadership
+    action: send_directive
+    title: Semiconductor ATMP leadership — hire + groom
+    severity: medium
+    sla: Due in 4 days
+    sla_style: plain
+    summary: >
+      Open senior search and start 2 internal development plans · routes to TA & Succession
+    detail: >
+      VP Semiconductor ATMP readiness is 15% with no ready internal. Open a senior search and
+      start two internal development plans for nominated ready-1–2y successors so continuity
+      risk in semiconductor leadership is covered within 12–18 months.
+    insights:
+      - Semiconductors (new) have only 2 ready-now successors across critical roles.
+      - Blend external hire with grooming 2 internals is the recommended path.
+    recipients:
+      - email: rohan.iyer@example.com
+        role_hint: Group HR Operations
+      - email: kavitha.rao@example.com
+        role_hint: LTIM CHRO
+    channels: [email, teams]
+    routes_to: [TA, Succession]
+    steps:
+      - Open senior ATMP search brief with TA
+      - Nominate 2 ready-1–2y successors for development plans
+      - Align Succession & TA on fill timeline
+    propose_args:
+      subject: "ATMP leadership: open senior search + 2 development plans"
+      body: >
+        Please open the senior ATMP leadership search and start two internal development
+        plans for nominated ready-1–2y successors. Confirm search brief and plan owners
+        within 4 days.
+      channel: email
+      recipient_emails:
+        - rohan.iyer@example.com
+        - kavitha.rao@example.com
+      company_codes: [LTIM]
+
+  - key: manager_effectiveness_bq
+    action: send_directive
+    title: Manager effectiveness programme — bottom quartile
+    severity: medium
+    sla: 30-day SLA
+    summary: >
+      Targeted coaching & feedback enablement · routes to L&D & HRBPs
+    detail: >
+      Goal-setting, feedback frequency and fairness scores vary sharply by manager cohort.
+      The bottom quartile accounts for a disproportionate share of disengagement and regretted
+      exits — launch coaching & feedback enablement with L&D and HRBP 30-day check-ins.
+    insights:
+      - Manager quality is a primary driver of early-career attrition and EX index softness.
+      - Higher pay will not close this capability gap.
+    recipients:
+      - email: daniel.joseph@example.com
+        role_hint: LTTS CHRO
+      - email: rohan.iyer@example.com
+        role_hint: Group HR Operations
+    channels: [email, teams]
+    routes_to: [L&D, HRBPs]
+    steps:
+      - Identify bottom-quartile manager cohort
+      - Launch coaching & feedback enablement with L&D
+      - Brief HRBPs on 30-day check-ins
+    propose_args:
+      subject: "Manager effectiveness: bottom-quartile coaching programme"
+      body: >
+        Please launch the targeted manager effectiveness programme for the bottom-quartile
+        cohort — coaching and feedback enablement with L&D, HRBP 30-day check-ins.
+        Confirm enrolment list within one week.
+      channel: email
+      recipient_emails:
+        - daniel.joseph@example.com
+        - rohan.iyer@example.com
+      company_codes: [LTTS, LTIM]

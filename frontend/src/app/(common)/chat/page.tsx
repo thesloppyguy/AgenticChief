@@ -51,7 +51,7 @@ function NewChat() {
 
   return (
     <div className="flex h-[calc(100svh-5.5rem)] min-h-0 flex-col gap-4">
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.35rem] bg-card shadow-md ring-1 ring-black/[0.04] dark:ring-white/10">
         <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto p-6">
           <div className="w-full max-w-3xl space-y-6">
             <div className="space-y-2">
@@ -63,7 +63,7 @@ function NewChat() {
                     type="button"
                     disabled={busy}
                     onClick={() => void send(ex.body)}
-                    className="rounded-2xl bg-muted/50 p-4 text-left shadow-sm ring-1 ring-black/5 transition-colors hover:bg-white dark:ring-white/10"
+                    className="rounded-[1.25rem] bg-muted/60 p-4 text-left shadow-sm ring-1 ring-black/[0.03] transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-md dark:ring-white/10"
                   >
                     <div className="font-medium">{ex.title}</div>
                     <div className="mt-1 text-sm text-muted-foreground">
@@ -74,7 +74,7 @@ function NewChat() {
               </div>
             </div>
             <div className="space-y-2 text-center">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-neutral-900 text-white shadow-sm dark:bg-neutral-100 dark:text-neutral-900">
+              <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand-gradient text-white shadow-md">
                 <Bot className="size-6" />
               </div>
               <p className="text-muted-foreground">Good to see you</p>

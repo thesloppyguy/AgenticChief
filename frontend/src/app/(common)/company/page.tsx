@@ -11,6 +11,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FreshnessLine } from "@/components/FreshnessLine";
 import { fmt, label, reasonLabel } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
@@ -45,12 +46,16 @@ function Companies({ period }: { period: string }) {
           {card.data?.companies.map((c) => (
             <li key={c.company_id}>
               <button onClick={() => setPicked(c.company_id)}
-                className={cn("flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-muted",
-                  selected === c.company_id && "bg-secondary font-medium")}>
+                className={cn("flex w-full items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left text-sm transition-colors hover:bg-accent",
+                  selected === c.company_id && "bg-primary font-medium text-primary-foreground shadow-sm hover:bg-primary")}>
                 <span className="truncate">{c.code}</span>
                 <span className="flex items-center gap-2">
                   <span className="tabular-nums">{fmt(c.score)}</span>
-                  <StatusBadge status={c.status} withheld={c.status_withheld} />
+                  <StatusBadge
+                    status={c.status}
+                    withheld={c.status_withheld}
+                    onAccent={selected === c.company_id}
+                  />
                 </span>
               </button>
             </li>
@@ -204,11 +209,17 @@ function CompanyView() {
             </TabsList>
           }
         />
+        <ScorecardFreshness period={period} />
         <TabsContent value="companies"><Companies period={period} /></TabsContent>
         <TabsContent value="pillars"><Pillars period={period} /></TabsContent>
       </Tabs>
     </div>
   );
+}
+
+function ScorecardFreshness({ period }: { period: string }) {
+  const card = useApi<Scorecard>(`/scorecard?period=${period}`);
+  return <FreshnessLine freshness={card.data?.freshness} />;
 }
 
 export default function CompanyPage() {

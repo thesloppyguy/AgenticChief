@@ -1,4 +1,7 @@
 # Succession / bench strength (demo fixture).
+# Group totals plus per-IC slices. Talent-management scorecard KPIs (TTR, IDP, PLI)
+# are NOT succession coverage — do not treat them as substitutes.
+as_of: "2026-10"
 headline:
   critical_roles_tracked: 130
   ready_now_coverage_pct: 63
@@ -6,57 +9,232 @@ headline:
   weak_or_no_successor: 34
   internal_fill_rate_pct: 41
   internal_fill_target_pct: 60
+subtitle: >
+  Green energy and semiconductors — the growth engines — have the thinnest ready-now benches.
+insights:
+  - Ready-now coverage 63%, down 5 pts vs last year.
+  - 34 of 130 critical roles have weak or no successor — new businesses lead.
+  - Internal fill rate 41% vs 60% target; mobility architecture is the bottleneck.
+  - VP Semiconductor ATMP has no ready internal (15%) — hire senior lead + groom 2 internals.
 by_function:
   - function: Construction / EPC
-    ready_now: 18
-    ready_1_2y: 12
-    no_successor: 4
-  - function: Heavy Engineering
     ready_now: 14
-    ready_1_2y: 9
-    no_successor: 3
-  - function: Power & T&D
-    ready_now: 11
-    ready_1_2y: 8
-    no_successor: 5
-  - function: Digital / L&T Tech
-    ready_now: 16
-    ready_1_2y: 10
-    no_successor: 2
-  - function: Green Energy (new)
-    ready_now: 4
-    ready_1_2y: 6
-    no_successor: 8
-  - function: Semiconductors (new)
-    ready_now: 2
-    ready_1_2y: 3
-    no_successor: 7
-  - function: R&D
-    ready_now: 7
     ready_1_2y: 5
     no_successor: 3
-  - function: Finance / Corporate
+  - function: Heavy Engineering
+    ready_now: 10
+    ready_1_2y: 5
+    no_successor: 3
+  - function: Power & T&D
     ready_now: 9
-    ready_1_2y: 6
-    no_successor: 2
+    ready_1_2y: 4
+    no_successor: 3
+  - function: Digital / L&T Tech
+    ready_now: 12
+    ready_1_2y: 5
+    no_successor: 3
+  - function: Green Energy (new)
+    ready_now: 4
+    ready_1_2y: 4
+    no_successor: 7
+  - function: Semiconductors (new)
+    ready_now: 2
+    ready_1_2y: 2
+    no_successor: 5
+  - function: R&D / Technology
+    ready_now: 4
+    ready_1_2y: 2
+    no_successor: 4
+  - function: Finance / Corporate
+    ready_now: 15
+    ready_1_2y: 4
+    no_successor: 3
 bench:
-  - role: Electrolyser Mfg Head
+  - role: Head, Electrolyser Manufacturing
+    business: Green Energy
+    company_code: LTTS
     ready_pct: 55
+    readiness: ready_1_2y
     status: thin
-    note: 1 ready-in-18mo candidate
-  - role: VP Semiconductor ATMP
+    nine_box: high_potential
+    incumbent_flight_risk: medium
+    vacancy_exposure: medium
+    successor: 1 internal · 55% ready
+    development_move: Stretch assignment + external adjunct
+    note: 1 ready-in-18mo candidate from EPC adjacency
+  - role: VP, Semiconductor ATMP
+    business: Semiconductors
+    company_code: LTTS
     ready_pct: 15
+    readiness: no_ready
     status: no_ready_internal
+    nine_box: critical
+    incumbent_flight_risk: high
+    vacancy_exposure: high
+    successor: No ready internal
+    development_move: Hire senior lead + groom 2 internals
     note: External search + 2 internal IDPs
-  - role: Green H₂ Projects Head
+  - role: Head, Green H₂ Projects
+    business: Green Energy
+    company_code: LTTS
     ready_pct: 60
+    readiness: ready_1_2y
     status: thin
+    nine_box: high_potential
+    incumbent_flight_risk: medium
+    vacancy_exposure: medium
+    successor: 1 internal · 60% ready
+    development_move: Mentoring + certification track
     note: Mobility from EPC cluster
-  - role: GM Power Electronics
+  - role: GM, Power Electronics
+    business: Power & T&D
+    company_code: LTTS
     ready_pct: 78
+    readiness: ready_now
     status: covered
+    nine_box: high_performer
+    incumbent_flight_risk: low
+    vacancy_exposure: low
+    successor: 1 internal · 78% ready
+    development_move: P&L exposure
     note: Ready-now successor identified
-  - role: Cluster Head Digital
+  - role: Cluster Head, Digital Platforms
+    business: L&T Technology
+    company_code: LTTS
     ready_pct: 82
+    readiness: ready_now
     status: covered
+    nine_box: star
+    incumbent_flight_risk: low
+    vacancy_exposure: low
+    successor: 2 internal · 82% ready
+    development_move: Board exposure — near ready
     note: Strong bench
+  - role: BU Head, BFSI Digital
+    business: LTIMindtree
+    company_code: LTIM
+    ready_pct: 70
+    readiness: ready_1_2y
+    status: thin
+    nine_box: high_potential
+    incumbent_flight_risk: medium
+    vacancy_exposure: medium
+    successor: 1 internal · 70% ready
+    development_move: Client P&L rotation
+    note: Strong delivery leader; needs commercial stretch
+  - role: Head of AI / GenAI Practice
+    business: LTIMindtree
+    company_code: LTIM
+    ready_pct: 40
+    readiness: no_ready
+    status: thin
+    nine_box: critical
+    incumbent_flight_risk: high
+    vacancy_exposure: high
+    successor: 2 internals · neither ready-now
+    development_move: External adjunct + accelerated IDP
+    note: Single-point-of-failure incumbent; market demand elevated
+  - role: CHRO, LTIMindtree
+    business: LTIMindtree
+    company_code: LTIM
+    ready_pct: 65
+    readiness: ready_1_2y
+    status: thin
+    nine_box: high_performer
+    incumbent_flight_risk: low
+    vacancy_exposure: medium
+    successor: 1 internal · 65% ready
+    development_move: Group CHRO shadowing
+    note: Ready-in-18mo candidate identified
+by_ic:
+  LTIM:
+    name: LTIMindtree
+    aliases: [LTIMindtree, "LNT Mindtree", "L&T Mindtree", Mindtree]
+    headline:
+      critical_roles_tracked: 28
+      ready_now_coverage_pct: 68
+      ready_now_delta_pts: -3
+      weak_or_no_successor: 7
+      internal_fill_rate_pct: 48
+      internal_fill_target_pct: 60
+      single_point_of_failure: 3
+    insights:
+      - Ready-now coverage 68% across 28 critical digital / delivery roles.
+      - 7 roles have weak or no successor; Head of AI / GenAI is the sharpest gap.
+      - 3 single-point-of-failure incumbents with high flight risk.
+      - Internal fill 48% vs 60% target — mobility from LTTS adjacency underused.
+    by_function:
+      - function: BFSI Digital
+        ready_now: 4
+        ready_1_2y: 2
+        no_successor: 1
+      - function: Hi-Tech / Manufacturing
+        ready_now: 3
+        ready_1_2y: 2
+        no_successor: 1
+      - function: AI / Data
+        ready_now: 1
+        ready_1_2y: 2
+        no_successor: 2
+      - function: Delivery / Operations
+        ready_now: 5
+        ready_1_2y: 2
+        no_successor: 1
+      - function: Corporate / Enabling
+        ready_now: 4
+        ready_1_2y: 1
+        no_successor: 2
+  LTTS:
+    name: L&T Technology Services
+    aliases: [LTTS, "L&T Technology", "L&T Tech"]
+    headline:
+      critical_roles_tracked: 36
+      ready_now_coverage_pct: 58
+      ready_now_delta_pts: -6
+      weak_or_no_successor: 11
+      internal_fill_rate_pct: 39
+      internal_fill_target_pct: 60
+      single_point_of_failure: 5
+    insights:
+      - Thinnest benches sit in Green Energy and Semiconductors.
+      - VP Semiconductor ATMP has no ready-now internal successor.
+      - Internal fill well below target; EPC adjacency is the main build path.
+  LTF:
+    name: L&T Finance
+    aliases: [LTF, "L&T Finance"]
+    headline:
+      critical_roles_tracked: 18
+      ready_now_coverage_pct: 72
+      ready_now_delta_pts: 1
+      weak_or_no_successor: 3
+      internal_fill_rate_pct: 55
+      internal_fill_target_pct: 60
+      single_point_of_failure: 1
+    insights:
+      - Coverage is healthier than Group average; credit-risk leadership is the residual gap.
+  LTMR:
+    name: L&T Metro Rail
+    aliases: [LTMR, "L&T Metro", "Metro Rail"]
+    headline:
+      critical_roles_tracked: 22
+      ready_now_coverage_pct: 61
+      ready_now_delta_pts: -2
+      weak_or_no_successor: 6
+      internal_fill_rate_pct: 44
+      internal_fill_target_pct: 60
+      single_point_of_failure: 2
+    insights:
+      - Operations and safety leadership benches are adequate; project-controls successors are thin.
+  LTR:
+    name: L&T Realty
+    aliases: [LTR, "L&T Realty", Realty]
+    headline:
+      critical_roles_tracked: 16
+      ready_now_coverage_pct: 69
+      ready_now_delta_pts: 0
+      weak_or_no_successor: 4
+      internal_fill_rate_pct: 50
+      internal_fill_target_pct: 60
+      single_point_of_failure: 1
+    insights:
+      - Development and sales leadership covered; design-lead succession remains a watch item.

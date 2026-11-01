@@ -8,6 +8,22 @@ from sqlalchemy.orm import Session
 from app.core.security import Principal
 from app.workforce import loader
 
+_SUCCESSION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "company_code": {
+            "type": "string",
+            "description": "Independent Company code, e.g. LTIM, LTTS, LTF, LTMR, LTR. "
+            "Omit for Group totals. Resolve 'LTIMindtree' / 'LNT Mindtree' → LTIM.",
+        },
+        "period": {
+            "type": "string",
+            "description": "YYYY-MM period for freshness check against fixture as_of. "
+            "Optional; defaults to the run period.",
+        },
+    },
+}
+
 WORKFORCE_TOOLS: list[dict[str, Any]] = sorted(
     [
         {
@@ -24,10 +40,17 @@ WORKFORCE_TOOLS: list[dict[str, Any]] = sorted(
             "input_schema": {"type": "object", "properties": {}},
         },
         {
+            "name": "get_succession_coverage",
+            "description": "Succession coverage for Group or one IC: critical roles, nominated "
+            "successors with readiness (ready_now / ready_1_2y / no_ready), 9-box, incumbent "
+            "flight-risk, and vacancy exposure. Fixture-backed. Use this for succession reports. "
+            "Do NOT substitute Talent Management scorecard KPIs (Top Talent Review, IDPs, PLI).",
+            "input_schema": _SUCCESSION_SCHEMA,
+        },
+        {
             "name": "get_succession_bench",
-            "description": "Succession coverage by function and critical-role bench readiness. "
-            "Fixture-backed.",
-            "input_schema": {"type": "object", "properties": {}},
+            "description": "Alias of get_succession_coverage. Prefer get_succession_coverage in new plans.",
+            "input_schema": _SUCCESSION_SCHEMA,
         },
         {
             "name": "list_draft_actions",
@@ -48,10 +71,30 @@ WORKFORCE_TOOLS: list[dict[str, Any]] = sorted(
 )
 
 _WORKFORCE_NAMES = {t["name"] for t in WORKFORCE_TOOLS}
+_SUCCESSION_NAMES = {"get_succession_coverage", "get_succession_bench"}
 
 
 def is_workforce_tool(name: str) -> bool:
     return name in _WORKFORCE_NAMES
+
+
+def _succession_payload(args: dict) -> dict:
+    code = (args.get("company_code") or "").strip().upper() or None
+    period = (args.get("period") or "").strip() or None
+    data = loader.succession(code)
+    as_of = data.get("as_of")
+    freshness = {
+        "as_of": as_of,
+        "requested_period": period,
+        "stale": bool(period and as_of and period != as_of),
+        "note": (
+            f"Fixture as_of {as_of}; requested {period} — treat as demo snapshot, not live HRIS."
+            if period and as_of and period != as_of
+            else (f"Fixture as_of {as_of}." if as_of else "Fixture-backed demo snapshot.")
+        ),
+    }
+    out = {**data, "freshness": freshness, "artifact": loader.artifact_for("succession", data)}
+    return out
 
 
 def dispatch(name: str, args: dict, db: Session, who: Principal) -> dict:
@@ -62,9 +105,8 @@ def dispatch(name: str, args: dict, db: Session, who: Principal) -> dict:
     if name == "get_skills_gap":
         data = loader.skills()
         return {**data, "artifact": loader.artifact_for("skills", data)}
-    if name == "get_succession_bench":
-        data = loader.succession()
-        return {**data, "artifact": loader.artifact_for("succession", data)}
+    if name in _SUCCESSION_NAMES:
+        return _succession_payload(args)
     if name == "list_draft_actions":
         data = loader.draft_actions()
         key = (args.get("key") or "").strip()

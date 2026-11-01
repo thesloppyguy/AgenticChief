@@ -8,16 +8,26 @@ import { fmt, STATUS_STYLE, statusOf } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Status } from "@/lib/types";
 
-export function StatusBadge({ status, withheld }: { status: Status; withheld?: boolean }) {
+export function StatusBadge({
+  status,
+  withheld,
+  onAccent,
+}: {
+  status: Status;
+  withheld?: boolean;
+  onAccent?: boolean;
+}) {
   const empty = !status;
   return (
     <Badge
       variant="outline"
       className={cn(
         "h-6 px-2.5 text-sm",
-        status
-          ? STATUS_STYLE[status]
-          : "border-foreground/20 bg-muted font-normal text-foreground/70",
+        onAccent
+          ? "border-white/35 bg-white/20 font-medium text-white"
+          : status
+            ? STATUS_STYLE[status]
+            : "border-foreground/20 bg-muted font-normal text-foreground/70",
       )}
       title={withheld ? "Too little of the scorecard could be scored to give a status" : undefined}
     >
@@ -41,17 +51,18 @@ export function ScoreTile(props: {
   const body = (
     <ShadCard
       className={cn(
-        "gap-0 rounded-2xl py-5 shadow-sm ring-black/5 [--card-spacing:--spacing(4)]",
-        empty && !props.accent && "bg-muted/40",
-        props.accent && "bg-neutral-900 text-white shadow-md ring-0 dark:bg-neutral-100 dark:text-neutral-900",
-        props.href && "transition-shadow hover:shadow-md",
+        "gap-0 rounded-[1.25rem] py-5 shadow-md ring-black/[0.04] [--card-spacing:--spacing(4)]",
+        empty && !props.accent && "bg-muted/50",
+        props.accent &&
+          "bg-brand-gradient text-white shadow-lg ring-0",
+        props.href && "transition-all hover:-translate-y-0.5 hover:shadow-lg",
       )}
     >
       <CardContent className="flex flex-col gap-3">
         <div
           className={cn(
             "text-sm font-medium leading-snug",
-            props.accent ? "text-white/70 dark:text-neutral-900/70" : "text-muted-foreground",
+            props.accent ? "text-white/80" : "text-muted-foreground",
           )}
         >
           {props.title}
@@ -66,7 +77,7 @@ export function ScoreTile(props: {
               <p
                 className={cn(
                   "text-xs leading-snug",
-                  props.accent ? "text-white/60 dark:text-neutral-900/60" : "text-muted-foreground",
+                  props.accent ? "text-white/70" : "text-muted-foreground",
                 )}
               >
                 {props.note}
@@ -79,12 +90,16 @@ export function ScoreTile(props: {
               {fmt(props.score)}
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <StatusBadge status={props.status} withheld={props.withheld} />
+              <StatusBadge
+                status={props.status}
+                withheld={props.withheld}
+                onAccent={props.accent}
+              />
               {props.note && (
                 <span
                   className={cn(
                     "text-xs leading-snug",
-                    props.accent ? "text-white/60 dark:text-neutral-900/60" : "text-muted-foreground",
+                    props.accent ? "text-white/70" : "text-muted-foreground",
                   )}
                 >
                   {props.note}
@@ -110,10 +125,15 @@ export function Card({ title, children, action, className, contentClassName }: {
   title?: string; children: ReactNode; action?: ReactNode; className?: string; contentClassName?: string;
 }) {
   return (
-    <ShadCard className={cn("min-h-0 gap-5 py-6 text-base [--card-spacing:--spacing(5)]", className)}>
+    <ShadCard
+      className={cn(
+        "min-h-0 gap-5 rounded-[1.25rem] py-6 text-base shadow-md ring-black/[0.04] [--card-spacing:--spacing(5)]",
+        className,
+      )}
+    >
       {(title || action) && (
         <CardHeader className="gap-2">
-          <CardTitle className="text-lg">{title}</CardTitle>
+          <CardTitle className="text-lg font-semibold tracking-tight">{title}</CardTitle>
           {action && <CardAction>{action}</CardAction>}
         </CardHeader>
       )}
@@ -127,11 +147,11 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
       <div className="min-w-0 space-y-1.5">
-        <h1 className="text-balance text-[1.75rem] font-semibold tracking-tight text-foreground md:text-3xl">
+        <h1 className="text-balance text-[1.75rem] font-semibold tracking-tight text-foreground md:text-[1.85rem]">
           {title}
         </h1>
         {subtitle && (
-          <p className="max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground md:text-base">
+          <p className="max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground md:text-[0.95rem]">
             {subtitle}
           </p>
         )}

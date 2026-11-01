@@ -6,6 +6,7 @@ Dedupe is a unique key per (kind, entity, period), so re-evaluating a period nev
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -111,6 +112,42 @@ def on_ingestion(db: Session, summaries: list[SourceSummary], period: str) -> li
         if a:
             created.append(a)
     db.commit()
+    return created
+
+
+def check_source_freshness(db: Session, period: str | None = None) -> list[Alert]:
+    """Raise inbox alerts when a connected source breaches the freshness SLA or has never synced."""
+    from app.services import sources_status as src_status
+    from app.services.scorecard import current_period
+
+    period = period or current_period()
+    created: list[Alert] = []
+    for s in src_status.build_sources_list(db):
+        if s["mode"] == "disabled":
+            continue
+        freshness = s["freshness"]
+        if freshness == "fresh":
+            continue
+        label = s["label"]
+        if freshness == "never":
+            title = f"{label} has never successfully synced"
+            severity = "medium"
+        else:
+            title = (f"{label} data is stale "
+                     f"({s['age_hours']:.0f}h > {s['sla_hours']:.0f}h SLA)")
+            severity = "high"
+        # Dedupe per calendar day so operators get a daily reminder, not a flood.
+        day = datetime.now(UTC).strftime("%Y-%m-%d")
+        a = _raise(
+            db, kind="source_stale", severity=severity, company_id=None, entity=s["source"], period=period,
+            title=title,
+            detail={"freshness": freshness, "age_hours": s["age_hours"], "sla_hours": s["sla_hours"],
+                    "mode": s["mode"], "data_origin": s["data_origin"]},
+            dedupe_key=f"source_stale:{s['source']}:{day}")
+        if a:
+            created.append(a)
+    if created:
+        db.commit()
     return created
 
 

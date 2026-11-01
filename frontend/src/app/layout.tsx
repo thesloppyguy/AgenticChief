@@ -5,9 +5,13 @@ import AppShell from "@/components/AppShell";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Urbanist } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 
-const urbanist = Urbanist({ subsets: ["latin"], variable: "--font-urbanist" });
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-dm-sans",
+});
 
 export const metadata: Metadata = {
   title: "Lokibots | CHRO Copilot",
@@ -20,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={urbanist.variable} suppressHydrationWarning>
+    <html lang="en" className={dmSans.variable} suppressHydrationWarning>
       <head>
         <link
           rel="icon"

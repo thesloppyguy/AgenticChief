@@ -6,8 +6,19 @@ export interface Overall {
   score: number | null; status: Status; status_withheld: boolean; pillar_coverage: number; pillars: Pillar[];
 }
 export interface CompanyCard extends Overall { company_id: number; code: string; name: string }
+export interface SourceFreshness {
+  overall: "fresh" | "stale" | "never" | "partial";
+  sla_hours: number;
+  mock_sources_enabled?: boolean;
+  counts: { fresh: number; stale: number; never: number };
+  sources: {
+    source: string; label: string; mode: string; freshness: string;
+    age_hours: number | null; data_origin?: string | null; last_status?: string | null;
+  }[];
+}
 export interface Scorecard {
   period: string; calc_version: string; thresholds: { green_min: number; amber_min: number }; scope: "group" | "restricted"; synthetic_data: boolean; no_source_kpis: string[];
+  freshness?: SourceFreshness;
   group: Overall & { companies_in_scope: number; companies_with_data: number };
   companies: CompanyCard[];
 }
@@ -26,7 +37,18 @@ export interface KpiCatalog { pillar_weights: Record<string, number>; kpis: KpiD
 export interface SourceStatus {
   source: string; label: string; mode: "live" | "stub" | "disabled" | "registry"; live_enabled: boolean;
   kpis: string[]; stub_fixture: boolean; no_source_kpis: string[]; taken_over_by_registry?: string[]; data_origin?: string | null;
+  freshness?: "fresh" | "stale" | "never";
+  age_hours?: number | null;
+  sla_hours?: number;
   last_run: null | { period: string; status: string; mode: string; companies_ok: number; companies_failed: number; records_written: number; finished_at: string | null };
+}
+export interface SourcesStatusEnvelope {
+  mock_sources_enabled: boolean;
+  ai_configured: boolean;
+  stub_data_enabled: boolean;
+  sla_hours: number;
+  as_of: string;
+  sources: SourceStatus[];
 }
 
 export interface AlertItem {
@@ -36,7 +58,17 @@ export interface AlertItem {
 }
 export interface Approval {
   id: number; action: string; risk: string; summary: string; status: string; requested_by: string; via: string;
-  args: Record<string, unknown>; context: { reason?: string } | null; created_at: string;
+  args: Record<string, unknown>;
+  context: {
+    reason?: string;
+    title?: string;
+    blurb?: string;
+    sla?: string;
+    sla_style?: string;
+    draft_key?: string;
+    severity?: string;
+  } | null;
+  created_at: string;
   decided_by: string | null; decision_comment: string | null; result: Record<string, unknown> | null;
   events?: { at: string; actor: string; event: string; comment: string | null }[];
 }
@@ -47,7 +79,8 @@ export interface RunSummary { id: number; workflow: string; period: string; stat
 export interface RunDetail extends RunSummary {
   steps: { key: string; label: string; done: boolean }[];
   events: { seq: number; at: string; step: string; status: string; message: string }[];
-  result: ReportDoc | null;
+  /** Monthly review docs have `headline`; CHRO/def workflows use steps + optional artifacts. */
+  result: ReportDoc | Record<string, unknown> | null;
 }
 export interface SnapshotRow { id: number; kind: string; period: string; calc_version: string; content_hash: string | null; run_id: number | null; created_by: string; created_at: string }
 export interface ReportDoc {
@@ -135,7 +168,10 @@ export interface WorkflowDef {
   validation?: { ok: boolean; checked_at: string; checks: { name: string; ok: boolean; detail: string }[] } | null;
 }
 export interface WorkflowDraft {
-  spec: { title: string; steps: WorkflowStep[] } | null; problems: string[]; raw: string | null;
+  spec: { title: string; steps: WorkflowStep[] } | null;
+  problems: string[];
+  raw: string | null;
+  suggested_key?: string | null;
 }
 
 // --- activity timeline -----------------------------------------------------------------------

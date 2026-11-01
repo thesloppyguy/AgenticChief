@@ -189,7 +189,7 @@ export function AgentsPanel() {
                     size="sm"
                     disabled={busy}
                     onClick={saveInstructions}
-                    className="rounded-full bg-neutral-900 px-4 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
+                    className="rounded-full bg-primary px-4 text-primary-foreground hover:bg-[color-mix(in_srgb,var(--primary),#000_8%)]"
                   >
                     Save
                   </Button>

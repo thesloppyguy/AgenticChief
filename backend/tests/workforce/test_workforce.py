@@ -26,7 +26,12 @@ def test_workforce_yaml_loads_and_artifacts():
     succ = loader.succession()
     assert succ["headline"]["weak_or_no_successor"] == 34
     drafts = loader.draft_actions()["drafts"]
-    assert {d["key"] for d in drafts} >= {"capability_green_h2", "retention_semi"}
+    assert {d["key"] for d in drafts} >= {
+        "capability_green_h2",
+        "retention_semi",
+        "atmp_leadership",
+        "manager_effectiveness_bq",
+    }
     art = loader.artifact_for("skills", skills)
     assert art and art["kind"] == "skills_demand_supply"
 
@@ -47,10 +52,43 @@ def test_workforce_tools_dispatch(client):
     db = next(app.dependency_overrides[get_db]())
     who = Principal("admin", Role.ADMIN, None)
     out = workforce_tools.dispatch("get_workforce_pulse", {}, db, who)
-    assert out["artifact"]["kind"] == "kpi_bars"
+    assert out["artifact"]["kind"] == "workforce_pulse"
     out = workforce_tools.dispatch("list_draft_actions", {"key": "capability_green_h2"}, db, who)
     assert len(out["drafts"]) == 1
     assert out["drafts"][0]["action"] == "launch_capability_program"
+
+
+def test_succession_coverage_scopes_to_ic(client):
+    loader.clear_cache()
+    db = next(app.dependency_overrides[get_db]())
+    who = Principal("admin", Role.ADMIN, None)
+    group = workforce_tools.dispatch("get_succession_coverage", {}, db, who)
+    assert group["headline"]["critical_roles_tracked"] == 130
+    assert group["freshness"]["as_of"] == "2026-10"
+
+    ltim = workforce_tools.dispatch(
+        "get_succession_coverage", {"company_code": "LTIM", "period": "2026-10"}, db, who
+    )
+    assert ltim["available"] is True
+    assert ltim["company_code"] == "LTIM"
+    assert ltim["headline"]["critical_roles_tracked"] == 28
+    assert all(b.get("company_code") == "LTIM" for b in ltim["bench"])
+    assert any(b.get("nine_box") for b in ltim["bench"])
+    assert ltim["freshness"]["stale"] is False
+
+    missing = workforce_tools.dispatch(
+        "get_succession_coverage", {"company_code": "ZZZZ"}, db, who
+    )
+    assert missing["available"] is False
+    assert "critical_roles" in missing["missing"]
+
+
+def test_succession_bench_alias_matches_coverage(client):
+    db = next(app.dependency_overrides[get_db]())
+    who = Principal("admin", Role.ADMIN, None)
+    a = workforce_tools.dispatch("get_succession_bench", {"company_code": "LTIM"}, db, who)
+    b = workforce_tools.dispatch("get_succession_coverage", {"company_code": "LTIM"}, db, who)
+    assert a["headline"] == b["headline"]
 
 
 def test_send_directive_queues_to_named_people(client):

@@ -4,6 +4,14 @@ headline:
   projected_supply: 1000
   capability_gap: 1300
   buildable_internally_pct: 70
+subtitle: >
+  Green hydrogen / electrolysers and semiconductors show the widest gaps — the areas
+  central to L&T's new-business strategy.
+insights:
+  - Total demand 2,300 · projected supply ~1,000 · gap 1,300 roles unmet over 24 months.
+  - ~70% of the gap is buildable internally with a capability programme — cheaper and faster than buying scarce skills.
+  - Green H₂ (gap 440) and Semiconductors (gap 360) are the strategic pinch points.
+  - Digital / AI has the largest supply base (300) but still leaves 240 roles unmet.
 domains:
   - key: green_h2
     label: Green H₂ & Electrolysers
@@ -11,42 +19,57 @@ domains:
     supply: 180
     gap: 440
     path: build
+    insight: Largest gap (440 roles) — central to new-business ramp.
   - key: semiconductors
     label: Semiconductors
     demand: 480
     supply: 120
     gap: 360
     path: blend
+    insight: Significant gap (360) — blend build with selective senior hire.
   - key: digital_ai
     label: Digital / AI & Data
     demand: 540
     supply: 300
     gap: 240
     path: build
+    insight: Largest supply base, still a 240-role shortfall.
   - key: power_electronics
     label: Power Electronics & Grid
     demand: 360
     supply: 210
     gap: 150
     path: build
+    insight: Gap of 150 — adjacency from mature power businesses is strong.
   - key: advanced_mfg
     label: Advanced Mfg / Robotics
     demand: 300
     supply: 190
     gap: 110
     path: blend
+    insight: Smallest gap (110) — blend internal build with selective hire.
 build_vs_buy:
   focus: Electrolyser engineering
+  insight: >
+    For scarce skills, building internally wins on cost, speed and retention —
+    programme cost ≈ ₹9.2 Cr vs ≈ ₹41 Cr avoided hiring premium.
   metrics:
-    - label: Cost index
+    - label: Cost per role (indexed)
       build: 45
       buy: 100
-    - label: Time to productivity (months)
+      unit: index
+    - label: Time to productivity
       build: 4
       buy: 8
-    - label: 2-year retention (%)
+      unit: months
+    - label: 2-year retention
       build: 88
       buy: 68
+      unit: "%"
+capacity_insight: >
+  46 mechanical & chemical engineers from mature EPC projects are the strongest
+  adjacency for electrolyser systems — a 12-week certification brings them to
+  productivity faster than external hires reach ramp.
 internal_build_capacity:
   - from: EPC & heavy eng
     to: Green H₂
@@ -55,15 +78,18 @@ internal_build_capacity:
     to: Semi
     candidates: 22
   - from: Digital
-    to: AI/data
+    to: AI / data
     candidates: 38
   - from: Process
     to: Electrolysers
     candidates: 19
+mobility_insight: >
+  High-potential engineers whose adjacent skills make them candidates to move into
+  the future-critical businesses — the mobility that career architecture should be enabling.
 mobility_adjacency:
   - label: EPC & heavy eng → Green energy
     count: 46
   - label: Power electronics → Semiconductors
     count: 22
-  - label: Digital → AI/data platforms
+  - label: Digital → AI / data platforms
     count: 38

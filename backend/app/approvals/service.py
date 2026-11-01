@@ -65,7 +65,16 @@ def submit(db: Session, who: Principal, action_key: str, raw_args: dict, via: st
     decision = evaluate(action, action.targets(args), visible, who)
 
     status = {Verdict.DENY: "denied", Verdict.REQUIRE_APPROVAL: "pending", Verdict.ALLOW: "approved"}[decision.verdict]
-    req = ApprovalRequest(action=action.key, risk=action.risk.value, summary=action.summarize(args)[:300],
+    # Prefer an explicit human title from context (workforce drafts / chat cards).
+    human_title = ""
+    if context:
+        for key in ("title", "reason"):
+            val = context.get(key)
+            if isinstance(val, str) and val.strip() and val.strip() != action.key:
+                human_title = val.strip()
+                break
+    summary = (human_title or action.summarize(args))[:300]
+    req = ApprovalRequest(action=action.key, risk=action.risk.value, summary=summary,
                           args=args.model_dump(mode="json"), context=context, requested_by=who.user_id,
                           via=via, session_id=session_id, status=status)
     db.add(req)

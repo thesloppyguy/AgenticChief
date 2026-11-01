@@ -3,6 +3,10 @@ import { use, useEffect, useState } from "react";
 import { CheckCircle2, CircleDashed, Loader2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import ReportView from "@/components/ReportView";
+import WorkflowResultView, {
+  isMonthlyReport,
+  isWorkflowResult,
+} from "@/components/WorkflowResultView";
 import { Card, Loading } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +28,8 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
   const [busy, setBusy] = useState(false);
   const me = getClaims();
   const running = data?.status === "running" || data?.status === "queued";
+  const monthly = data?.result != null && isMonthlyReport(data.result);
+  const workflowKey = data?.workflow?.replace(/^def:/, "") || "";
 
   // A run streams its steps, so poll while it is in flight and stop as soon as it settles.
   useEffect(() => {
@@ -53,7 +59,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h1 className="text-xl font-semibold">
-                {label(data.workflow.replace("def:", ""))} — {data.period}
+                {label(workflowKey)} — {data.period}
               </h1>
               <p className="text-sm text-muted-foreground">
                 Run #{data.id} · asked by {data.requested_by}
@@ -61,7 +67,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {data.status === "succeeded" && (
+              {data.status === "succeeded" && monthly && (
                 <>
                   <Button variant="outline" size="sm"
                     onClick={() => download(`/workflows/runs/${id}/pdf`, `review-${data.period}.pdf`)}>
@@ -122,13 +128,17 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
             )}
           </Card>
 
-          {data.result && "headline" in data.result && <ReportView r={data.result} />}
+          {monthly && data.result ? <ReportView r={data.result} /> : null}
 
-          {data.result && !("headline" in data.result) && (
+          {!monthly && data.result && isWorkflowResult(data.result) ? (
+            <WorkflowResultView result={data.result} />
+          ) : null}
+
+          {!monthly && data.result && !isWorkflowResult(data.result) ? (
             <Card title="Result">
               <pre className="overflow-x-auto text-xs">{JSON.stringify(data.result, null, 2)}</pre>
             </Card>
-          )}
+          ) : null}
         </>
       )}
     </div>

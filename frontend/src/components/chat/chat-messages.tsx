@@ -16,6 +16,7 @@ import {
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller";
 import { ChatArtifacts } from "./chat-artifacts";
+import { Markdown } from "./markdown";
 import { ToolTrace } from "./tool-trace";
 import type { AgentOption, ChatMsg } from "./types";
 
@@ -32,39 +33,56 @@ export function ChatMessages({
         <MessageScrollerViewport className="p-4">
           <MessageScrollerContent>
             <MessageGroup>
-              {messages.map((m, i) => (
-                <MessageScrollerItem
-                  key={i}
-                  scrollAnchor={i === messages.length - 1}
-                >
-                  <Message align={m.role === "user" ? "end" : "start"}>
-                    <MessageContent>
-                      {m.role === "assistant" && (
-                        <>
-                          <MessageHeader>{agentLabel}</MessageHeader>
-                          <ToolTrace tools={m.tools} live={!m.done} />
-                        </>
-                      )}
-                      <Bubble
-                        variant={m.role === "user" ? "default" : "muted"}
-                        align={m.role === "user" ? "end" : "start"}
-                      >
-                        <BubbleContent className="whitespace-pre-wrap">
-                          {m.content || (m.done ? "" : "Thinking…")}
-                          {m.attachments && m.attachments.length > 0 && (
-                            <span className="mt-2 block text-xs opacity-80">
-                              Attached: {m.attachments.join(", ")}
-                            </span>
-                          )}
-                          {m.role === "assistant" && (
-                            <ChatArtifacts artifacts={m.artifacts} />
-                          )}
-                        </BubbleContent>
-                      </Bubble>
-                    </MessageContent>
-                  </Message>
-                </MessageScrollerItem>
-              ))}
+              {messages.map((m, i) => {
+                const assistant = m.role === "assistant";
+                const pending = !m.content && !m.done;
+                return (
+                  <MessageScrollerItem
+                    key={i}
+                    scrollAnchor={i === messages.length - 1}
+                  >
+                    <Message align={assistant ? "start" : "end"}>
+                      <MessageContent className={assistant ? "max-w-[min(100%,52rem)]" : undefined}>
+                        {assistant && (
+                          <>
+                            <MessageHeader>{agentLabel}</MessageHeader>
+                            <ToolTrace tools={m.tools} live={!m.done} />
+                          </>
+                        )}
+                        {(pending || m.content || (m.attachments && m.attachments.length > 0)) && (
+                          <Bubble
+                            variant={assistant ? "ghost" : "default"}
+                            align={assistant ? "start" : "end"}
+                            className={assistant ? "max-w-full" : undefined}
+                          >
+                            <BubbleContent
+                              className={
+                                assistant
+                                  ? "w-full max-w-full px-0"
+                                  : "whitespace-pre-wrap"
+                              }
+                            >
+                              {pending ? (
+                                <span className="text-muted-foreground">Thinking…</span>
+                              ) : assistant && m.content ? (
+                                <Markdown>{m.content}</Markdown>
+                              ) : (
+                                m.content
+                              )}
+                              {m.attachments && m.attachments.length > 0 && (
+                                <span className="mt-2 block text-xs opacity-80">
+                                  Attached: {m.attachments.join(", ")}
+                                </span>
+                              )}
+                            </BubbleContent>
+                          </Bubble>
+                        )}
+                        {assistant && <ChatArtifacts artifacts={m.artifacts} />}
+                      </MessageContent>
+                    </Message>
+                  </MessageScrollerItem>
+                );
+              })}
             </MessageGroup>
           </MessageScrollerContent>
         </MessageScrollerViewport>

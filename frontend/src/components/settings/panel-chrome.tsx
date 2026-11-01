@@ -132,7 +132,7 @@ export function SideListItem({
             className={cn(
               "flex size-8 shrink-0 items-center justify-center rounded-full",
               active
-                ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-foreground/70",
             )}
           >
@@ -171,14 +171,14 @@ export function StatusPill({ ok, label }: { ok: boolean; label?: string }) {
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
         ok
-          ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900"
+          ? "bg-primary text-primary-foreground"
           : "bg-muted text-muted-foreground",
       )}
     >
       <span
         className={cn(
           "size-1.5 rounded-full",
-          ok ? "bg-white/90 dark:bg-neutral-900/80" : "bg-foreground/30",
+          ok ? "bg-white/90" : "bg-foreground/30",
         )}
       />
       {label ?? (ok ? "On" : "Off")}

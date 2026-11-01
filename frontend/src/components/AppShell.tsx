@@ -149,14 +149,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <SidebarProvider>
+      <SidebarProvider className="bg-shell! min-h-svh">
         <AppSidebar open={open} onOpenChange={setOpen} />
-        <SidebarInset className="bg-[#F4F5F4] dark:bg-background">
-          <header className="flex h-14 shrink-0 items-center justify-between gap-2 px-5">
+        <SidebarInset className="overflow-hidden bg-background md:peer-data-[variant=inset]:m-4 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-2xl md:peer-data-[variant=inset]:shadow-md md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-4">
+          <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border/70 px-5">
             <SidebarTrigger className="-ml-1" />
             <ThemeToggle />
           </header>
-          <div className="flex min-h-0 flex-1 flex-col gap-5 px-5 pb-6 md:px-6">
+          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 md:px-7 md:py-6">
             {children}
           </div>
         </SidebarInset>

@@ -165,11 +165,60 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
     data.context && typeof data.context === "object" && "reason" in data.context
       ? String((data.context as { reason?: unknown }).reason ?? "")
       : "";
+  const blurb =
+    data.context && typeof data.context === "object" && "blurb" in data.context
+      ? String((data.context as { blurb?: unknown }).blurb ?? "").trim()
+      : "";
+  const detail =
+    data.context && typeof data.context === "object" && "detail" in data.context
+      ? String((data.context as { detail?: unknown }).detail ?? "").trim()
+      : "";
+  const sla =
+    data.context && typeof data.context === "object" && "sla" in data.context
+      ? String((data.context as { sla?: unknown }).sla ?? "").trim()
+      : "";
+  const insights =
+    data.context &&
+    typeof data.context === "object" &&
+    Array.isArray((data.context as { insights?: unknown }).insights)
+      ? ((data.context as { insights: unknown[] }).insights as unknown[])
+          .map((i) => String(i))
+          .filter(Boolean)
+      : [];
+  const routesTo =
+    data.context &&
+    typeof data.context === "object" &&
+    Array.isArray((data.context as { routes_to?: unknown }).routes_to)
+      ? ((data.context as { routes_to: unknown[] }).routes_to as unknown[])
+          .map((i) => String(i))
+          .filter(Boolean)
+      : [];
+  const roi =
+    data.context &&
+    typeof data.context === "object" &&
+    (data.context as { roi?: Record<string, number> | null }).roi &&
+    typeof (data.context as { roi?: unknown }).roi === "object"
+      ? ((data.context as { roi: Record<string, number> }).roi)
+      : null;
   const otherContext =
     data.context && typeof data.context === "object"
       ? Object.fromEntries(
           Object.entries(data.context as Record<string, unknown>).filter(
-            ([k]) => k !== "reason",
+            ([k]) =>
+              ![
+                "reason",
+                "title",
+                "blurb",
+                "detail",
+                "sla",
+                "sla_style",
+                "draft_key",
+                "insights",
+                "routes_to",
+                "roi",
+                "drivers",
+                "severity",
+              ].includes(k),
           ),
         )
       : {};
@@ -203,6 +252,14 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
           <Badge variant="outline" className={cn(STATUS_STYLE[data.status])}>
             {label(data.status)}
           </Badge>
+          {sla ? (
+            <Badge
+              variant="outline"
+              className="rounded-full border-warning/25 bg-warning/10 text-[11px] font-medium text-warning"
+            >
+              {sla}
+            </Badge>
+          ) : null}
           <span className="text-xs text-muted-foreground">{label(data.risk)}</span>
           <span className="text-xs text-muted-foreground">·</span>
           <span className="text-xs text-muted-foreground">#{data.id}</span>
@@ -212,7 +269,7 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
             {data.summary}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {RISK_NOTE[data.risk] ?? label(data.action)}
+            {blurb || RISK_NOTE[data.risk] || label(data.action)}
           </p>
           <p className="text-xs text-muted-foreground">
             Requested by {data.requested_by}
@@ -226,8 +283,68 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
           <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             What this would do
           </h3>
-          {reason ? (
-            <p className="text-sm leading-relaxed text-foreground">{reason}</p>
+          {(detail || (reason && reason !== data.summary)) ? (
+            <p className="text-sm leading-relaxed text-foreground">
+              {detail || reason}
+            </p>
+          ) : null}
+          {routesTo.length > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Routes to {routesTo.join(", ")}
+            </p>
+          ) : null}
+          {insights.length > 0 ? (
+            <ul className="space-y-1.5 rounded-xl bg-muted/50 px-3.5 py-3 text-sm text-muted-foreground">
+              {insights.map((line) => (
+                <li key={line} className="flex gap-2">
+                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {roi ? (
+            <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {roi.programme_cost_cr != null ? (
+                <div>
+                  <dt className="text-[10px] text-muted-foreground">Programme cost</dt>
+                  <dd className="text-sm font-semibold tabular-nums">
+                    ≈ ₹{roi.programme_cost_cr} Cr
+                  </dd>
+                </div>
+              ) : null}
+              {roi.avoided_hiring_premium_cr != null ? (
+                <div>
+                  <dt className="text-[10px] text-muted-foreground">
+                    Avoided hiring premium
+                  </dt>
+                  <dd className="text-sm font-semibold tabular-nums text-[#0F624D]">
+                    ≈ ₹{roi.avoided_hiring_premium_cr} Cr
+                  </dd>
+                </div>
+              ) : null}
+              {roi.gap_closed_pct != null ? (
+                <div>
+                  <dt className="text-[10px] text-muted-foreground">Gap closed</dt>
+                  <dd className="text-sm font-semibold tabular-nums">
+                    ~{roi.gap_closed_pct}%
+                  </dd>
+                </div>
+              ) : null}
+              {roi.time_to_productivity_mo != null ? (
+                <div>
+                  <dt className="text-[10px] text-muted-foreground">
+                    Time to productivity
+                  </dt>
+                  <dd className="text-sm font-semibold tabular-nums">
+                    {roi.time_to_productivity_mo} mo
+                    {roi.buy_time_to_productivity_mo != null
+                      ? ` vs ${roi.buy_time_to_productivity_mo}`
+                      : ""}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
           ) : null}
           <ArgsSummary action={data.action} args={data.args ?? {}} />
           {Object.keys(otherContext).length > 0 && (
@@ -386,7 +503,7 @@ function Queue() {
       >
         <PageHeader
           title="Actions"
-          subtitle="Approvals for reminders, snapshots, and other consequential changes."
+          subtitle="Capability, retention, and other people decisions ready for your call."
           actions={
             <TabsList className="rounded-full">
               <TabsTrigger value="pending" className="rounded-full">
@@ -402,57 +519,95 @@ function Queue() {
           }
         />
         <TabsContent value={tab} className="mt-0">
-          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
-            <div className="space-y-2">
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
+            <div className="overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
               <Loading error={error} loading={loading && !data} />
               {data?.length === 0 && (
-                <div className="rounded-2xl bg-card px-4 py-10 text-center shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+                <div className="px-4 py-10 text-center">
                   <p className="text-sm text-muted-foreground">Nothing in this queue.</p>
                 </div>
               )}
-              {data?.map((a) => {
-                const active = sel === a.id;
-                return (
-                  <button
-                    key={a.id}
-                    type="button"
-                    onClick={() => setSelected(a.id)}
-                    className={cn(
-                      "w-full rounded-2xl px-4 py-3.5 text-left transition-colors",
-                      "ring-1 ring-black/5 dark:ring-white/10",
-                      active
-                        ? "bg-neutral-900 text-white ring-0 dark:bg-neutral-100 dark:text-neutral-900"
-                        : "bg-card text-foreground shadow-sm hover:bg-muted/40",
-                    )}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="line-clamp-2 text-sm font-medium leading-snug">
-                        {a.summary}
-                      </p>
-                      {!active && (
-                        <Badge
-                          variant="outline"
-                          className={cn("shrink-0 text-[10px]", STATUS_STYLE[a.status])}
-                        >
-                          {label(a.status)}
-                        </Badge>
-                      )}
-                    </div>
-                    <p
-                      className={cn(
-                        "mt-2 text-xs",
-                        active
-                          ? "text-white/65 dark:text-neutral-900/65"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      {label(a.action)}
-                      <span className="mx-1.5 opacity-50">·</span>
-                      {shortDate(a.created_at)}
-                    </p>
-                  </button>
-                );
-              })}
+              <ul className="divide-y divide-black/5 dark:divide-white/10">
+                {data?.map((a) => {
+                  const active = sel === a.id;
+                  const blurb =
+                    typeof a.context?.blurb === "string" ? a.context.blurb.trim() : "";
+                  const sla =
+                    typeof a.context?.sla === "string" ? a.context.sla.trim() : "";
+                  const plainSla = a.context?.sla_style === "plain";
+                  return (
+                    <li key={a.id}>
+                      <button
+                        type="button"
+                        onClick={() => setSelected(a.id)}
+                        className={cn(
+                          "flex w-full flex-col gap-3 px-4 py-4 text-left transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+                          active
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-card text-foreground hover:bg-accent/60",
+                        )}
+                      >
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <p className="text-sm font-semibold leading-snug">
+                            {a.summary}
+                          </p>
+                          <p
+                            className={cn(
+                              "line-clamp-2 text-sm leading-relaxed",
+                              active
+                                ? "text-primary-foreground/80"
+                                : "text-muted-foreground",
+                            )}
+                          >
+                            {blurb ||
+                              `${label(a.action)} · ${shortDate(a.created_at)}`}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2 self-end sm:self-center">
+                          {sla && a.status === "pending" ? (
+                            plainSla ? (
+                              <span
+                                className={cn(
+                                  "text-sm",
+                                  active
+                                    ? "text-primary-foreground/75"
+                                    : "text-muted-foreground",
+                                )}
+                              >
+                                {sla}
+                              </span>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  "rounded-full px-2.5 py-0.5 text-[11px] font-medium",
+                                  active
+                                    ? "border-white/30 bg-white/15 text-primary-foreground"
+                                    : "border-warning/25 bg-warning/10 text-warning",
+                                )}
+                              >
+                                {sla}
+                              </Badge>
+                            )
+                          ) : (
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "shrink-0 text-[10px]",
+                                active
+                                  ? "border-white/30 bg-white/15 text-primary-foreground"
+                                  : STATUS_STYLE[a.status],
+                              )}
+                            >
+                              {label(a.status)}
+                            </Badge>
+                          )}
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
             <div className="min-w-0">
               {sel ? (

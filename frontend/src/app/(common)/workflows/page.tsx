@@ -254,7 +254,10 @@ function Builder({ onSaved }: { onSaved: () => void }) {
     }), "Planned. Review it before saving.");
     if (out) {
       setDraft(out);
-      if (out.spec) setKey(out.spec.title.toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 40));
+      if (out.spec) {
+        setKey(out.suggested_key
+          || out.spec.title.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 48));
+      }
     }
     setBusy(false);
   }
@@ -282,7 +285,12 @@ function Builder({ onSaved }: { onSaved: () => void }) {
             placeholder="Each month, build the group overview, find companies missing L&D data, and summarise what needs chasing."
             onChange={(e) => setDescription(e.target.value)} />
         </Field>
-        <Button onClick={plan} disabled={busy || description.trim().length < 10}>
+        <Button
+          variant="brand"
+          className="rounded-full"
+          onClick={plan}
+          disabled={busy || description.trim().length < 10}
+        >
           <Sparkles className="size-4" />{busy ? "Planning…" : "Plan it"}
         </Button>
       </FieldGroup>
@@ -339,16 +347,18 @@ function Definitions() {
   const me = getClaims();
 
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-12">
-      <div className="min-w-0 lg:col-span-7">
+    <div className="flex flex-col gap-4">
       <Card title="Saved workflows">
         <Loading error={error} loading={loading && !data} />
         {data?.length === 0 && (
           <p className="text-sm text-muted-foreground">None yet — describe one below.</p>
         )}
-        <ul className="divide-y">
+        <ul className="space-y-2.5">
           {data?.map((w) => (
-            <li key={w.key} className="py-3 text-sm">
+            <li
+              key={w.key}
+              className="rounded-2xl bg-muted/50 px-3.5 py-3.5 text-sm ring-1 ring-black/[0.03] transition-shadow hover:shadow-sm"
+            >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <div className="flex items-center gap-2">
@@ -375,7 +385,7 @@ function Definitions() {
                       }), "Proposed — a second admin must approve it.")}>Propose publishing</Button>
                   )}
                   {w.published_version && (
-                    <Button variant="outline" size="sm"
+                    <Button variant="default" size="sm" className="rounded-full"
                       onClick={() => run(() => api(`/workflows/defs/${w.key}/runs`, {
                         method: "POST", body: JSON.stringify({ period }),
                       }), `Running for ${period}.`)}>Run now</Button>
@@ -393,8 +403,7 @@ function Definitions() {
           ))}
         </ul>
       </Card>
-      </div>
-      <div className="min-w-0 lg:col-span-5"><Builder onSaved={reload} /></div>
+      <Builder onSaved={reload} />
     </div>
   );
 }
@@ -412,18 +421,11 @@ export default function WorkflowsPage() {
             <TabsList className="rounded-full">
               <TabsTrigger value="workflows" className="rounded-full">Workflows</TabsTrigger>
               <TabsTrigger value="watches" className="rounded-full">Watches</TabsTrigger>
-              <TabsTrigger value="runs" className="rounded-full">Runs</TabsTrigger>
             </TabsList>
           }
         />
         <TabsContent value="workflows" className="mt-4"><Definitions /></TabsContent>
         <TabsContent value="watches" className="mt-4"><Watches /></TabsContent>
-        <TabsContent value="runs" className="mt-4">
-          <p className="text-sm text-muted-foreground">
-            Every run, including the monthly review, is listed on{" "}
-            <Link href="/reports" className="underline">Reports</Link>.
-          </p>
-        </TabsContent>
       </Tabs>
     </div>
   );

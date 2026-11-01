@@ -58,6 +58,8 @@ class Settings(BaseSettings):
     mock_source_token: SecretStr | None = None  # the bearer token the mock endpoints require
     mock_source_model: str | None = None  # defaults to stub_generator_model
     mock_sources_allow_fallback: bool = False  # if the AI call fails: False = answer 503, True = use seeded data
+    # Hours since last successful ingestion (or KPI write) before a source is marked stale.
+    source_freshness_sla_hours: float = 72.0
 
     stub_data_enabled: bool = True
     demo_rng_enabled: bool = False  # or use stub_data_enabled; either gates /demo/rng/*

@@ -15,6 +15,7 @@ from app.api.demo_rng import router as demo_rng_router
 from app.api.documents import router as documents_router
 from app.api.fixtures import router as fixtures_router
 from app.api.ingestion import router as ingestion_router
+from app.api.sources import router as sources_router
 from app.api.memories import router as memories_router
 from app.api.oe_skills import router as skills_router
 from app.api.org import router as org_router
@@ -136,6 +137,7 @@ app.include_router(auth_router)
 app.include_router(router)
 app.include_router(copilot_router)
 app.include_router(ingestion_router)
+app.include_router(sources_router)
 app.include_router(approvals_router)
 app.include_router(alerts_router)
 app.include_router(workflows_router)

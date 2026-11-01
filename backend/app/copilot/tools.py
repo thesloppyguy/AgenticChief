@@ -14,10 +14,14 @@ from app.db.models import ReportSnapshot, WorkflowRun
 from app.knowledge import store as knowledge
 from app.kpi_registry.seed import DEFAULT_CONFIG
 from app.services import scorecard as sc
+from app.services import sources_status as src_status
+from app.workforce.tools import WORKFORCE_TOOLS, is_workforce_tool
+from app.workforce import tools as workforce_tools
 
 PERIOD_PROP = {"type": "string", "description": "Fiscal period as YYYY-MM. Defaults to the current month."}
 
 # Sorted by name: a stable tool array keeps the prompt cache valid.
+# Workforce tools are included so the workflow planner/runner and chat share one catalogue.
 TOOLS: list[dict[str, Any]] = sorted(
     [
         DELEGATE,
@@ -88,26 +92,126 @@ TOOLS: list[dict[str, Any]] = sorted(
                 "order": {"type": "string", "enum": ["lowest", "highest"]},
                 "limit": {"type": "integer", "minimum": 1, "maximum": 88}, "period": PERIOD_PROP}},
         },
+        {
+            "name": "get_source_status",
+            "description": "Data-source health and freshness for SuccessFactors, PeopleStrong, MyHealth and "
+                           "Hi5Plus: mode (live/stub/disabled), last ingestion, age vs SLA, and whether values "
+                           "came from AI mock profiles (data_origin=ai). Use when asked which sources are stale "
+                           "or whether scorecard numbers are partial.",
+            "input_schema": {"type": "object", "properties": {
+                "source": {"type": "string",
+                           "description": "Optional source key: successfactors, peoplestrong, myhealth, hi5plus."},
+                "period": PERIOD_PROP}},
+        },
+        *WORKFORCE_TOOLS,
     ],
     key=lambda t: t["name"],
 )
 
 
+def _round_score(value: object) -> float | None:
+    if value is None:
+        return None
+    try:
+        return round(float(value), 1)
+    except (TypeError, ValueError):
+        return None
+
+
+def _pillar_label(key: object) -> str:
+    raw = str(key or "")
+    return raw.replace("_", " ").title() if raw else "Pillar"
+
+
+def _scorecard_exception_detail(pillar_key: object, score: float | None) -> str:
+    """Prefer the workforce briefing narrative when Retention is the exception."""
+    key = str(pillar_key or "").lower()
+    if key == "retention":
+        try:
+            from app.workforce import loader as wf_loader
+
+            ex = (wf_loader.pulse() or {}).get("scorecard_exception") or {}
+            detail = " ".join(str(ex.get("detail") or "").split())
+            if detail:
+                return detail
+        except Exception:
+            pass
+    label = _pillar_label(pillar_key)
+    scored = f"{score:.0f}" if isinstance(score, (int, float)) else "n/a"
+    return (
+        f"{label} is at {scored}, below the 75 threshold — review IC drivers "
+        "and draft corrective actions."
+    )
+
+
 def _scorecard_summary_artifact(period: str, group: dict) -> dict:
     pillars = group.get("pillars") or []
+    no_source = group.get("no_source_kpis") if isinstance(group.get("no_source_kpis"), list) else []
+    scored_pillars = [p for p in pillars if p.get("score") is not None]
+    on_target = sum(1 for p in scored_pillars if p.get("status") == "green")
+    reds = [p for p in scored_pillars if p.get("status") == "red"]
+    kpi_total = sum(len(p.get("kpis") or []) for p in pillars)
+    kpi_scored = sum(
+        1
+        for p in pillars
+        for k in (p.get("kpis") or [])
+        if k.get("score") is not None or k.get("group_score") is not None
+    )
+    weakest = min(scored_pillars, key=lambda p: p.get("score") or 0, default=None)
+    overall = _round_score(group.get("score"))
+    subtitle = "Group overview across Independent Companies and pillars."
+    if weakest and weakest.get("status") in {"amber", "red"}:
+        subtitle = (
+            f"Group (all ICs) is near target overall — "
+            f"{_pillar_label(weakest.get('pillar'))} ({_round_score(weakest.get('score'))}) "
+            "is the pillar below threshold and driving the gap."
+        )
     return {
         "kind": "scorecard_summary",
         "title": f"Group HR Scorecard · {period}",
+        "subtitle": subtitle,
         "source": "scorecard.group",
         "export_key": "scorecard",
         "schedule_key": "scorecard_snapshot",
-        "overall": group.get("score"),
+        "overall": overall,
         "status": group.get("status"),
+        "target": 90,
+        "companies_in_scope": group.get("companies_in_scope"),
+        "companies_with_data": group.get("companies_with_data"),
+        "pillar_coverage": group.get("pillar_coverage"),
+        "stats": [
+            {
+                "label": "Sub-KPIs scored",
+                "value": f"{kpi_scored or '—'}/{kpi_total or 23}",
+                "note": "not-yet-due excluded from scoring",
+            },
+            {
+                "label": "Pillars on / above target",
+                "value": f"{on_target}/{len(scored_pillars) or 7}",
+                "note": "Green ≥ 90 · Amber 75–89.9 · Red < 75",
+            },
+        ],
+        "exceptions": [
+            {
+                "title": f"{_pillar_label(p.get('pillar'))} is off track",
+                "score": _round_score(p.get("score")),
+                "status": "red",
+                "detail": _scorecard_exception_detail(p.get("pillar"), p.get("score")),
+            }
+            for p in reds
+        ],
         "pillars": [
-            {"key": p.get("pillar"), "label": p.get("label") or p.get("pillar"),
-             "score": p.get("score"), "status": p.get("status")}
+            {
+                "key": p.get("pillar"),
+                "label": _pillar_label(p.get("pillar")),
+                "score": _round_score(p.get("score")),
+                "status": p.get("status"),
+                "weight": _round_score((p.get("eligible_weight") or 0) * 100),
+                "kpi_count": len(p.get("kpis") or []),
+            }
             for p in pillars
         ],
+        "no_source_count": len(no_source),
     }
 
 
@@ -119,7 +223,11 @@ def _ic_compare_artifact(period: str, ranking: list[dict]) -> dict:
         "export_key": "scorecard",
         "schedule_key": "monthly_review",
         "items": [
-            {"label": r.get("code"), "value": r.get("score"), "status": r.get("status")}
+            {
+                "label": r.get("code"),
+                "value": _round_score(r.get("score")),
+                "status": r.get("status"),
+            }
             for r in ranking
         ],
     }
@@ -127,52 +235,117 @@ def _ic_compare_artifact(period: str, ranking: list[dict]) -> dict:
 
 def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int | None = None,
              *, client: Any = None, delegation: dict | None = None) -> dict:
+    if is_workforce_tool(name):
+        return workforce_tools.dispatch(name, args, db, who)
     period = args.get("period") or sc.current_period()
     try:
         if name == "get_group_score":
             card = sc.build_scorecard(db, who, period)
             group = card["group"]
+            artifact_src = {**group, "no_source_kpis": card.get("no_source_kpis") or []}
             return {"period": period, "scope": card["scope"],
                     "no_source_kpis": card["no_source_kpis"], **group,
-                    "artifact": _scorecard_summary_artifact(period, group)}
+                    "source_freshness": card.get("freshness"),
+                    "as_of_month": period,
+                    "artifact": _scorecard_summary_artifact(period, artifact_src)}
+        if name == "get_source_status":
+            envelope = src_status.build_sources_status(db)
+            wanted = (args.get("source") or "").strip().lower() or None
+            sources = envelope["sources"]
+            if wanted:
+                sources = [s for s in sources if s["source"] == wanted]
+                if not sources:
+                    return {"error": f"unknown source '{wanted}'", "as_of_month": period}
+            return {
+                "data": sources,
+                "as_of_month": period,
+                "source_freshness": {
+                    "overall": src_status.freshness_summary(db)["overall"],
+                    "sla_hours": envelope["sla_hours"],
+                    "mock_sources_enabled": envelope["mock_sources_enabled"],
+                    "ai_configured": envelope["ai_configured"],
+                },
+                "definition_ref": "HR source connectors; origin=ai means AI-backed mock profiles, not a real tenant.",
+                "scope_applied": "group",
+                "note": "When freshness is stale or never, treat scorecard numbers as partial and say so.",
+            }
         if name == "get_ic_score":
             code = args["company_code"].upper()
             match = next((c for c in sc.visible_companies(db, who) if c.code == code), None)
             if match is None:
                 return {"error": "unknown company or no access"}
             out = sc.build_company_scorecard(db, who, match.id, period)
+            out["as_of_month"] = period
+            out["source_freshness"] = out.get("freshness")
             out["artifact"] = {
                 "kind": "scorecard_summary",
                 "title": f"{code} scorecard · {period}",
                 "source": "scorecard.ic",
                 "export_key": "scorecard",
                 "schedule_key": "scorecard_snapshot",
-                "overall": out.get("score"),
+                "overall": _round_score(out.get("score")),
                 "status": out.get("status"),
                 "pillars": [
-                    {"key": p.get("pillar"), "label": p.get("label") or p.get("pillar"),
-                     "score": p.get("score"), "status": p.get("status")}
+                    {
+                        "key": p.get("pillar"),
+                        "label": p.get("label") or p.get("pillar"),
+                        "score": _round_score(p.get("score")),
+                        "status": p.get("status"),
+                    }
                     for p in (out.get("pillars") or [])
                 ],
             }
             return out
         if name == "explain_pillar":
             out = sc.build_pillar_drilldown(db, who, args["pillar"], period)
+
+            def _kpi_status(score: float | None) -> str | None:
+                if score is None:
+                    return None
+                if score >= 90:
+                    return "green"
+                if score >= 75:
+                    return "amber"
+                return "red"
+
+            items = []
+            for k in out.get("kpis") or []:
+                sc_val = _round_score(k.get("group_score"))
+                if sc_val is None:
+                    continue
+                items.append(
+                    {
+                        "label": _pillar_label(k.get("key")),
+                        "value": sc_val,
+                        "unit": "",
+                        "target": k.get("target"),
+                        "actual": _round_score(k.get("group_achievement")),
+                        "weight": _round_score((k.get("weight") or 0) * 100),
+                        "status": _kpi_status(sc_val),
+                        "note": (
+                            "No source connected"
+                            if k.get("no_source")
+                            else None
+                        ),
+                        "tags": [
+                            t
+                            for t in [
+                                "SuccessFactors",
+                                "Due: Continuous",
+                                "No source" if k.get("no_source") else None,
+                            ]
+                            if t
+                        ],
+                    }
+                )
             out["artifact"] = {
                 "kind": "kpi_bars",
-                "title": f"{args['pillar']} sub-KPIs · {period}",
+                "title": f"{_pillar_label(args['pillar'])} sub-KPIs · {period}",
+                "subtitle": "Target · actual · score · weight for scored sub-KPIs.",
                 "source": "scorecard.pillar",
                 "export_key": "scorecard",
                 "schedule_key": "monthly_review",
-                "items": [
-                    {
-                        "label": k.get("key"),
-                        "value": k.get("group_score"),
-                        "unit": "",
-                    }
-                    for k in (out.get("kpis") or [])
-                    if k.get("group_score") is not None
-                ],
+                "items": items,
             }
             return out
         if name == "list_missing_submissions":

@@ -107,7 +107,7 @@ export function PromptComposer({
         </AttachmentGroup>
       )}
 
-      <InputGroup className="rounded-2xl border-transparent bg-muted/70 shadow-sm ring-1 ring-black/5">
+      <InputGroup className="rounded-[1.35rem] border-transparent bg-muted/80 shadow-md ring-1 ring-black/[0.04]">
         <InputGroupTextarea
           rows={2}
           value={text}
@@ -173,7 +173,7 @@ export function PromptComposer({
           <InputGroupButton
             variant="default"
             size="icon-sm"
-            className="rounded-full bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900"
+            className="rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-[color-mix(in_srgb,var(--primary),#000_8%)]"
             disabled={busy || (!text.trim() && files.length === 0)}
             onClick={() => onSend()}
             aria-label="Send"

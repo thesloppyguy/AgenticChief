@@ -36,12 +36,21 @@ def job_ingest(db: Session, params: dict, now: datetime, deps: dict[str, Any]) -
     period = resolve_period(params.get("period", "current"), now)
     summaries = ingest(db, period, registry.build_extractors(db=db), params.get("sources"))
     alerts_engine.on_ingestion(db, summaries, period)
+    alerts_engine.check_source_freshness(db, period=period)
     alerts_engine.safe_evaluate(db, period)
     records = sum(s.records_written for s in summaries)
     failed = [s.source for s in summaries if s.status == "failed"]
     if failed:
         raise JobFailed(f"{period}: ingestion failed for {', '.join(failed)}")
     return f"{period}: {len(summaries)} sources, {records} records"
+
+
+def job_source_freshness(db: Session, params: dict, now: datetime, deps: dict[str, Any]) -> str:
+    """Daily SLA check: raise inbox alerts for stale or never-synced sources."""
+    del deps
+    period = resolve_period(params.get("period", "current"), now)
+    created = alerts_engine.check_source_freshness(db, period=period)
+    return f"{period}: {len(created)} freshness alert(s)"
 
 
 def job_monthly_review(db: Session, params: dict, now: datetime, deps: dict[str, Any]) -> str:
@@ -128,6 +137,7 @@ def job_end_of_day_digest(db: Session, params: dict, now: datetime, deps: dict[s
 
 JOBS = {
     "ingest": job_ingest,
+    "source_freshness": job_source_freshness,
     "monthly_review": job_monthly_review,
     "watch": job_watch,
     "workflow": job_workflow,

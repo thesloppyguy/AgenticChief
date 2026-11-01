@@ -73,6 +73,11 @@ def _tool_defs(
     from app.orchestrator.web_search_tool import build_web_search_tool
     from app.workforce import tools as workforce_tools
 
+    # document_tools owns search_documents; scorecard TOOLS still keeps a copy for run_tool tests.
+    scorecard = [
+        t for t in SCORECARD_TOOLS
+        if t["name"] in _SCORECARD_NAMES and t["name"] != "search_documents"
+    ]
     tools = [dict(t) for t in SPECIALIST_TOOLS]
     tools += [dict(t) for t in skills_tools.SKILL_TOOLS]
     tools += [dict(t) for t in document_tools.DOCUMENT_TOOLS]
@@ -81,13 +86,24 @@ def _tool_defs(
     tools += [dict(t) for t in reminder_tools.REMINDER_TOOLS]
     tools += [dict(t) for t in org_tools.ORG_TOOLS]
     tools += [dict(t) for t in workforce_tools.WORKFORCE_TOOLS]
-    tools += [dict(t) for t in SCORECARD_TOOLS if t["name"] in _SCORECARD_NAMES]
+    tools += [dict(t) for t in scorecard]
     if get_active_gateway() is not None:
         tools += [dict(t) for t in MCP_GATEWAY_TOOLS]
 
     if isinstance(tools_override, list) and tools_override and isinstance(tools_override[0], str):
         allow = set(tools_override)
         tools = [t for t in tools if t["name"] in allow]
+
+    # Anthropic rejects the request if any tool name appears twice.
+    seen: set[str] = set()
+    unique: list[dict[str, Any]] = []
+    for t in tools:
+        name = t.get("name")
+        if not isinstance(name, str) or name in seen:
+            continue
+        seen.add(name)
+        unique.append(t)
+    tools = unique
 
     tools.sort(key=lambda t: t["name"])
     if tools:
