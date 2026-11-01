@@ -5,7 +5,7 @@
 # SQLite is single-writer: run exactly ONE api container; keep /data on a volume.
 #
 # Dokploy Compose: uncomment networks + labels below, and ensure dokploy-network exists.
-# For two apps on one host, give the API router PathPrefix(`/api`) + stripprefix in Dokploy,
+# For two apps on one host, route PathPrefix(`/api`) to the API (no strip — the app serves /api/*),
 # and set NEXT_PUBLIC_API_URL=https://chro.lokibots.ai/api.
 
 services:
@@ -27,15 +27,13 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
-    # Dokploy Traefik (same host as web — use /api path in Dokploy domain settings):
+    # Dokploy Traefik (same host as web — PathPrefix `/api`, do not strip):
     # networks: [dokploy-network]
     # labels:
     #   - traefik.enable=true
     #   - traefik.http.routers.chro-api.rule=Host(`chro.lokibots.ai`) && PathPrefix(`/api`)
     #   - traefik.http.routers.chro-api.entrypoints=websecure
     #   - traefik.http.routers.chro-api.tls.certResolver=letsencrypt
-    #   - traefik.http.middlewares.chro-api-strip.stripprefix.prefixes=/api
-    #   - traefik.http.routers.chro-api.middlewares=chro-api-strip
     #   - traefik.http.services.chro-api.loadbalancer.server.port=8000
 
   web:
@@ -43,7 +41,7 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://chro.lokibots.ai}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://chro.lokibots.ai/api}
     ports:
       - "3000:3000"
     depends_on: [api]

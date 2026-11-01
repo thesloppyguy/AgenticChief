@@ -14,6 +14,19 @@ from app.knowledge.store import ensure_fts
 from app.main import app
 
 
+class ApiClient(TestClient):
+    """Prepend /api so tests can keep using paths like /auth/login."""
+
+    def request(self, method, url, *args, **kwargs):
+        if (
+            isinstance(url, str)
+            and url.startswith("/")
+            and not url.startswith(("/api", "/mcp", "/docs", "/openapi", "/redoc"))
+        ):
+            url = "/api" + url
+        return super().request(method, url, *args, **kwargs)
+
+
 @pytest.fixture()
 def client():
     eng = configure_sqlite(create_engine("sqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False}))
@@ -32,7 +45,7 @@ def client():
     app.dependency_overrides[get_session_factory] = lambda: S  # background workflows use the test database
     app.dependency_overrides[get_llm] = lambda: None  # never call a real model from tests
     app.dependency_overrides[get_async_llm] = lambda: None
-    yield TestClient(app)
+    yield ApiClient(app)
     app.dependency_overrides.clear()
 
 

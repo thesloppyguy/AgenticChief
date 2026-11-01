@@ -1,7 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.agents import router as agents_router
@@ -133,33 +133,36 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(auth_router)
-app.include_router(router)
-app.include_router(copilot_router)
-app.include_router(ingestion_router)
-app.include_router(sources_router)
-app.include_router(approvals_router)
-app.include_router(alerts_router)
-app.include_router(workflows_router)
-app.include_router(scorecard_config_router)
-app.include_router(pins_router)
-app.include_router(documents_router)
-app.include_router(skills_router)
-app.include_router(agents_router)
-app.include_router(saved_tools_router)
-app.include_router(tools_router)
-app.include_router(setup_router)
+
+api = APIRouter(prefix="/api")
+api.include_router(auth_router)
+api.include_router(router)
+api.include_router(copilot_router)
+api.include_router(ingestion_router)
+api.include_router(sources_router)
+api.include_router(approvals_router)
+api.include_router(alerts_router)
+api.include_router(workflows_router)
+api.include_router(scorecard_config_router)
+api.include_router(pins_router)
+api.include_router(documents_router)
+api.include_router(skills_router)
+api.include_router(agents_router)
+api.include_router(saved_tools_router)
+api.include_router(tools_router)
+api.include_router(setup_router)
 if settings.mock_sources_enabled:
     from app.mock_sources.router import router as mock_sources_router
 
-    app.include_router(mock_sources_router)
-app.include_router(schedules_router)
-app.include_router(memories_router)
-app.include_router(company_profile_router)
-app.include_router(briefs_router)
-app.include_router(org_router)
-app.include_router(workforce_router)
-app.include_router(fixtures_router)
-app.include_router(demo_rng_router)
+    api.include_router(mock_sources_router)
+api.include_router(schedules_router)
+api.include_router(memories_router)
+api.include_router(company_profile_router)
+api.include_router(briefs_router)
+api.include_router(org_router)
+api.include_router(workforce_router)
+api.include_router(fixtures_router)
+api.include_router(demo_rng_router)
+app.include_router(api)
 
 mcp_server.mount(app)

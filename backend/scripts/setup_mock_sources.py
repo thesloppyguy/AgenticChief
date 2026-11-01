@@ -1,6 +1,6 @@
 """Point the live integrations at the AI-backed mock source systems.
 
-Usage: uv run python -m scripts.setup_mock_sources [--base-url http://localhost:8000] [--write-env]
+Usage: uv run python -m scripts.setup_mock_sources [--base-url http://localhost:8000/api] [--write-env]
 
 Always (re)writes integrations/mock/<source>.mapping.json from the endpoint catalog. With --write-env it also
 adds the settings to backend/.env (a random bearer token is created once and reused). Existing values win.
@@ -38,7 +38,7 @@ def env_block(base_url: str, token: str) -> dict[str, str]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base-url", default="http://localhost:8000")
+    ap.add_argument("--base-url", default="http://localhost:8000/api")
     ap.add_argument("--write-env", action="store_true")
     a = ap.parse_args()
     for p in write_mappings():

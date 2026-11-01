@@ -183,7 +183,7 @@ def test_the_committed_mapping_files_match_the_catalog():
 
 
 def test_setup_writes_mappings_and_a_complete_env_block_once(tmp_path):
-    env_ = env_block("http://localhost:8000", "tok")
+    env_ = env_block("http://localhost:8000/api", "tok")
     assert env_["MOCK_SOURCES_ENABLED"] == "true" and env_["MOCK_SOURCE_TOKEN"] == "tok"
     assert {k for k in env_ if k.endswith("__ENABLED") and k.startswith("INTEGRATIONS__")} == {f"INTEGRATIONS__{s.upper()}__ENABLED" for s in SOURCE_KPIS}
     assert len(write_mappings()) == 4

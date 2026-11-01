@@ -30,7 +30,7 @@ docker compose -f docker/docker-compose.yml up --build
   - `CORS_ORIGINS=https://chro.lokibots.ai` (optional; already the app default)
   - optional `SEED_ON_START=auto|true|false`
 
-If web and API share the host, set the API app **path** to `/api` (strip prefix) in Dokploy, and web build arg `NEXT_PUBLIC_API_URL=https://chro.lokibots.ai/api`.
+If web and API share the host, route the API app at path `/api` in Dokploy (**do not strip** — the API serves `/api/*`), and set the web build arg `NEXT_PUBLIC_API_URL=https://chro.lokibots.ai/api`.
 
 **Web**
 
@@ -40,7 +40,7 @@ If web and API share the host, set the API app **path** to `/api` (strip prefix)
 | Docker Context Path | `frontend` |
 | Port | `3000` |
 | Domain | `chro.lokibots.ai` |
-| Build arg | `NEXT_PUBLIC_API_URL=https://chro.lokibots.ai` |
+| Build arg | `NEXT_PUBLIC_API_URL=https://chro.lokibots.ai/api` |
 
 ## DNS
 

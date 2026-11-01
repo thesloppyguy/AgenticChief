@@ -38,7 +38,7 @@ docker compose -f docker/docker-compose.yml up --build
 
 Dokploy setup (two apps or Compose): [docker/README.md](docker/README.md) — both on `chro.lokibots.ai`.
 
-In the UI: **Settings → Company → Load L&T demo** (admin), or `POST /fixtures/lnt/load`.
+In the UI: **Settings → Company → Load L&T demo** (admin), or `POST /api/fixtures/lnt/load`.
 
 ## Agents, Skills, Tools, Connectors, MCP
 
