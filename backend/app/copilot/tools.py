@@ -30,7 +30,7 @@ TOOLS: list[dict[str, Any]] = sorted(
             "name": "get_ic_score",
             "description": "One company's overall score, pillar scores and per-KPI scores with exclusions.",
             "input_schema": {"type": "object", "properties": {
-                "company_code": {"type": "string", "description": "e.g. IC007"}, "period": PERIOD_PROP},
+                "company_code": {"type": "string", "description": "e.g. LTTS, LTMR"}, "period": PERIOD_PROP},
                 "required": ["company_code"]},
         },
         {
@@ -70,9 +70,11 @@ TOOLS: list[dict[str, Any]] = sorted(
             "description": "Propose an action for human approval. This does NOT run it: it returns a pending "
                            "approval id, or a denial with the reason. Actions: " + "; ".join(
                                f"{a.key} - {a.description}" for a in sorted(ACTIONS.values(), key=lambda a: a.key))
-                           + ". send_kpi_reminder args: company_codes (list, max 5), period, optional kpi_key, "
-                             "optional note. create_snapshot args: period (YYYY-MM). "
-                             "publish_monthly_report args: run_id (from latest_monthly_review).",
+                           + ". Common args: send_kpi_reminder (company_codes, period, optional person_ids); "
+                             "send_directive (subject, body, person_ids|recipient_emails|company_codes, channel); "
+                             "launch_capability_program / launch_retention_corrective (see list_draft_actions); "
+                             "schedule_report (report_key: workforce_brief|monthly_review|scorecard_snapshot); "
+                             "create_snapshot (period); publish_monthly_report (run_id).",
             "input_schema": {"type": "object", "properties": {
                 "action": {"type": "string", "enum": sorted(ACTIONS)},
                 "args": {"type": "object"},
@@ -91,22 +93,88 @@ TOOLS: list[dict[str, Any]] = sorted(
 )
 
 
+def _scorecard_summary_artifact(period: str, group: dict) -> dict:
+    pillars = group.get("pillars") or []
+    return {
+        "kind": "scorecard_summary",
+        "title": f"Group HR Scorecard · {period}",
+        "source": "scorecard.group",
+        "export_key": "scorecard",
+        "schedule_key": "scorecard_snapshot",
+        "overall": group.get("score"),
+        "status": group.get("status"),
+        "pillars": [
+            {"key": p.get("pillar"), "label": p.get("label") or p.get("pillar"),
+             "score": p.get("score"), "status": p.get("status")}
+            for p in pillars
+        ],
+    }
+
+
+def _ic_compare_artifact(period: str, ranking: list[dict]) -> dict:
+    return {
+        "kind": "ic_compare",
+        "title": f"IC ranking · {period}",
+        "source": "scorecard.rank_ics",
+        "export_key": "scorecard",
+        "schedule_key": "monthly_review",
+        "items": [
+            {"label": r.get("code"), "value": r.get("score"), "status": r.get("status")}
+            for r in ranking
+        ],
+    }
+
+
 def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int | None = None,
              *, client: Any = None, delegation: dict | None = None) -> dict:
     period = args.get("period") or sc.current_period()
     try:
         if name == "get_group_score":
             card = sc.build_scorecard(db, who, period)
+            group = card["group"]
             return {"period": period, "scope": card["scope"],
-                    "no_source_kpis": card["no_source_kpis"], **card["group"]}
+                    "no_source_kpis": card["no_source_kpis"], **group,
+                    "artifact": _scorecard_summary_artifact(period, group)}
         if name == "get_ic_score":
             code = args["company_code"].upper()
             match = next((c for c in sc.visible_companies(db, who) if c.code == code), None)
             if match is None:
                 return {"error": "unknown company or no access"}
-            return sc.build_company_scorecard(db, who, match.id, period)
+            out = sc.build_company_scorecard(db, who, match.id, period)
+            out["artifact"] = {
+                "kind": "scorecard_summary",
+                "title": f"{code} scorecard · {period}",
+                "source": "scorecard.ic",
+                "export_key": "scorecard",
+                "schedule_key": "scorecard_snapshot",
+                "overall": out.get("score"),
+                "status": out.get("status"),
+                "pillars": [
+                    {"key": p.get("pillar"), "label": p.get("label") or p.get("pillar"),
+                     "score": p.get("score"), "status": p.get("status")}
+                    for p in (out.get("pillars") or [])
+                ],
+            }
+            return out
         if name == "explain_pillar":
-            return sc.build_pillar_drilldown(db, who, args["pillar"], period)
+            out = sc.build_pillar_drilldown(db, who, args["pillar"], period)
+            out["artifact"] = {
+                "kind": "kpi_bars",
+                "title": f"{args['pillar']} sub-KPIs · {period}",
+                "source": "scorecard.pillar",
+                "export_key": "scorecard",
+                "schedule_key": "monthly_review",
+                "items": [
+                    {
+                        "label": k.get("key"),
+                        "value": k.get("group_score"),
+                        "unit": "",
+                    }
+                    for k in (out.get("kpis") or [])
+                    if k.get("group_score") is not None
+                ],
+            }
+            return out
         if name == "list_missing_submissions":
             card = sc.build_scorecard(db, who, period)
             kpi = args.get("kpi_key")
@@ -158,9 +226,10 @@ def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int
             scored = [c for c in card["companies"] if c["score"] is not None]
             scored.sort(key=lambda c: c["score"], reverse=args.get("order") == "highest")
             n = min(int(args.get("limit", 10)), 88)
+            ranking = [{"code": c["code"], "score": c["score"], "status": c["status"],
+                        "pillar_coverage": c["pillar_coverage"]} for c in scored[:n]]
             return {"period": period, "unscored": len(card["companies"]) - len(scored),
-                    "ranking": [{"code": c["code"], "score": c["score"], "status": c["status"],
-                                 "pillar_coverage": c["pillar_coverage"]} for c in scored[:n]]}
+                    "ranking": ranking, "artifact": _ic_compare_artifact(period, ranking)}
     except (KeyError, ValueError) as e:
         return {"error": f"bad arguments: {type(e).__name__}"}
     return {"error": f"unknown tool {name}"}

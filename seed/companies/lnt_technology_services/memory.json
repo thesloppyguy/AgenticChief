@@ -1,0 +1,32 @@
+{
+  "decisions": [
+    {
+      "timestamp": "2026-10-05T11:00:00+00:00",
+      "domain": "hr",
+      "summary": "L&T Technology Services (LTTS): prioritise talent density this quarter.",
+      "rationale": "Archetype=strong on Group scorecard.",
+      "outcome": "Local action plan shared with Group People.",
+      "tags": "ltts,hr"
+    }
+  ],
+  "initiatives": [
+    {
+      "title": "L&T Technology Services scorecard hygiene",
+      "status": "active",
+      "created_at": "2026-04-15T00:00:00+00:00",
+      "updated_at": "2026-10-20T00:00:00+00:00",
+      "summary": "Keep sourced KPIs current; editors enter GPTW and IDPs for LTTS.",
+      "department": "people"
+    }
+  ],
+  "advice_given": [
+    {
+      "timestamp": "-3d",
+      "domain": "hr",
+      "query_summary": "What should L&T Technology Services fix first?",
+      "advice_summary": "Defend top-talent retention and deepen skills coverage for digital programs.",
+      "department": "people"
+    }
+  ],
+  "scheduled_actions": []
+}

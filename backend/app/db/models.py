@@ -26,6 +26,53 @@ class Company(Base):
     active: Mapped[bool] = mapped_column(default=True)
 
 
+class Person(Base):
+    """OE-inspired roster entry. company_code None = Group-level (e.g. Group CHRO)."""
+
+    __tablename__ = "person"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    full_name: Mapped[str] = mapped_column(String(120))
+    role: Mapped[str] = mapped_column(String(120))
+    email: Mapped[str] = mapped_column(String(200), default="")
+    company_code: Mapped[str | None] = mapped_column(String(32), index=True)  # None = Group
+    is_principal: Mapped[bool] = mapped_column(default=False)
+    authority_scope: Mapped[list | None] = mapped_column(JSON, default=list)
+    department_slugs: Mapped[list | None] = mapped_column(JSON, default=list)
+    preferred_channel: Mapped[str] = mapped_column(String(24), default="any")
+    response_sla_hours: Mapped[int | None] = mapped_column(Integer)
+
+
+class Department(Base):
+    """Org unit with optional specialist mapping and charter."""
+
+    __tablename__ = "department"
+    __table_args__ = (UniqueConstraint("company_code", "slug", name="uq_department_company_slug"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    slug: Mapped[str] = mapped_column(String(48))
+    title: Mapped[str] = mapped_column(String(120))
+    company_code: Mapped[str | None] = mapped_column(String(32), index=True)  # None = Group
+    specialist_key: Mapped[str | None] = mapped_column(String(32))
+    head_person_id: Mapped[int | None] = mapped_column(ForeignKey("person.id"))
+    authority_level: Mapped[str] = mapped_column(String(24), default="propose_only")
+    charter: Mapped[dict | None] = mapped_column(JSON)
+    headcount: Mapped[int | None] = mapped_column(Integer)
+
+
+class Goal(Base):
+    """Department OKR / key result, optionally linked to a scorecard pillar."""
+
+    __tablename__ = "goal"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    department_id: Mapped[int] = mapped_column(ForeignKey("department.id"), index=True)
+    period_type: Mapped[str] = mapped_column(String(16), default="quarter")  # quarter | ongoing
+    period_value: Mapped[str] = mapped_column(String(32), default="")
+    key_result: Mapped[str] = mapped_column(String(400))
+    target: Mapped[str] = mapped_column(String(120), default="")
+    current: Mapped[str] = mapped_column(String(120), default="")
+    status: Mapped[str] = mapped_column(String(16), default="on_track")  # on_track | at_risk | off_track
+    pillar_key: Mapped[str | None] = mapped_column(String(48))
+
+
 class KpiRecord(Base):
     """One validated value per (company, kpi, period). period = 'YYYY-MM'."""
 
@@ -140,6 +187,7 @@ class ChatMessage(Base):
     role: Mapped[str] = mapped_column(String(16))
     content: Mapped[str] = mapped_column(String)
     tool_calls: Mapped[list | None] = mapped_column(JSON)
+    artifacts: Mapped[list | None] = mapped_column(JSON)  # chart/table payloads for chat UI
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
 
 
@@ -202,7 +250,9 @@ class OutboundMessage(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     approval_id: Mapped[int | None] = mapped_column(ForeignKey("approval_request.id"), index=True)
     channel: Mapped[str] = mapped_column(String(16))
-    company_code: Mapped[str] = mapped_column(String(32))
+    company_code: Mapped[str | None] = mapped_column(String(32))
+    person_id: Mapped[int | None] = mapped_column(ForeignKey("person.id"), index=True)
+    to_email: Mapped[str | None] = mapped_column(String(200))
     subject: Mapped[str] = mapped_column(String(200))
     body: Mapped[str] = mapped_column(String)
     status: Mapped[str] = mapped_column(String(16), default="queued")

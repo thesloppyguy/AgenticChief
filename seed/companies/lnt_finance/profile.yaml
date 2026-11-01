@@ -1,0 +1,26 @@
+company:
+  name: L&T Finance
+  industry: Financial services / NBFC
+  stage: Independent Company
+  founding_year: 2000
+  headcount: 22000
+  mission: Deliver IC people outcomes that lift the Group HR Scorecard.
+  vision: Best-in-class employer within the Group for our industry.
+  org_structure:
+    departments: [people, operations, finance]
+    leadership_team:
+      - Priya Nair, CHRO, L&T Finance
+  strategic_priorities:
+    current_year:
+      - Scale responsible lending talent and strengthen mid-management bench.
+      - Clear amber/red pillars before monthly Group review
+    north_star_metric: IC overall HR scorecard score
+  culture:
+    values: [Integrity, Excellence, Collaboration]
+    operating_principles:
+      - Submit KPI data on time
+      - Own pillar turnarounds locally
+  financials:
+    key_metrics:
+      company_code: LTF
+      archetype: steady

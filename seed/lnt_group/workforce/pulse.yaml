@@ -1,0 +1,65 @@
+# Synthetic Group workforce briefing pulse (HTML mockup-aligned). Not KPI-engine scores.
+as_of: "2026-10-07T07:12:00+05:30"
+narrative: >
+  Group needs ~2,300 specialised engineers over 24 months for green H₂, electrolyser and
+  semiconductor programmes; external market can sustainably supply ~1,000. 34 critical roles
+  have thin succession. Hiring volume is high (78k applications for 1,540 engineering roles)
+  but future-skill fit is only ~9%. Early-career attrition ties to learning & growth, not pay.
+synthesized_by: Executive Analytics
+cells:
+  - key: core_headcount
+    label: Core staff headcount
+    value: 58400
+    unit: ""
+    delta_pct: 3.1
+    delta_direction: up
+    note: YoY
+  - key: future_skill_gap
+    label: Future-skill gap · 24mo
+    value: 1300
+    unit: roles
+    delta_pct: null
+    delta_direction: flat
+    note: unmet at current supply
+  - key: internal_fill_rate
+    label: Internal fill rate
+    value: 41
+    unit: "%"
+    delta_pct: null
+    delta_direction: flat
+    note: target 60%
+  - key: weak_successors
+    label: Weak / no successor
+    value: 34
+    unit: ""
+    delta_pct: null
+    delta_direction: flat
+    note: of 130 critical roles
+  - key: ex_index
+    label: Employee experience index
+    value: 74
+    unit: ""
+    delta_pct: -3
+    delta_direction: down
+    note: pts vs prior
+top_issues:
+  - rank: 1
+    title: Capability gap in green hydrogen & electrolysers
+    summary: Build internally ~70%; decision package ready for approval.
+    severity: high
+  - rank: 2
+    title: Thin succession in new businesses
+    summary: 34 of 130 critical roles have weak or no ready successor.
+    severity: high
+  - rank: 3
+    title: Hiring quality, not volume
+    summary: 9% future-skill fit across 78k applications for 1,540 engineering roles.
+    severity: medium
+  - rank: 4
+    title: Early-career attrition where growth stalls
+    summary: EX layer 3 (learning & growth) drives exits more than pay.
+    severity: medium
+  - rank: 5
+    title: Manager effectiveness varies widely
+    summary: Bottom-quartile managers concentrate regrettable exits.
+    severity: medium

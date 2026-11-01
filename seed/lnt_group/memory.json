@@ -1,0 +1,79 @@
+{
+  "decisions": [
+    {
+      "timestamp": "2026-06-15T10:00:00+00:00",
+      "domain": "hr",
+      "summary": "Open KRA submission tracking from June for all ICs; exclude from scoring until due month rules apply.",
+      "rationale": "CHRO.md due-month rules \u2014 KRA from June.",
+      "outcome": "Scorecard config unchanged; watches added for kra_submission coverage.",
+      "tags": "kra,scorecard,governance"
+    },
+    {
+      "timestamp": "2026-09-02T09:00:00+00:00",
+      "domain": "hr",
+      "summary": "Escalate L&T Metro Rail Retention pillar to Group CHRO weekly until overall leaves red.",
+      "rationale": "LTMR struggling archetype with regrettable exits in ops.",
+      "outcome": "Pending send_kpi_reminder for LTMR retention KPIs.",
+      "tags": "retention,ltmr"
+    },
+    {
+      "timestamp": "2026-10-01T08:30:00+00:00",
+      "domain": "hr",
+      "summary": "Require IDP creation rate and GPTW manual inputs before monthly review publish.",
+      "rationale": "Four manual KPIs must be editor-entered; integrity check fails otherwise.",
+      "outcome": "Monthly review workflow gated on manual KPI coverage.",
+      "tags": "monthly_review,manual_inputs"
+    }
+  ],
+  "initiatives": [
+    {
+      "title": "FY26-27 Group HR Scorecard operating cadence",
+      "status": "active",
+      "created_at": "2026-04-01T00:00:00+00:00",
+      "updated_at": "2026-10-20T00:00:00+00:00",
+      "summary": "Monthly collect \u2192 lineage \u2192 build \u2192 commentary with number integrity; owned by Group People.",
+      "department": "people"
+    },
+    {
+      "title": "December mid-term and top talent review readiness",
+      "status": "active",
+      "created_at": "2026-08-01T00:00:00+00:00",
+      "updated_at": "2026-10-18T00:00:00+00:00",
+      "summary": "Prep IC calendars so mid-term and top talent reviews score from December due month.",
+      "department": "people"
+    },
+    {
+      "title": "Metro Rail retention turnaround",
+      "status": "active",
+      "created_at": "2026-09-01T00:00:00+00:00",
+      "updated_at": "2026-10-22T00:00:00+00:00",
+      "summary": "Focus regrettable exits and trainee retention at LTMR with weekly CHRO check-ins.",
+      "department": "people"
+    },
+    {
+      "title": "Training calendar H2 milestone (target 2 from October)",
+      "status": "active",
+      "created_at": "2026-09-15T00:00:00+00:00",
+      "updated_at": "2026-10-15T00:00:00+00:00",
+      "summary": "Confirm each IC hits training_calendar value 2 from October per CHRO.md.",
+      "department": "people"
+    }
+  ],
+  "advice_given": [
+    {
+      "timestamp": "-2d",
+      "domain": "hr",
+      "query_summary": "Which ICs are dragging Group Retention?",
+      "advice_summary": "Prioritise LTMR; LTF and LTR are amber-adjacent \u2014 send targeted reminders before publishing the monthly review.",
+      "department": "people"
+    },
+    {
+      "timestamp": "-5d",
+      "domain": "hr",
+      "query_summary": "Should we change pillar weights for Talent Management?",
+      "advice_summary": "Keep 20% Talent Management weight; fix IDP and top-talent process compliance instead of reweighting.",
+      "department": "people"
+    }
+  ],
+  "scheduled_actions": []
+}

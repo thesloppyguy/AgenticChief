@@ -1,32 +1,26 @@
-"""Generate the AI stub-data fixture with Claude.
+"""Generate the stub-data fixture for the 5 L&T ICs.
 
-Usage: uv run python -m scripts.generate_stub_data [--count 88] [--batch-size 8] [--out stub_data/stub_company_data.json]
-
-Needs Anthropic credentials (ANTHROPIC_API_KEY, or `ant auth login`). Costs real tokens: about
-count/batch-size requests. Companies the model gets wrong fall back to the deterministic generator and
-are marked origin=synthetic_fallback in the fixture.
+Usage:
+  uv run python -m scripts.generate_stub_data            # deterministic (default)
+  uv run python -m scripts.generate_stub_data --ai       # Claude (costs tokens)
 """
 import argparse
 
-import anthropic
-
 from app.core.config import settings
-from app.ingestion.ai_generator import generate_fixture, write_fixture
+from app.ingestion.ai_generator import write_fixture
+from scripts.seed_integrations import lnt_fixture
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--count", type=int, default=88)
-ap.add_argument("--batch-size", type=int, default=8)
+ap.add_argument("--ai", action="store_true")
 ap.add_argument("--out", default=settings.stub_data_path)
-ap.add_argument("--model", default=settings.stub_generator_model)
 a = ap.parse_args()
 
-client = anthropic.Anthropic(api_key=settings.anthropic_api_key) if settings.anthropic_api_key \
-    else anthropic.Anthropic()
-codes = [f"IC{i:03d}" for i in range(1, a.count + 1)]
-fixture = generate_fixture(client, a.model, codes, a.batch_size)
+fixture = lnt_fixture(ai=a.ai)
 write_fixture(a.out, fixture)
 m = fixture["meta"]
-print(f"wrote {a.out}: {m['ai_generated']}/{m['count']} AI-generated, "
-      f"{m['count'] - m['ai_generated']} deterministic fallback")
+print(
+    f"wrote {a.out}: {m['ai_generated']}/{m['count']} AI-generated, "
+    f"{m['count'] - m['ai_generated']} deterministic"
+)
 for n in m["notes"]:
     print("  note:", n)

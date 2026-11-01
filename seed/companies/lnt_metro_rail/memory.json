@@ -1,0 +1,32 @@
+{
+  "decisions": [
+    {
+      "timestamp": "2026-10-05T11:00:00+00:00",
+      "domain": "hr",
+      "summary": "L&T Metro Rail (LTMR): prioritise retention this quarter.",
+      "rationale": "Archetype=struggling on Group scorecard.",
+      "outcome": "Local action plan shared with Group People.",
+      "tags": "ltmr,hr"
+    }
+  ],
+  "initiatives": [
+    {
+      "title": "L&T Metro Rail scorecard hygiene",
+      "status": "active",
+      "created_at": "2026-04-15T00:00:00+00:00",
+      "updated_at": "2026-10-20T00:00:00+00:00",
+      "summary": "Keep sourced KPIs current; editors enter GPTW and IDPs for LTMR.",
+      "department": "people"
+    }
+  ],
+  "advice_given": [
+    {
+      "timestamp": "-3d",
+      "domain": "hr",
+      "query_summary": "What should L&T Metro Rail fix first?",
+      "advice_summary": "Stabilise operations workforce and cut regrettable exits in critical ops roles.",
+      "department": "people"
+    }
+  ],
+  "scheduled_actions": []
+}

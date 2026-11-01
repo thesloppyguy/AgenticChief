@@ -1,0 +1,62 @@
+# Succession / bench strength (demo fixture).
+headline:
+  critical_roles_tracked: 130
+  ready_now_coverage_pct: 63
+  ready_now_delta_pts: -5
+  weak_or_no_successor: 34
+  internal_fill_rate_pct: 41
+  internal_fill_target_pct: 60
+by_function:
+  - function: Construction / EPC
+    ready_now: 18
+    ready_1_2y: 12
+    no_successor: 4
+  - function: Heavy Engineering
+    ready_now: 14
+    ready_1_2y: 9
+    no_successor: 3
+  - function: Power & T&D
+    ready_now: 11
+    ready_1_2y: 8
+    no_successor: 5
+  - function: Digital / L&T Tech
+    ready_now: 16
+    ready_1_2y: 10
+    no_successor: 2
+  - function: Green Energy (new)
+    ready_now: 4
+    ready_1_2y: 6
+    no_successor: 8
+  - function: Semiconductors (new)
+    ready_now: 2
+    ready_1_2y: 3
+    no_successor: 7
+  - function: R&D
+    ready_now: 7
+    ready_1_2y: 5
+    no_successor: 3
+  - function: Finance / Corporate
+    ready_now: 9
+    ready_1_2y: 6
+    no_successor: 2
+bench:
+  - role: Electrolyser Mfg Head
+    ready_pct: 55
+    status: thin
+    note: 1 ready-in-18mo candidate
+  - role: VP Semiconductor ATMP
+    ready_pct: 15
+    status: no_ready_internal
+    note: External search + 2 internal IDPs
+  - role: Green H₂ Projects Head
+    ready_pct: 60
+    status: thin
+    note: Mobility from EPC cluster
+  - role: GM Power Electronics
+    ready_pct: 78
+    status: covered
+    note: Ready-now successor identified
+  - role: Cluster Head Digital
+    ready_pct: 82
+    status: covered
+    note: Strong bench

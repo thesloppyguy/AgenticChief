@@ -1,0 +1,97 @@
+# Draft company-wide CHRO actions awaiting approval (HTML mockup-aligned).
+drafts:
+  - key: capability_green_h2
+    action: launch_capability_program
+    title: Capability build — Green H₂ & Electrolyser engineering
+    severity: high
+    sla: Decide this week
+    summary: >
+      Reskill 40 engineers (12-week electrolyser certification); 12 internal mobility moves;
+      8 mentors + technical career pathway; fast-track 3 successors.
+    roi:
+      programme_cost_cr: 9.2
+      avoided_hiring_premium_cr: 41
+      gap_closed_pct: 70
+      time_to_productivity_mo: 4
+      buy_time_to_productivity_mo: 8
+    recipients:
+      # Resolved by role/email at approve time against People roster
+      - email: rohan.iyer@example.com
+        role_hint: Group HR Operations
+      - email: daniel.joseph@example.com
+        role_hint: LTTS CHRO
+      - email: kavitha.rao@example.com
+        role_hint: LTIM CHRO
+    channels: [email, teams]
+    steps:
+      - GOV validation
+      - Enrol 40 in Learning (LRN-4821…4860)
+      - Open 12 mobility cases in HRMS
+      - Mentoring pathway PATHWAY GH2-TECH
+      - Succession plans SUCC-514,515,516
+      - Notify cohort via Teams
+      - Audit AUDIT-7731
+      - Arm 90-day capability monitor
+    monitor:
+      name: Capability 90-day · Green H₂
+      days: 90
+    propose_args:
+      program_key: capability_green_h2
+      enrol_count: 40
+      mobility_count: 12
+      successor_count: 3
+      mentor_count: 8
+      recipient_emails:
+        - rohan.iyer@example.com
+        - daniel.joseph@example.com
+        - kavitha.rao@example.com
+      subject: "Approve & execute: Green H₂ capability build"
+      body: >
+        Group CHRO has approved the Green H₂ / Electrolyser capability programme.
+        Please enrol the named cohort, open mobility cases, and confirm mentoring pathway
+        PATHWAY GH2-TECH. Audit trail AUDIT-7731 applies. Reply with blockers within 48h.
+      channel: email
+      company_codes: [LTTS, LTIM]
+
+  - key: retention_semi
+    action: launch_retention_corrective
+    title: Retention corrective — L&T Semiconductor Technologies focus
+    severity: high
+    sla: Scorecard exception
+    summary: >
+      Retention pillar red at Group; traced to semiconductor / new-business pressure.
+      Scope 58 at-risk engineers: career paths, growth tracks, manager coaching — not pay.
+    drivers: [career stagnation, manager quality, learning]
+    recipients:
+      - email: kavitha.rao@example.com
+        role_hint: LTIM CHRO
+      - email: rohan.iyer@example.com
+        role_hint: Group HR Operations
+    channels: [email, teams]
+    steps:
+      - GOV validation
+      - Driver analysis (engagement + SF)
+      - HRMS pathways for 58 engineers
+      - Learning growth tracks
+      - Manager coaching cohort COACH-Q3-SEMI
+      - Notify via Teams
+      - Arm 90-day IC retention monitor (AUDIT-7742)
+    monitor:
+      name: Retention 90-day · Semi / LTIM
+      days: 90
+      company_code: LTIM
+      pillar: retention
+    propose_args:
+      program_key: retention_semi
+      at_risk_count: 58
+      company_code: LTIM
+      recipient_emails:
+        - kavitha.rao@example.com
+        - rohan.iyer@example.com
+      subject: "Approve & execute: Semiconductor retention corrective"
+      body: >
+        Group CHRO has approved the retention corrective for semiconductor / LTIM focus.
+        Activate career pathways for 58 at-risk engineers, enrol growth tracks, and start
+        manager coaching COACH-Q3-SEMI. Audit AUDIT-7742. Confirm within 48h.
+      channel: email
+      company_codes: [LTIM]

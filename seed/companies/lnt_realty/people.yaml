@@ -1,0 +1,25 @@
+people:
+  - full_name: Sneha Kapoor
+    role: CHRO, L&T Realty
+    email: sneha.kapoor@example.com
+    company_code: LTR
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 12
+    authority_scope: [hiring_signoff]
+  - full_name: HRBP Lead LTR
+    role: Senior HRBP
+    email: hrbp.ltr@example.com
+    company_code: LTR
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]
+  - full_name: Imran Sheikh
+    role: L&D Lead, L&T Realty
+    email: imran.sheikh@example.com
+    company_code: LTR
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]

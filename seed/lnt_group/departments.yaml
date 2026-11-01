@@ -1,0 +1,84 @@
+departments:
+  - slug: people
+    title: Group People & Talent
+    specialist_key: chro
+    head_person_name: Ananya Krishnan
+    authority_level: propose_only
+    charter:
+      mission: >
+        Govern the Group HR Scorecard, coach IC CHROs, and keep monthly reviews honest.
+      scope:
+        - Group scorecard cadence and exception management
+        - Talent reviews, IDPs, and leadership pipelines
+        - Comp frameworks with Finance
+      out_of_scope:
+        - Day-to-day IC hiring transactions
+    headcount: 42
+    goals:
+      - period_type: quarter
+        period_value: Q3 FY2026-27
+        key_result: "Offer-to-joining and time-to-fill on track for critical roles (Talent Acquisition)"
+        target: ">= 90% pillar score"
+        current: "91%"
+        status: on_track
+        pillar_key: talent_acquisition
+      - period_type: quarter
+        period_value: Q3 FY2026-27
+        key_result: "KRA submission and mid-term reviews completed on cadence (Performance Management)"
+        target: ">= 90% pillar score"
+        current: "78%"
+        status: at_risk
+        pillar_key: performance_management
+      - period_type: quarter
+        period_value: Q3 FY2026-27
+        key_result: "TNI fulfilment and training calendar milestones met (L&D)"
+        target: ">= 90% pillar score"
+        current: "88%"
+        status: on_track
+        pillar_key: learning_development
+      - period_type: quarter
+        period_value: Q3 FY2026-27
+        key_result: "Role-skill coverage and PLI assessments completed (Organizational Effectiveness)"
+        target: ">= 90% pillar score"
+        current: "86%"
+        status: on_track
+        pillar_key: org_effectiveness
+      - period_type: quarter
+        period_value: Q3 FY2026-27
+        key_result: "Top talent reviews done; IDPs created for target population (Talent Management)"
+        target: ">= 90% pillar score"
+        current: "74%"
+        status: at_risk
+        pillar_key: talent_management
+      - period_type: quarter
+        period_value: Q3 FY2026-27
+        key_result: "AHC completion and platform adoption healthy (Engagement / Wellness)"
+        target: ">= 90% pillar score"
+        current: "90%"
+        status: on_track
+        pillar_key: engagement_wellness
+      - period_type: quarter
+        period_value: Q3 FY2026-27
+        key_result: "Overall and top-talent retention above amber threshold (Retention)"
+        target: ">= 90% pillar score"
+        current: "81%"
+        status: at_risk
+        pillar_key: retention
+
+  - slug: finance
+    title: Group Finance
+    specialist_key: cfo
+    head_person_name: Vikram Desai
+    authority_level: propose_only
+    charter:
+      mission: Partner on workforce cost and compensation envelopes.
+      scope: [Comp envelopes, workforce cost, IC budget signals]
+      out_of_scope: [IC P&L ownership]
+    headcount: 28
+    goals:
+      - period_type: quarter
+        period_value: Q3 FY2026-27
+        key_result: Hold Group people-cost variance within 2% of plan
+        target: "<= 2%"
+        current: "1.4%"
+        status: on_track

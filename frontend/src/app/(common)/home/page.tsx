@@ -48,6 +48,18 @@ function Dashboard() {
   const { data, error, loading } = useApi<Scorecard>(
     `/scorecard?period=${period}`,
   );
+  const pulse = useApi<{
+    cells?: {
+      key: string;
+      label: string;
+      value: number;
+      unit?: string;
+      delta_pct?: number | null;
+      delta_direction?: string;
+      note?: string;
+    }[];
+    top_issues?: { rank: number; title: string; severity: string }[];
+  }>("/workforce/pulse");
   const brief = useApi<{
     brief: { id: number; title: string; body: string; kind: string } | null;
   }>("/briefs/latest");
@@ -135,6 +147,60 @@ function Dashboard() {
           <pre className="max-h-48 overflow-y-auto whitespace-pre-wrap text-sm text-muted-foreground">
             {brief.data.brief.body}
           </pre>
+        </Card>
+      )}
+      {pulse.data?.cells && pulse.data.cells.length > 0 && (
+        <Card
+          title="Workforce pulse"
+          action={
+            <div className="flex gap-3 text-sm">
+              <Link href="/actions" className="text-primary hover:underline">
+                Review draft actions
+              </Link>
+              <Link href="/chat" className="text-muted-foreground hover:underline">
+                Ask the Co-Pilot
+              </Link>
+            </div>
+          }
+        >
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {pulse.data.cells.map((c) => (
+              <div key={c.key} className="rounded-xl bg-muted/40 px-3 py-3">
+                <div className="text-xs text-muted-foreground">{c.label}</div>
+                <div className="mt-1 flex items-baseline gap-1 text-2xl font-semibold tabular-nums tracking-tight">
+                  {typeof c.value === "number" ? c.value.toLocaleString() : c.value}
+                  {c.unit ? (
+                    <span className="text-sm font-medium text-muted-foreground">{c.unit}</span>
+                  ) : null}
+                </div>
+                {(c.note || c.delta_pct != null) && (
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    {c.delta_pct != null
+                      ? `${c.delta_direction === "down" ? "▼" : c.delta_direction === "up" ? "▲" : "·"} ${c.delta_pct}%`
+                      : ""}
+                    {c.note ? ` ${c.note}` : ""}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          {pulse.data.top_issues && pulse.data.top_issues.length > 0 && (
+            <ol className="mt-4 space-y-1.5 text-sm text-muted-foreground">
+              {pulse.data.top_issues.slice(0, 3).map((issue) => (
+                <li key={issue.rank}>
+                  <span className="font-medium text-foreground">
+                    {issue.rank}. {issue.title}
+                  </span>
+                  {issue.severity ? (
+                    <span className="ml-2 text-xs uppercase tracking-wide">{issue.severity}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          )}
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Demo workforce fixtures (skills / succession / pulse) — not live scorecard KPI engine numbers.
+          </p>
         </Card>
       )}
       {exportError && (

@@ -1,0 +1,64 @@
+departments:
+  - slug: people
+    title: People & Talent — L&T Metro Rail
+    specialist_key: chro
+    head_person_name: Arjun Mehta
+    authority_level: propose_only
+    charter:
+      mission: Deliver IC scorecard outcomes and partner with Group CHRO on exceptions.
+      scope:
+        - Pillar ownership and KPI submissions
+        - Hiring, performance, L&D, retention programs
+      out_of_scope:
+        - Group policy authorship
+    headcount: 24
+    goals:
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Metro Rail: Offer-to-joining and time-to-fill on track for critical roles"
+            target: ">= 90%"
+            current: "78%"
+            status: at_risk
+            pillar_key: talent_acquisition
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Metro Rail: KRA submission and mid-term reviews completed on cadence"
+            target: ">= 90%"
+            current: "68%"
+            status: off_track
+            pillar_key: performance_management
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Metro Rail: TNI fulfilment and training calendar milestones met"
+            target: ">= 90%"
+            current: "74%"
+            status: at_risk
+            pillar_key: learning_development
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Metro Rail: Role-skill coverage and PLI assessments completed"
+            target: ">= 90%"
+            current: "71%"
+            status: at_risk
+            pillar_key: org_effectiveness
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Metro Rail: Top talent reviews done; IDPs created for target population"
+            target: ">= 90%"
+            current: "65%"
+            status: off_track
+            pillar_key: talent_management
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Metro Rail: AHC completion and platform adoption healthy"
+            target: ">= 90%"
+            current: "72%"
+            status: at_risk
+            pillar_key: engagement_wellness
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Metro Rail: Overall and top-talent retention above amber threshold"
+            target: ">= 90%"
+            current: "61%"
+            status: off_track
+            pillar_key: retention

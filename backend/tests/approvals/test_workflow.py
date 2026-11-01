@@ -47,7 +47,8 @@ def test_pending_request_executes_nothing_until_approved(client, db):
     assert r["verdict"] == "require_approval" and r["approval"]["status"] == "pending"
     assert db.query(OutboundMessage).count() == 0           # proposing sends nothing
     d = decide(client, r["approval"]["id"], "approve")
-    assert d.status_code == 200 and d.json()["status"] == "executed" and d.json()["result"] == {"queued": 1}
+    assert d.status_code == 200 and d.json()["status"] == "executed"
+    assert d.json()["result"]["queued"] == 1
     msgs = db.scalars(select(OutboundMessage)).all()
     assert [(m.company_code, m.status, m.approval_id) for m in msgs] == [("IC1", "queued", r["approval"]["id"])]
     hist = client.get(f"/approvals/{r['approval']['id']}", headers=BOB).json()["events"]

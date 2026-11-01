@@ -54,6 +54,27 @@ def builtin_tools() -> list[dict[str, Any]]:
                 group="Skills",
             )
         )
+    from app.orchestrator import org_tools
+    from app.workforce import tools as workforce_tools
+
+    for t in org_tools.ORG_TOOLS:
+        items.append(
+            _item(
+                name=t["name"],
+                description=t.get("description") or "",
+                source="builtin",
+                group="Org",
+            )
+        )
+    for t in workforce_tools.WORKFORCE_TOOLS:
+        items.append(
+            _item(
+                name=t["name"],
+                description=t.get("description") or "",
+                source="builtin",
+                group="Workforce",
+            )
+        )
     for t in SCORECARD_TOOLS:
         if t["name"] not in _SCORECARD_NAMES:
             continue

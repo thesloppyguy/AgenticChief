@@ -1,0 +1,25 @@
+people:
+  - full_name: Daniel Joseph
+    role: CHRO, L&T Technology Services
+    email: daniel.joseph@example.com
+    company_code: LTTS
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 12
+    authority_scope: [hiring_signoff]
+  - full_name: HRBP Lead LTTS
+    role: Senior HRBP
+    email: hrbp.ltts@example.com
+    company_code: LTTS
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]
+  - full_name: Priyanka Sen
+    role: L&D Lead, L&T Technology Services
+    email: priyanka.sen@example.com
+    company_code: LTTS
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]

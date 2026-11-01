@@ -1,0 +1,25 @@
+people:
+  - full_name: Priya Nair
+    role: CHRO, L&T Finance
+    email: priya.nair@example.com
+    company_code: LTF
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 12
+    authority_scope: [hiring_signoff]
+  - full_name: HRBP Lead LTF
+    role: Senior HRBP
+    email: hrbp.ltf@example.com
+    company_code: LTF
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]
+  - full_name: Anil Bose
+    role: L&D Lead, L&T Finance
+    email: anil.bose@example.com
+    company_code: LTF
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]

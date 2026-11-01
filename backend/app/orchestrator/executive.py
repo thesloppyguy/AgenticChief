@@ -69,8 +69,9 @@ def _tool_defs(
             tools[-1] = {**tools[-1], "cache_control": {"type": "ephemeral"}}
         return tools
 
-    from app.orchestrator import document_tools, history_tools, reminder_tools, saved_tool_defs
+    from app.orchestrator import document_tools, history_tools, org_tools, reminder_tools, saved_tool_defs
     from app.orchestrator.web_search_tool import build_web_search_tool
+    from app.workforce import tools as workforce_tools
 
     tools = [dict(t) for t in SPECIALIST_TOOLS]
     tools += [dict(t) for t in skills_tools.SKILL_TOOLS]
@@ -78,6 +79,8 @@ def _tool_defs(
     tools += [dict(t) for t in saved_tool_defs.SAVED_TOOL_DEFS]
     tools += [dict(t) for t in history_tools.HISTORY_TOOLS]
     tools += [dict(t) for t in reminder_tools.REMINDER_TOOLS]
+    tools += [dict(t) for t in org_tools.ORG_TOOLS]
+    tools += [dict(t) for t in workforce_tools.WORKFORCE_TOOLS]
     tools += [dict(t) for t in SCORECARD_TOOLS if t["name"] in _SCORECARD_NAMES]
     if get_active_gateway() is not None:
         tools += [dict(t) for t in MCP_GATEWAY_TOOLS]
@@ -163,6 +166,16 @@ async def _dispatch_tool(
         if name == "search_tools":
             return json.loads(await gateway.search_tools(args))
         return json.loads(await gateway.call_tool(args))
+    if name in ("list_people", "list_goals"):
+        from app.orchestrator import org_tools
+
+        return org_tools.dispatch(name, args, db, who)
+    from app.workforce.tools import is_workforce_tool
+
+    if is_workforce_tool(name):
+        from app.workforce import tools as workforce_tools
+
+        return workforce_tools.dispatch(name, args, db, who)
     if name in _SCORECARD_NAMES:
         return await asyncio.to_thread(
             run_tool, db, who, name, args, session_id, client=client, delegation=None
@@ -256,7 +269,11 @@ async def chat_turn(
                 episodic_context=episodic,
                 company_stage=stage,
             )
-            yield {"type": "tool", "name": block.name}
+            tool_ev: dict[str, Any] = {"type": "tool", "name": block.name}
+            if isinstance(out, dict) and out.get("artifact"):
+                tool_ev["artifact"] = out["artifact"]
+                yield {"type": "artifact", "artifact": out["artifact"], "tool": block.name}
+            yield tool_ev
             audit(db, who, "copilot_tool", block.name, {"input": dict(block.input)})
             results.append(
                 {

@@ -1,0 +1,25 @@
+people:
+  - full_name: Arjun Mehta
+    role: Head of HR, L&T Metro Rail
+    email: arjun.mehta@example.com
+    company_code: LTMR
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 12
+    authority_scope: [hiring_signoff]
+  - full_name: HRBP Lead LTMR
+    role: Senior HRBP
+    email: hrbp.ltmr@example.com
+    company_code: LTMR
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]
+  - full_name: Neha Kulkarni
+    role: L&D Lead, L&T Metro Rail
+    email: neha.kulkarni@example.com
+    company_code: LTMR
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]

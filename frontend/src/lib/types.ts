@@ -156,7 +156,13 @@ export const SESSIONS_CHANGED = "chro:sessions-changed";
 export interface SessionDetail {
   id: number; title: string;
   created_at: string;
-  messages: { role: string; content: string; tools: string[] | null; at: string }[];
+  messages: {
+    role: string;
+    content: string;
+    tools: string[] | null;
+    artifacts?: Record<string, unknown>[] | null;
+    at: string;
+  }[];
   approvals?: { id: number; action: string; summary: string; status: string }[];
 }
 export interface AssetRow {

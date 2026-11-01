@@ -134,6 +134,30 @@ export function CompanyProfilePanel() {
     }
   }
 
+  async function loadLntDemo() {
+    if (
+      !window.confirm(
+        "Reset org data and load the L&T Group CHRO demo (5 ICs, memory, watches, workflows)?",
+      )
+    ) {
+      return;
+    }
+    setBusy(true);
+    try {
+      await api("/fixtures/lnt/load", {
+        method: "POST",
+        body: JSON.stringify({ reset: true, ingest: true }),
+      });
+      const data = await api<{ profile: Profile }>("/company-profile");
+      setProfile({ ...empty, ...data.profile });
+      toast.success("L&T Group CHRO demo loaded.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Demo load failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <PanelShell>
       <PanelIntro
@@ -211,7 +235,14 @@ export function CompanyProfilePanel() {
               <Button variant="outline" disabled={busy} onClick={() => void startInterview()}>
                 Start interview
               </Button>
+              <Button variant="secondary" disabled={busy} onClick={() => void loadLntDemo()}>
+                Load L&T demo
+              </Button>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Demo loads People (Group CHRO + IC HR/L&D) with @example.com emails for
+              queued directives — not separate login accounts. Sign-in stays the open admin JWT.
+            </p>
 
             {interviewId && (
               <div className="space-y-3 rounded-xl border border-black/5 bg-white p-4 dark:border-white/10 dark:bg-card">

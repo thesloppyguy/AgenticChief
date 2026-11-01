@@ -1,71 +1,99 @@
 "use client";
-import { use } from "react";
+
+import { use, useEffect } from "react";
 import Link from "next/link";
-import { Terminal } from "lucide-react";
-import { Card, Loading, PageHeader } from "@/components/ui";
+import { Card, Loading } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import {
-  Message, MessageContent, MessageGroup, MessageHeader,
-} from "@/components/ui/message";
-import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
+  agentLabelFor,
+  ChatMessages,
+} from "@/components/chat/chat-messages";
+import { PromptComposer } from "@/components/chat/prompt-composer";
+import { useChatSession } from "@/components/chat/chat-session-context";
 import { label } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import type { SessionDetail } from "@/lib/types";
 
-export default function ChatSessionPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-  const { data, error, loading } = useApi<SessionDetail>(`/copilot/sessions/${id}`);
+export default function ChatSessionPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id: idParam } = use(params);
+  const id = Number(idParam);
+  const {
+    messages,
+    text,
+    setText,
+    files,
+    setFiles,
+    agent,
+    setAgent,
+    modes,
+    busy,
+    send,
+    openSession,
+  } = useChatSession();
+
+  const detail = useApi<SessionDetail>(
+    Number.isFinite(id) ? `/copilot/sessions/${id}` : null,
+  );
+
+  useEffect(() => {
+    if (!Number.isFinite(id)) return;
+    void openSession(id);
+  }, [id, openSession]);
+
+  const loading = messages.length === 0 && !busy && detail.loading;
+  const missing =
+    messages.length === 0 && !busy && !detail.loading && !!detail.error;
 
   return (
-    <div className="space-y-4">
-      <PageHeader
-        title={data?.title ?? "Session"}
-        subtitle="A past conversation, exactly as it ran."
-        actions={<Button variant="outline" size="sm" render={<Link href="/chat" />}>New question</Button>}
-      />
+    <div className="flex h-[calc(100svh-5.5rem)] min-h-0 flex-col gap-4">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+        {missing ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6">
+            <Loading error={detail.error} loading={false} />
+            <Button variant="outline" size="sm" render={<Link href="/chat" />}>
+              New chat
+            </Button>
+          </div>
+        ) : loading ? (
+          <div className="flex flex-1 items-center justify-center p-6">
+            <Loading error={null} loading />
+          </div>
+        ) : (
+          <>
+            <ChatMessages
+              messages={messages}
+              agentLabel={agentLabelFor(agent, modes)}
+            />
+            <div className="border-t p-3">
+              <PromptComposer
+                text={text}
+                onTextChange={setText}
+                files={files}
+                onFilesChange={setFiles}
+                agent={agent}
+                onAgentChange={setAgent}
+                modes={modes}
+                busy={busy}
+                onSend={(p) => void send(p)}
+              />
+            </div>
+          </>
+        )}
+      </div>
 
-      <Loading error={error} loading={loading && !data} />
-
-      {data && (
-        <Card>
-        <MessageGroup>
-          {data.messages.map((m, i) => (
-            <Message key={i} align={m.role === "user" ? "end" : "start"}>
-              <MessageContent>
-                {m.role === "assistant" && (
-                  <>
-                    <MessageHeader>Copilot</MessageHeader>
-                    {m.tools && m.tools.length > 0 && (
-                      <Trace className="mb-2">
-                        {[...new Set(m.tools)].map((t) => (
-                          <TraceLine key={t}>
-                            <TraceIcon><Terminal className="size-3.5" /></TraceIcon>
-                            <TraceTitle>Used {label(t)}</TraceTitle>
-                          </TraceLine>
-                        ))}
-                      </Trace>
-                    )}
-                  </>
-                )}
-                <Bubble variant={m.role === "user" ? "default" : "muted"}
-                  align={m.role === "user" ? "end" : "start"}>
-                  <BubbleContent className="whitespace-pre-wrap">{m.content}</BubbleContent>
-                </Bubble>
-              </MessageContent>
-            </Message>
-          ))}
-        </MessageGroup>
-        </Card>
-      )}
-
-      {data?.approvals && data.approvals.length > 0 && (
+      {detail.data?.approvals && detail.data.approvals.length > 0 && (
         <Card title="Proposed from this session">
           <ul className="space-y-1 text-sm">
-            {data.approvals.map((a) => (
+            {detail.data.approvals.map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-2">
-                <Link href={`/actions?id=${a.id}`} className="hover:underline">{a.summary}</Link>
+                <Link href={`/actions?id=${a.id}`} className="hover:underline">
+                  {a.summary}
+                </Link>
                 <Badge variant="outline">{label(a.status)}</Badge>
               </li>
             ))}

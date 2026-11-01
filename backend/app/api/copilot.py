@@ -116,7 +116,10 @@ async def chat(
             await asyncio.to_thread(save)
 
     async def events():
-        text, tools = [], []
+        # Emit the session id immediately so the client can route to /chat/{id}
+        # before the model starts streaming.
+        yield {"data": json.dumps({"type": "session", "session_id": sid})}
+        text, tools, artifacts = [], [], []
         try:
             async for ev in chat_turn(
                 client,
@@ -131,6 +134,11 @@ async def chat(
                 if ev["type"] == "chunk":
                     text.append(ev["content"])
                     yield {"data": json.dumps({**ev, "session_id": sid})}
+                elif ev["type"] == "artifact":
+                    art = ev.get("artifact")
+                    if isinstance(art, dict):
+                        artifacts.append(art)
+                    yield {"data": json.dumps({**ev, "session_id": sid})}
                 else:
                     tools.append(ev.get("name"))
                     yield {"data": json.dumps({**ev, "session_id": sid})}
@@ -140,6 +148,7 @@ async def chat(
                     role="assistant",
                     content="".join(text),
                     tool_calls=tools,
+                    artifacts=artifacts or None,
                 )
             )
             db.commit()
@@ -238,7 +247,13 @@ def session_messages(
         "title": s.title,
         "created_at": s.created_at,
         "messages": [
-            {"role": m.role, "content": m.content, "tools": m.tool_calls, "at": m.created_at}
+            {
+                "role": m.role,
+                "content": m.content,
+                "tools": m.tool_calls,
+                "artifacts": m.artifacts,
+                "at": m.created_at,
+            }
             for m in rows
         ],
         "approvals": [

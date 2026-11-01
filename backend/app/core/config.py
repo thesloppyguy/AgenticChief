@@ -60,6 +60,7 @@ class Settings(BaseSettings):
     mock_sources_allow_fallback: bool = False  # if the AI call fails: False = answer 503, True = use seeded data
 
     stub_data_enabled: bool = True
+    demo_rng_enabled: bool = False  # or use stub_data_enabled; either gates /demo/rng/*
     stub_data_path: str = "stub_data/stub_company_data.json"
     stub_generator_model: str = "claude-opus-5-5"
     integrations: dict[str, IntegrationConfig] = Field(default_factory=dict)

@@ -1,0 +1,50 @@
+# Synthetic demo roster — example.com emails only.
+people:
+  - full_name: Ananya Krishnan
+    role: Group Chief Human Resources Officer
+    is_principal: true
+    email: ananya.krishnan@example.com
+    department_slugs: [people]
+    preferred_channel: any
+    response_sla_hours: 8
+    authority_scope: [wildcard]
+
+  - full_name: Meera Shah
+    role: Group Chief of Staff
+    email: meera.shah@example.com
+    department_slugs: [strategy]
+    preferred_channel: email
+    response_sla_hours: 12
+    authority_scope: [board_comms]
+
+  - full_name: Vikram Desai
+    role: Group CFO
+    email: vikram.desai@example.com
+    department_slugs: [finance]
+    preferred_channel: email
+    response_sla_hours: 24
+    authority_scope: [spend_lt_10k]
+
+  - full_name: Rohan Iyer
+    role: Group HR Operations Lead
+    email: rohan.iyer@example.com
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 12
+    authority_scope: [hiring_signoff]
+
+  - full_name: Lakshmi Venkatesh
+    role: Group Head of Learning & Development
+    email: lakshmi.venkatesh@example.com
+    department_slugs: [people]
+    preferred_channel: email
+    response_sla_hours: 12
+    authority_scope: [hiring_signoff]
+
+  - full_name: Farhan Qureshi
+    role: Group Talent Management Lead
+    email: farhan.qureshi@example.com
+    department_slugs: [people]
+    preferred_channel: teams
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]

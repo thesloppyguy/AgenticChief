@@ -11,10 +11,13 @@ from app.api.auth import router as auth_router
 from app.api.briefs import router as briefs_router
 from app.api.company_profile import router as company_profile_router
 from app.api.copilot import router as copilot_router
+from app.api.demo_rng import router as demo_rng_router
 from app.api.documents import router as documents_router
+from app.api.fixtures import router as fixtures_router
 from app.api.ingestion import router as ingestion_router
 from app.api.memories import router as memories_router
 from app.api.oe_skills import router as skills_router
+from app.api.org import router as org_router
 from app.api.pins import router as pins_router
 from app.api.routes import router
 from app.api.saved_tools import router as saved_tools_router
@@ -23,6 +26,7 @@ from app.api.scorecard_config import router as scorecard_config_router
 from app.api.setup_status import router as setup_router
 from app.api.tools import router as tools_router
 from app.api.workflows import router as workflows_router
+from app.api.workforce import router as workforce_router
 from app.core.config import settings
 from app.mcp_server import server as mcp_server
 from app.orchestrator.mcp_gateway import boot_gateway, get_active_gateway
@@ -151,5 +155,9 @@ app.include_router(schedules_router)
 app.include_router(memories_router)
 app.include_router(company_profile_router)
 app.include_router(briefs_router)
+app.include_router(org_router)
+app.include_router(workforce_router)
+app.include_router(fixtures_router)
+app.include_router(demo_rng_router)
 
 mcp_server.mount(app)

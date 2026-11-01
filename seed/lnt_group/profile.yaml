@@ -1,0 +1,47 @@
+company:
+  name: Larsen & Toubro Group
+  industry: Conglomerate — Engineering, Construction, Manufacturing, Services
+  stage: Public / Group
+  founding_year: 1938
+  headcount: 140000
+  annual_revenue_arr: 2300000000000
+  mission: >
+    Build a world-class people system across Independent Companies so every IC
+    delivers on talent, performance, learning, and retention outcomes on the Group HR Scorecard.
+  vision: A trusted employer of choice with consistent people practices across the Group.
+  target_customer:
+    profile: Group and IC leadership needing a single CHRO cockpit for HR performance.
+    pain_points:
+      - Fragmented HRIS signals across ICs
+      - Late visibility into amber/red pillars
+      - Uneven KRA / mid-term / top-talent cadence
+  competitive_landscape:
+    primary_competitors: []
+    competitive_advantages:
+      - Diversified IC portfolio with shared Group HR governance
+      - Deterministic scorecard with clear pillar weights
+  org_structure:
+    departments: [people, strategy, finance, operations]
+    leadership_team:
+      - Ananya Krishnan, Group CHRO — principal; owns Group HR Scorecard and IC HR governance
+      - Vikram Desai, Group CFO — partner on comp and workforce cost
+      - Meera Shah, Group Chief of Staff — operating cadence and board prep
+  strategic_priorities:
+    current_year:
+      - Lift Group score above 90 with no IC overall in red
+      - Close mid-term and top-talent review gaps before December due month
+      - Standardise IDP completion for critical talent across ICs
+    north_star_metric: Group HR Scorecard overall score
+  culture:
+    values: [Integrity, Customer focus, Excellence, Mutual respect]
+    operating_principles:
+      - Scores are deterministic — never invent numbers; use tools
+      - Propose reminders and publishes; humans approve
+      - Prefer IC accountability with Group coaching, not central command
+  financials:
+    burn_rate_monthly: 0
+    runway_months: 0
+    key_metrics:
+      ics_on_scorecard: 5
+      pillars: 7
+      sub_kpis: 23

@@ -1,0 +1,26 @@
+company:
+  name: L&T Metro Rail
+  industry: Urban transit / concessions
+  stage: Independent Company
+  founding_year: 2000
+  headcount: 4800
+  mission: Deliver IC people outcomes that lift the Group HR Scorecard.
+  vision: Best-in-class employer within the Group for our industry.
+  org_structure:
+    departments: [people, operations, finance]
+    leadership_team:
+      - Arjun Mehta, Head of HR, L&T Metro Rail
+  strategic_priorities:
+    current_year:
+      - Stabilise operations workforce and cut regrettable exits in critical ops roles.
+      - Clear amber/red pillars before monthly Group review
+    north_star_metric: IC overall HR scorecard score
+  culture:
+    values: [Integrity, Excellence, Collaboration]
+    operating_principles:
+      - Submit KPI data on time
+      - Own pillar turnarounds locally
+  financials:
+    key_metrics:
+      company_code: LTMR
+      archetype: struggling

@@ -1,0 +1,69 @@
+# Future skills demand vs supply (demo fixture).
+headline:
+  future_critical_roles_24mo: 2300
+  projected_supply: 1000
+  capability_gap: 1300
+  buildable_internally_pct: 70
+domains:
+  - key: green_h2
+    label: Green H₂ & Electrolysers
+    demand: 620
+    supply: 180
+    gap: 440
+    path: build
+  - key: semiconductors
+    label: Semiconductors
+    demand: 480
+    supply: 120
+    gap: 360
+    path: blend
+  - key: digital_ai
+    label: Digital / AI & Data
+    demand: 540
+    supply: 300
+    gap: 240
+    path: build
+  - key: power_electronics
+    label: Power Electronics & Grid
+    demand: 360
+    supply: 210
+    gap: 150
+    path: build
+  - key: advanced_mfg
+    label: Advanced Mfg / Robotics
+    demand: 300
+    supply: 190
+    gap: 110
+    path: blend
+build_vs_buy:
+  focus: Electrolyser engineering
+  metrics:
+    - label: Cost index
+      build: 45
+      buy: 100
+    - label: Time to productivity (months)
+      build: 4
+      buy: 8
+    - label: 2-year retention (%)
+      build: 88
+      buy: 68
+internal_build_capacity:
+  - from: EPC & heavy eng
+    to: Green H₂
+    candidates: 46
+  - from: Power electronics
+    to: Semi
+    candidates: 22
+  - from: Digital
+    to: AI/data
+    candidates: 38
+  - from: Process
+    to: Electrolysers
+    candidates: 19
+mobility_adjacency:
+  - label: EPC & heavy eng → Green energy
+    count: 46
+  - label: Power electronics → Semiconductors
+    count: 22
+  - label: Digital → AI/data platforms
+    count: 38

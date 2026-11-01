@@ -1,50 +1,25 @@
-# NOTE: Synthetic demo roster — fictional people with placeholder emails
-# (example.com) and non-routable Discord IDs. Safe to publish; no real contact
-# data. This shared roster is mapped onto Halcyon Motors' EV org via each
-# person's `department_slugs`, authority scopes, and preferred channels.
 people:
-  - full_name: Jordan Avery
-    role: CEO & Co-founder
-    is_principal: true
-    email: jordan.avery@example.com
-    discord_user_id: "100000000000000001"
-    department_slugs: [product]
-    preferred_channel: any
-    response_sla_hours: 8
-    authority_scope: [wildcard]
-
-  - full_name: Sam Rivera
-    role: Head of Finance
-    email: sam.rivera@example.com
-    discord_user_id: "100000000000000002"
-    department_slugs: [finance]
+  - full_name: Kavitha Rao
+    role: CHRO, LTIMindtree
+    email: kavitha.rao@example.com
+    company_code: LTIM
+    department_slugs: [people]
     preferred_channel: email
     response_sla_hours: 12
-    authority_scope: [spend_lt_10k, vendor_onboarding]
-
-  - full_name: Chris Donovan
-    role: Head of Operations
-    email: chris.donovan@example.com
-    discord_user_id: "100000000000000003"
-    department_slugs: [operations]
+    authority_scope: [hiring_signoff]
+  - full_name: HRBP Lead LTIM
+    role: Senior HRBP
+    email: hrbp.ltim@example.com
+    company_code: LTIM
+    department_slugs: [people]
     preferred_channel: email
     response_sla_hours: 24
-    authority_scope: [spend_lt_2k]
-
-  - full_name: Taylor Brooks
-    role: Head of Strategy & Customer
-    email: taylor.brooks@example.com
-    discord_user_id: "100000000000000004"
-    department_slugs: [strategy, legal]
+    authority_scope: [hiring_signoff]
+  - full_name: Ritu Malhotra
+    role: L&D Lead, LTIMindtree
+    email: ritu.malhotra@example.com
+    company_code: LTIM
+    department_slugs: [people]
     preferred_channel: email
-    response_sla_hours: 12
-    authority_scope: [board_comms, customer_credit, spend_lt_10k]
-
-  - full_name: Morgan Patel
-    role: Head of Marketing & People
-    email: morgan.patel@example.com
-    discord_user_id: "100000000000000005"
-    department_slugs: [marketing, people]
-    preferred_channel: discord
-    response_sla_hours: 12
-    authority_scope: [hiring_signoff, vendor_onboarding]
+    response_sla_hours: 24
+    authority_scope: [hiring_signoff]

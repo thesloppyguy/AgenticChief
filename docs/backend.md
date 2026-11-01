@@ -53,7 +53,9 @@ app/
   assets/           workflow definition assets only (skills/agents moved to OE model)
   scheduler/        cadence, jobs, runner
   audit/            append-only audit log
-  api/              HTTP routers
+  org/              L&T IC constants, reset_org
+  fixtures/         L&T loader + CHRO workflow seed specs
+  api/              HTTP routers (incl. /fixtures, /demo/rng, /people)
 ```
 
 ## 3. Identity, roles and scope
@@ -424,6 +426,7 @@ The Playwright smoke test in `e2e/` is the opposite: it drives the real UI with 
 - Live source adapters are verified against the AI-generated endpoints and mocks, **not a real tenant**.
 - No golden test against the original Excel workbook (only its image is in the repo).
 - Approved reminders queue in `outbound_message`; no email/chat delivery channel is wired up.
-- Root-level `seed/` and `New Plan.md` are untracked scratch files from a different template — the
-  `seed/companies/*/profile.yaml` content describes an unrelated fictional company. Nothing in `backend/`
-  reads them.
+- Root-level `seed/lnt_group` and `seed/companies/*` are the L&T Group CHRO fixtures (OE-shaped).
+  Load with `uv run python -m scripts.seed_lnt --reset` or `POST /fixtures/lnt/load`.
+- Org model: `Person` / `Department` / `Goal` tables + `/people`, `/departments`, `/goals`.
+- Demo RNG: `/demo/rng/*` (admin; `STUB_DATA_ENABLED` or `DEMO_RNG_ENABLED`).

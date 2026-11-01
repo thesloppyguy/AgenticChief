@@ -1,0 +1,64 @@
+departments:
+  - slug: people
+    title: People & Talent — L&T Technology Services
+    specialist_key: chro
+    head_person_name: Daniel Joseph
+    authority_level: propose_only
+    charter:
+      mission: Deliver IC scorecard outcomes and partner with Group CHRO on exceptions.
+      scope:
+        - Pillar ownership and KPI submissions
+        - Hiring, performance, L&D, retention programs
+      out_of_scope:
+        - Group policy authorship
+    headcount: 120
+    goals:
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Technology Services: Offer-to-joining and time-to-fill on track for critical roles"
+            target: ">= 90%"
+            current: "94%"
+            status: on_track
+            pillar_key: talent_acquisition
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Technology Services: KRA submission and mid-term reviews completed on cadence"
+            target: ">= 90%"
+            current: "92%"
+            status: on_track
+            pillar_key: performance_management
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Technology Services: TNI fulfilment and training calendar milestones met"
+            target: ">= 90%"
+            current: "91%"
+            status: on_track
+            pillar_key: learning_development
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Technology Services: Role-skill coverage and PLI assessments completed"
+            target: ">= 90%"
+            current: "90%"
+            status: on_track
+            pillar_key: org_effectiveness
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Technology Services: Top talent reviews done; IDPs created for target population"
+            target: ">= 90%"
+            current: "93%"
+            status: on_track
+            pillar_key: talent_management
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Technology Services: AHC completion and platform adoption healthy"
+            target: ">= 90%"
+            current: "95%"
+            status: on_track
+            pillar_key: engagement_wellness
+          - period_type: quarter
+            period_value: Q3 FY2026-27
+            key_result: "L&T Technology Services: Overall and top-talent retention above amber threshold"
+            target: ">= 90%"
+            current: "92%"
+            status: on_track
+            pillar_key: retention

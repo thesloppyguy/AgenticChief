@@ -16,7 +16,6 @@ import {
 
 import { NavConversations } from "@/components/shared/nav-conversations";
 import { NavMain } from "@/components/shared/nav-main";
-import { NavLists } from "@/components/shared/nav-project";
 import { NavUser } from "@/components/shared/nav-user";
 import {
   Sidebar,
@@ -118,7 +117,6 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavLists title="Reports & Analytics" lists="reports" />
         <NavConversations />
       </SidebarContent>
       <SidebarFooter>

@@ -7,10 +7,11 @@
 
 ## 1. The problem this solves
 
-L&T is not one company. It is a holding structure over many independent companies — LTIMindtree, L&T
-Technology Services, L&T Finance, L&T Realty, L&T Metro Rail and dozens more — each with its own HR
+L&T is not one company. It is a holding structure over independent companies — LTIMindtree, L&T
+Technology Services, L&T Finance, L&T Realty, L&T Metro Rail and more — each with its own HR
 function, its own hiring market, its own HRIS tenant and its own definition of a "good" quarter. The
-reference configuration in this system is **88 independent companies (ICs)**.
+reference demo in this system is **five Independent Companies (ICs)** on the Group HR Scorecard
+(`LTF`, `LTMR`, `LTR`, `LTTS`, `LTIM`), loaded via `scripts.seed_lnt`.
 
 Today a Group CHRO's view of HR across that estate is assembled by hand: a workbook per IC, a monthly
 chase for submissions, a consolidation that is stale the day it lands, and no way to ask a follow-up
@@ -236,9 +237,15 @@ never mistaken for the Group number.
 4. Group-wide actions (publishing, changing rules) require group-wide access to request *and* to approve.
 5. **Nobody can approve their own request.**
 
-The seven actions that exist: send a KPI reminder, save a scorecard snapshot, publish a monthly report,
-publish a capability, publish a skill or agent, approve a KPI mapping, activate a new set of scoring
-rules. That is the whole list. There is no eighth path.
+Consequential actions today: send a KPI reminder (to IC HR leads on the People roster), send a
+company-wide directive (email/Teams queue), launch a capability programme or retention corrective
+(messages + 90-day watch), schedule a recurring report/brief, save a scorecard snapshot, publish a
+monthly report, publish a workflow asset, activate scoring rules. Skills and agents are Markdown/code
+registries, not approval-gated publishes.
+
+Separately, **workforce fixtures** (`/workforce/*`) give glanceable pulse, skills gap, and succession
+numbers for demos and chat charts. Those are deterministic YAML — not the live 23-KPI scorecard engine.
+The Copilot must not mix the two sources without saying which is which.
 
 Approvers see a prepared briefing before they decide — what changes, what depends on it, whether it is a
 rollback — and requests that could never succeed are rejected before anyone is asked. Every decision is
@@ -269,7 +276,7 @@ The platform is built and tested; what remains is a connection and configuration
 
 | # | Step | Owner |
 |---|---|---|
-| 1 | Replace the 88 placeholder ICs with the real L&T entity list and codes | Group HR + platform admin |
+| 1 | Extend the five demo ICs with any additional real L&T entity codes | Group HR + platform admin |
 | 2 | Point the SuccessFactors integration at the real tenant — base URL, credentials by environment-variable name, and a mapping file per KPI | Group IT |
 | 3 | Same for PeopleStrong/Skima, MyHealth and Hi5Plus | Group IT |
 | 4 | Confirm the Talent Acquisition source split. The prototype sheet lists "PeopleStrong / Skima AI / SuccessFactors" together; all three TA KPIs currently sit on PeopleStrong. Moving one is a one-line change | Group HR |
