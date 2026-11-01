@@ -25,4 +25,4 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
 RUN pnpm build
 
 EXPOSE 3000
-CMD ["pnpm", "start", "--", "-H", "0.0.0.0", "-p", "3000"]
+CMD ["pnpm", "start"]
