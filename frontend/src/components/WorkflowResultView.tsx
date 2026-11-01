@@ -6,7 +6,7 @@ import type { ChatArtifact } from "@/components/chat/types";
 import { Card, ScoreTile, StatusBadge } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { fmt, label } from "@/lib/format";
-import type { Status } from "@/lib/types";
+import type { ReportDoc, Status } from "@/lib/types";
 
 type StepPillar = {
   pillar?: string;
@@ -203,8 +203,13 @@ export default function WorkflowResultView({
   );
 }
 
-export function isMonthlyReport(result: unknown): result is { headline: unknown } {
-  return !!result && typeof result === "object" && "headline" in result;
+export function isMonthlyReport(result: unknown): result is ReportDoc {
+  return (
+    !!result &&
+    typeof result === "object" &&
+    "headline" in result &&
+    "meta" in result
+  );
 }
 
 export function isWorkflowResult(result: unknown): result is WorkflowResultDoc {

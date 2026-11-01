@@ -128,13 +128,15 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
             )}
           </Card>
 
-          {monthly && data.result ? <ReportView r={data.result} /> : null}
+          {data.result && isMonthlyReport(data.result) ? (
+            <ReportView r={data.result} />
+          ) : null}
 
-          {!monthly && data.result && isWorkflowResult(data.result) ? (
+          {data.result && !isMonthlyReport(data.result) && isWorkflowResult(data.result) ? (
             <WorkflowResultView result={data.result} />
           ) : null}
 
-          {!monthly && data.result && !isWorkflowResult(data.result) ? (
+          {data.result && !isMonthlyReport(data.result) && !isWorkflowResult(data.result) ? (
             <Card title="Result">
               <pre className="overflow-x-auto text-xs">{JSON.stringify(data.result, null, 2)}</pre>
             </Card>
