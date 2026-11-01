@@ -21,6 +21,18 @@ def test_workforce_yaml_loads_and_artifacts():
     loader.clear_cache()
     pulse = loader.pulse()
     assert pulse.get("cells") and len(pulse["cells"]) == 5
+    issues = pulse.get("top_issues") or []
+    assert issues
+    linked = [i for i in issues if i.get("action_key")]
+    assert {i["action_key"] for i in linked} >= {
+        "capability_green_h2",
+        "retention_semi",
+        "atmp_leadership",
+        "manager_effectiveness_bq",
+    }
+    assert all(i.get("company_codes") for i in linked)
+    assert pulse.get("scorecard_exception", {}).get("company_code") == "LTIM"
+    assert pulse.get("by_ic", {}).get("LTIM")
     skills = loader.skills()
     assert skills.get("domains") and skills["headline"]["capability_gap"] == 1300
     succ = loader.succession()
@@ -34,6 +46,10 @@ def test_workforce_yaml_loads_and_artifacts():
     }
     art = loader.artifact_for("skills", skills)
     assert art and art["kind"] == "skills_demand_supply"
+    pulse_art = loader.artifact_for("pulse", pulse)
+    assert pulse_art and pulse_art["kind"] == "workforce_pulse"
+    assert pulse_art["scope"] == "group"
+    assert any(i.get("action_key") for i in pulse_art["issues"])
 
 
 def test_workforce_http_endpoints(client):
@@ -42,6 +58,10 @@ def test_workforce_http_endpoints(client):
         assert r.status_code == 200, path
         body = r.json()
         assert "artifact" in body
+    ic = client.get("/workforce/pulse", params={"company_code": "LTIM"}, headers=h())
+    assert ic.status_code == 200
+    assert ic.json()["company_code"] == "LTIM"
+    assert ic.json()["available"] is True
     exp = client.get("/workforce/export/skills", headers=h())
     assert exp.status_code == 200
     assert "text/csv" in exp.headers.get("content-type", "")
@@ -56,6 +76,37 @@ def test_workforce_tools_dispatch(client):
     out = workforce_tools.dispatch("list_draft_actions", {"key": "capability_green_h2"}, db, who)
     assert len(out["drafts"]) == 1
     assert out["drafts"][0]["action"] == "launch_capability_program"
+
+
+def test_workforce_pulse_scopes_to_ic(client):
+    loader.clear_cache()
+    db = next(app.dependency_overrides[get_db]())
+    who = Principal("admin", Role.ADMIN, None)
+    group = workforce_tools.dispatch("get_workforce_pulse", {}, db, who)
+    assert len(group["cells"]) == 5
+    assert group["artifact"]["scope"] == "group"
+
+    ltim = workforce_tools.dispatch(
+        "get_workforce_pulse", {"company_code": "LTIM"}, db, who
+    )
+    assert ltim["available"] is True
+    assert ltim["company_code"] == "LTIM"
+    assert ltim["scope"] == "ic"
+    assert ltim["name"] == "LTIMindtree"
+    assert len(ltim["cells"]) == 5
+    assert ltim["cells"][0]["value"] != group["cells"][0]["value"]
+    ex = ltim.get("scorecard_exception") or {}
+    assert ex.get("action_key") == "retention_semi"
+    assert ex.get("company_code") == "LTIM"
+    assert ltim["artifact"]["scope"] == "ic"
+    assert "LTIMindtree" in ltim["artifact"]["subtitle"]
+
+    missing = workforce_tools.dispatch(
+        "get_workforce_pulse", {"company_code": "ZZZZ"}, db, who
+    )
+    assert missing["available"] is False
+    assert "cells" in missing["missing"]
+    assert missing["cells"] == []
 
 
 def test_succession_coverage_scopes_to_ic(client):

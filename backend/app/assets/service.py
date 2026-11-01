@@ -158,6 +158,10 @@ def workflow_checks(spec) -> list[dict]:
                       for i in s.args.get("inputs", []) if i not in keys})
     add("summarize_inputs_exist", not missing,
         f"no such step: {', '.join(missing)}" if missing else "")
+    agent_missing = sorted({i for s in spec.steps if s.type == "agent"
+                            for i in s.args.get("inputs", []) if i not in keys})
+    add("agent_inputs_exist", not agent_missing,
+        f"no such step: {', '.join(agent_missing)}" if agent_missing else "")
     return out
 
 

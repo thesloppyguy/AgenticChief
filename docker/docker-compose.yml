@@ -1,15 +1,66 @@
-# SQLite is a single-writer file database: run exactly ONE api container, and keep the file on the
-# named volume below. (Do not scale the api service or point two hosts at the same file.)
+# Local / Dokploy Compose deploy for AgenticChief (api + web).
+#
+# SQLite is single-writer: run exactly ONE api container; keep /data on a volume.
+#
+# Dokploy: set Compose Path to docker/docker-compose.yml, attach both services to
+# dokploy-network, and add Traefik domain labels (see comments below).
+#
+# Required env (file or Dokploy Environment):
+#   JWT_SECRET, ANTHROPIC_API_KEY
+#   CORS_ORIGINS=["https://your-web.example.com"]
+#   NEXT_PUBLIC_API_URL=https://your-api.example.com   (build arg for web)
+
 services:
   api:
-    build: { context: ../backend, dockerfile: ../docker/backend.Dockerfile }
-    env_file: ../backend/.env
-    environment: { DATABASE_URL: "sqlite:////data/chro.db" }
-    volumes: [chrodata:/data]
-    ports: ["8000:8000"]
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: "sqlite:////data/chro.db"
+      VECTOR_STORE_PATH: "/data/chroma"
+      # JSON list for pydantic-settings:
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-random-string-of-at-least-32-characters}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SEED_ON_START: ${SEED_ON_START:-auto}
+      STUB_DATA_ENABLED: ${STUB_DATA_ENABLED:-true}
+    volumes:
+      - chrodata:/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    # Dokploy Traefik (uncomment + set host):
+    # networks: [dokploy-network]
+    # labels:
+    #   - traefik.enable=true
+    #   - traefik.http.routers.agenticchief-api.rule=Host(`api.example.com`)
+    #   - traefik.http.routers.agenticchief-api.entrypoints=websecure
+    #   - traefik.http.routers.agenticchief-api.tls.certResolver=letsencrypt
+    #   - traefik.http.services.agenticchief-api.loadbalancer.server.port=8000
+
   web:
-    build: { context: ../frontend, dockerfile: ../docker/frontend.Dockerfile, args: { NEXT_PUBLIC_API_URL: "http://localhost:8000" } }
-    ports: ["3000:3000"]
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
     depends_on: [api]
+    restart: unless-stopped
+    # Dokploy Traefik (uncomment + set host):
+    # networks: [dokploy-network]
+    # labels:
+    #   - traefik.enable=true
+    #   - traefik.http.routers.agenticchief-web.rule=Host(`app.example.com`)
+    #   - traefik.http.routers.agenticchief-web.entrypoints=websecure
+    #   - traefik.http.routers.agenticchief-web.tls.certResolver=letsencrypt
+    #   - traefik.http.services.agenticchief-web.loadbalancer.server.port=3000
+
 volumes:
   chrodata:
+
+# Dokploy: uncomment
+# networks:
+#   dokploy-network:
+#     external: true

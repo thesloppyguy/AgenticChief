@@ -41,7 +41,10 @@ Shape:
 - "tool"       args: {"name": <tool name>, "args": {...}}
                 Calls one read-only Copilot tool.
 - "skill"      args: {"key": <published skill key>, "inputs": {...}}
-- "agent"      args: {"key": <published agent key>, "message": str}
+- "agent"      args: {"key": <published agent key>, "message": str,
+                       "inputs": [<earlier step keys>] (optional)}
+                Consults a specialist. Pass scorecard/tool step keys in `inputs` whenever the
+                message asks them to use numbers; omit `inputs` to auto-include every prior step.
 - "summarize"  args: {"inputs": [<earlier step keys>], "instructions": str}
                 Writes narrative over earlier steps. It may phrase the facts but cannot invent numbers.
 - "propose"    args: {"action": <action key>, "args": {...}}

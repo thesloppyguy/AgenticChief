@@ -177,9 +177,9 @@ function Dashboard() {
           </>
         }
       />
-      {data?.freshness && (
+      {/* {data?.freshness && (
         <FreshnessLine freshness={data.freshness} />
-      )}
+      )} */}
       <Loading error={error} loading={loading} />
       {brief.data?.brief && (
         <Card title={brief.data.brief.title}>
@@ -248,187 +248,187 @@ function Dashboard() {
       {(data ||
         pulse.data?.scorecard_exception ||
         (pulse.data?.top_issues && pulse.data.top_issues.length > 0)) && (
-        <Card
-          title="Scorecard & actions"
-          action={
-            <div className="flex gap-3 text-sm">
-              <Link href="/actions" className="text-primary hover:underline">
-                Review draft actions
-              </Link>
-              <Link href="/chat" className="text-muted-foreground hover:underline">
-                Ask the Co-Pilot
-              </Link>
-            </div>
-          }
-        >
-          <div className="grid items-start gap-5 lg:grid-cols-12">
-            {data && (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:col-span-5 lg:grid-cols-2">
-                <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-                  <ScoreTile
-                    accent
-                    title="Group score"
-                    score={data.group.score}
-                    status={data.group.status}
-                    withheld={data.group.status_withheld}
-                    note={
-                      data.group.pillar_coverage < 1
-                        ? `Only ${Math.round(data.group.pillar_coverage * 100)}% of weight scored`
-                        : `${data.group.companies_with_data}/${data.group.companies_in_scope} companies with data`
-                    }
-                  />
-                </div>
-                {data.group.pillars.map((p) => (
-                  <ScoreTile
-                    key={p.pillar}
-                    title={label(p.pillar)}
-                    score={p.score}
-                    status={p.status}
-                    href={`/company?tab=pillars&pillar=${p.pillar}`}
-                    note={
-                      p.eligible_weight < 1
-                        ? `${Math.round(p.eligible_weight * 100)}% of KPIs scored`
-                        : undefined
-                    }
-                  />
-                ))}
+          <Card
+            title="Scorecard & actions"
+            action={
+              <div className="flex gap-3 text-sm">
+                <Link href="/actions" className="text-primary hover:underline">
+                  Review draft actions
+                </Link>
+                <Link href="/chat" className="text-muted-foreground hover:underline">
+                  Ask the Co-Pilot
+                </Link>
               </div>
-            )}
-
-            <div
-              className={cn(
-                "min-w-0 space-y-3",
-                data ? "lg:col-span-7" : "lg:col-span-12",
-              )}
-            >
-              {pulse.data?.scorecard_exception && (
-                <div className="rounded-2xl border border-destructive/25 bg-destructive/[0.06] px-4 py-3.5">
-                  <div className="text-sm font-semibold text-destructive">
-                    {pulse.data.scorecard_exception.title ||
-                      "Scorecard exception — Retention is off track"}
+            }
+          >
+            <div className="grid items-start gap-5 lg:grid-cols-12">
+              {data && (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:col-span-5 lg:grid-cols-2">
+                  <div className="col-span-2 sm:col-span-3 lg:col-span-2">
+                    <ScoreTile
+                      accent
+                      title="Group score"
+                      score={data.group.score}
+                      status={data.group.status}
+                      withheld={data.group.status_withheld}
+                      note={
+                        data.group.pillar_coverage < 1
+                          ? `Only ${Math.round(data.group.pillar_coverage * 100)}% of weight scored`
+                          : `${data.group.companies_with_data}/${data.group.companies_in_scope} companies with data`
+                      }
+                    />
                   </div>
-                  {pulse.data.scorecard_exception.detail ? (
-                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                      {pulse.data.scorecard_exception.detail}
-                    </p>
-                  ) : null}
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      className="rounded-full"
-                      render={<Link href="/actions" />}
-                      nativeButton={false}
-                    >
-                      Approve &amp; execute corrective action
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-full"
-                      render={<Link href="/chat" />}
-                      nativeButton={false}
-                    >
-                      Ask the Co-Pilot
-                    </Button>
-                  </div>
+                  {data.group.pillars.map((p) => (
+                    <ScoreTile
+                      key={p.pillar}
+                      title={label(p.pillar)}
+                      score={p.score}
+                      status={p.status}
+                      href={`/company?tab=pillars&pillar=${p.pillar}`}
+                      note={
+                        p.eligible_weight < 1
+                          ? `${Math.round(p.eligible_weight * 100)}% of KPIs scored`
+                          : undefined
+                      }
+                    />
+                  ))}
                 </div>
               )}
 
-              {pulse.data?.top_issues && pulse.data.top_issues.length > 0 ? (
-                <div className="space-y-2.5">
-                  <h3 className="text-sm font-semibold tracking-tight">
-                    {pulse.data.top_issues.length} issues needing your attention
-                  </h3>
-                  <div className="max-h-[36rem] space-y-2.5 overflow-y-auto pr-1">
-                    {pulse.data.top_issues.map((issue) => {
-                      const high =
-                        issue.severity === "high" ||
-                        issue.severity === "urgent" ||
-                        issue.rank <= 2;
-                      return (
-                        <div
-                          key={issue.rank}
-                          className={cn(
-                            "rounded-xl border border-border/70 bg-card py-3 pl-3 pr-4 shadow-sm",
-                            "border-l-[3px]",
-                            high ? "border-l-destructive" : "border-l-warning",
-                          )}
-                        >
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span
-                              className={cn(
-                                "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium",
-                                high
-                                  ? "bg-destructive/10 text-destructive"
-                                  : "bg-warning/15 text-warning",
-                              )}
-                            >
+              <div
+                className={cn(
+                  "min-w-0 space-y-3",
+                  data ? "lg:col-span-7" : "lg:col-span-12",
+                )}
+              >
+                {pulse.data?.scorecard_exception && (
+                  <div className="rounded-2xl border border-destructive/25 bg-destructive/[0.06] px-4 py-3.5">
+                    <div className="text-sm font-semibold text-destructive">
+                      {pulse.data.scorecard_exception.title ||
+                        "Scorecard exception — Retention is off track"}
+                    </div>
+                    {pulse.data.scorecard_exception.detail ? (
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                        {pulse.data.scorecard_exception.detail}
+                      </p>
+                    ) : null}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        className="rounded-full"
+                        render={<Link href="/actions" />}
+                        nativeButton={false}
+                      >
+                        Approve &amp; execute corrective action
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full"
+                        render={<Link href="/chat" />}
+                        nativeButton={false}
+                      >
+                        Ask the Co-Pilot
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {pulse.data?.top_issues && pulse.data.top_issues.length > 0 ? (
+                  <div className="space-y-2.5">
+                    <h3 className="text-sm font-semibold tracking-tight">
+                      {pulse.data.top_issues.length} issues needing your attention
+                    </h3>
+                    <div className="max-h-[36rem] space-y-2.5 overflow-y-auto pr-1">
+                      {pulse.data.top_issues.map((issue) => {
+                        const high =
+                          issue.severity === "high" ||
+                          issue.severity === "urgent" ||
+                          issue.rank <= 2;
+                        return (
+                          <div
+                            key={issue.rank}
+                            className={cn(
+                              "rounded-xl border border-border/70 bg-card py-3 pl-3 pr-4 shadow-sm",
+                              "border-l-[3px]",
+                              high ? "border-l-destructive" : "border-l-warning",
+                            )}
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
                               <span
                                 className={cn(
-                                  "mr-1.5 inline-block size-1.5 rounded-full",
-                                  high ? "bg-destructive" : "bg-warning",
+                                  "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium",
+                                  high
+                                    ? "bg-destructive/10 text-destructive"
+                                    : "bg-warning/15 text-warning",
                                 )}
-                              />
-                              {issue.priority_label || (high ? "High" : "Medium")}
-                            </span>
-                            <span className="text-[10px] tabular-nums text-muted-foreground">
-                              #{issue.rank}
-                            </span>
-                          </div>
-                          <div className="mt-1.5 text-sm font-semibold leading-snug">
-                            {issue.title}
-                          </div>
-                          {issue.summary ? (
-                            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                              {issue.summary}
-                            </p>
-                          ) : null}
-                          {issue.tags && issue.tags.length > 0 ? (
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              {issue.tags.map((t) => (
+                              >
                                 <span
-                                  key={t}
-                                  className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
-                                >
-                                  {t}
-                                </span>
-                              ))}
+                                  className={cn(
+                                    "mr-1.5 inline-block size-1.5 rounded-full",
+                                    high ? "bg-destructive" : "bg-warning",
+                                  )}
+                                />
+                                {issue.priority_label || (high ? "High" : "Medium")}
+                              </span>
+                              <span className="text-[10px] tabular-nums text-muted-foreground">
+                                #{issue.rank}
+                              </span>
                             </div>
-                          ) : null}
-                          {issue.recommendation ? (
-                            <p className="mt-2 text-xs leading-relaxed">
-                              <span className="font-semibold">Recommended path: </span>
-                              {issue.recommendation}
-                            </p>
-                          ) : null}
-                          {issue.flagged_by && issue.flagged_by.length > 0 ? (
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              {issue.flagged_by.map((f) => (
-                                <span
-                                  key={f}
-                                  className="inline-flex items-center rounded-full bg-[rgba(15,98,77,0.12)] px-2 py-0.5 text-[10px] font-medium text-[#0F624D]"
-                                >
-                                  {f}
-                                </span>
-                              ))}
+                            <div className="mt-1.5 text-sm font-semibold leading-snug">
+                              {issue.title}
                             </div>
-                          ) : null}
-                        </div>
-                      );
-                    })}
+                            {issue.summary ? (
+                              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                {issue.summary}
+                              </p>
+                            ) : null}
+                            {issue.tags && issue.tags.length > 0 ? (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {issue.tags.map((t) => (
+                                  <span
+                                    key={t}
+                                    className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                  >
+                                    {t}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : null}
+                            {issue.recommendation ? (
+                              <p className="mt-2 text-xs leading-relaxed">
+                                <span className="font-semibold">Recommended path: </span>
+                                {issue.recommendation}
+                              </p>
+                            ) : null}
+                            {issue.flagged_by && issue.flagged_by.length > 0 ? (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {issue.flagged_by.map((f) => (
+                                  <span
+                                    key={f}
+                                    className="inline-flex items-center rounded-full bg-[rgba(15,98,77,0.12)] px-2 py-0.5 text-[10px] font-medium text-[#0F624D]"
+                                  >
+                                    {f}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                !pulse.data?.scorecard_exception && data && (
-                  <p className="text-sm text-muted-foreground">
-                    No priority actions for this period.
-                  </p>
-                )
-              )}
+                ) : (
+                  !pulse.data?.scorecard_exception && data && (
+                    <p className="text-sm text-muted-foreground">
+                      No priority actions for this period.
+                    </p>
+                  )
+                )}
+              </div>
             </div>
-          </div>
-        </Card>
-      )}
+          </Card>
+        )}
       {data && (
         <>
           <div className="grid items-start gap-5 lg:grid-cols-12">

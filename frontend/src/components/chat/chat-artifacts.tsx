@@ -1269,7 +1269,14 @@ function ArtifactBody({ artifact }: { artifact: ChatArtifact }) {
   );
 }
 
-export function ChatArtifacts({ artifacts }: { artifacts?: ChatArtifact[] }) {
+export function ChatArtifacts({
+  artifacts,
+  fullWidth = false,
+}: {
+  artifacts?: ChatArtifact[];
+  /** Report pages: use the content column width. Chat keeps the 52rem bubble cap. */
+  fullWidth?: boolean;
+}) {
   const [busy, setBusy] = useState<string | null>(null);
   if (!artifacts?.length) return null;
 
@@ -1335,7 +1342,13 @@ export function ChatArtifacts({ artifacts }: { artifacts?: ChatArtifact[] }) {
   }
 
   return (
-    <div className="mt-1 w-full max-w-[min(100%,52rem)] space-y-3">
+    <div
+      className={
+        fullWidth
+          ? "mt-1 w-full space-y-3"
+          : "mt-1 w-full max-w-[min(100%,52rem)] space-y-3"
+      }
+    >
       {artifacts.map((a, i) => {
         const meta = KIND_META[a.kind] ?? {
           label: "Report",

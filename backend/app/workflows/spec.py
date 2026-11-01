@@ -42,6 +42,9 @@ class SkillArgs(BaseModel):
 class AgentArgs(BaseModel):
     key: str
     message: str = Field(min_length=1, max_length=2000)
+    # Earlier step keys to inject as <conversation_context>. Empty = every prior step
+    # (so a scorecard that already ran reaches the specialist without re-authoring).
+    inputs: list[str] = Field(default_factory=list, max_length=MAX_STEPS)
 
 
 class SummarizeArgs(BaseModel):

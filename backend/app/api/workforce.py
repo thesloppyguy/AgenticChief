@@ -15,8 +15,12 @@ router = APIRouter(prefix="/workforce", tags=["workforce"])
 
 
 @router.get("/pulse")
-def get_pulse(_: Principal = Depends(get_principal)) -> dict[str, Any]:
-    data = loader.pulse()
+def get_pulse(
+    company_code: str | None = None,
+    _: Principal = Depends(get_principal),
+) -> dict[str, Any]:
+    code = (company_code or "").strip().upper() or None
+    data = loader.pulse(code)
     if not data:
         raise HTTPException(404, "workforce pulse fixture not found")
     return {**data, "artifact": loader.artifact_for("pulse", data)}
@@ -31,8 +35,12 @@ def get_skills(_: Principal = Depends(get_principal)) -> dict[str, Any]:
 
 
 @router.get("/succession")
-def get_succession(_: Principal = Depends(get_principal)) -> dict[str, Any]:
-    data = loader.succession()
+def get_succession(
+    company_code: str | None = None,
+    _: Principal = Depends(get_principal),
+) -> dict[str, Any]:
+    code = (company_code or "").strip().upper() or None
+    data = loader.succession(code)
     if not data:
         raise HTTPException(404, "workforce succession fixture not found")
     return {**data, "artifact": loader.artifact_for("succession", data)}

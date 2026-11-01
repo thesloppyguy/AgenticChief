@@ -25,6 +25,19 @@ Rules:
 - Never describe a KPI with no source as a company's failure. It is a connection gap.
 - Plain prose, no headings, bullets or markdown. Refer to companies by their codes."""
 
+EXEC_BRIEF_SYSTEM = """You write a short decision brief for a Group CHRO / C-suite audience.
+FACTS are JSON from deterministic scorecard and workforce steps. Charts on the page already show the numbers.
+
+Rules:
+- Use ONLY numbers that appear in FACTS. Never calculate, sum, count, average or estimate.
+  If a figure is missing, say so in words without inventing a number.
+- Lead with the decision or ask. Then at most ~6 short bullets or two tight sections (H2 + bullets).
+- Under 120 words total. Scannable markdown is fine; no wall of prose.
+- Human names only for pillars and KPIs (e.g. "IDPs for top talent", never snake_case or backticks).
+- Never mention tools, APIs, JSON, synthetic data, mock sources, fixtures, or that you are an AI.
+- Do not restate every company or every KPI — the infographics carry detail. Focus on risks and next actions.
+- Refer to companies by their codes (LTTS, LTIM, …)."""
+
 _WHITELIST = {7.0, 23.0}  # 7 pillars, 23 sub-KPIs: structural constants, not results
 _CODE = re.compile(r"\bIC\d+\b")
 _DATE = re.compile(r"\b\d{4}-\d{2}\b|\b20\d\d\b")
@@ -146,19 +159,25 @@ def _fact_lines(facts: dict) -> str:
     return "\n".join(out) or "- (nothing to summarise)"
 
 
-def summarize(client: Any | None, facts: dict, instructions: str) -> dict:
+def summarize(
+    client: Any | None,
+    facts: dict,
+    instructions: str,
+    *,
+    executive: bool = False,
+) -> dict:
     """Narrative over a workflow's earlier steps, held to the same rule as the monthly review: the
     model may phrase the facts but may not state a number that is not in them. Never raises.
 
-    This is why a prompt-authored workflow is safe to publish: whatever a planner dreams up, any
-    sentence it produces about numbers has been checked against what the deterministic steps computed.
+    When `executive` is True, use the C-suite brief voice (short markdown, no synthetic/meta talk).
     """
     fallback = {"text": _fact_lines(facts), "method": "template", "grounded": True, "issues": []}
     if client is None:
         return {**fallback, "issues": ["no_llm_configured"]}
+    system = EXEC_BRIEF_SYSTEM if executive else SYSTEM
     try:
         resp = client.messages.create(
-            model=settings.default_model, max_tokens=1500, system=SYSTEM,
+            model=settings.default_model, max_tokens=1500, system=system,
             messages=[{"role": "user", "content":
                        f"<instructions>{instructions[:2000]}</instructions>\n"
                        "<facts>\n" + json.dumps(facts, sort_keys=True, default=str) + "\n</facts>"}],

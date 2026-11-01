@@ -8,14 +8,23 @@ from sqlalchemy.orm import Session
 from app.core.security import Principal
 from app.workforce import loader
 
+_IC_CODE_PROP = {
+    "type": "string",
+    "description": "Independent Company code, e.g. LTIM, LTTS, LTF, LTMR, LTR. "
+    "Omit for Group totals. Resolve 'LTIMindtree' / 'LNT Mindtree' → LTIM.",
+}
+
+_PULSE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "company_code": _IC_CODE_PROP,
+    },
+}
+
 _SUCCESSION_SCHEMA = {
     "type": "object",
     "properties": {
-        "company_code": {
-            "type": "string",
-            "description": "Independent Company code, e.g. LTIM, LTTS, LTF, LTMR, LTR. "
-            "Omit for Group totals. Resolve 'LTIMindtree' / 'LNT Mindtree' → LTIM.",
-        },
+        "company_code": _IC_CODE_PROP,
         "period": {
             "type": "string",
             "description": "YYYY-MM period for freshness check against fixture as_of. "
@@ -28,10 +37,11 @@ WORKFORCE_TOOLS: list[dict[str, Any]] = sorted(
     [
         {
             "name": "get_workforce_pulse",
-            "description": "Group workforce briefing pulse: headcount, skill gap, internal fill, "
-            "succession thinness, EX index, and top ranked issues. Demo fixture numbers "
+            "description": "Workforce briefing pulse for Group or one IC: headcount, skill gap, "
+            "internal fill, succession thinness, EX index, and top ranked issues with "
+            "company_codes and draft action_key when ready. Demo fixture numbers "
             "(not the live scorecard KPI engine). Prefer this for 'what's the weekly brief'.",
-            "input_schema": {"type": "object", "properties": {}},
+            "input_schema": _PULSE_SCHEMA,
         },
         {
             "name": "get_skills_gap",
@@ -100,7 +110,8 @@ def _succession_payload(args: dict) -> dict:
 def dispatch(name: str, args: dict, db: Session, who: Principal) -> dict:
     del db, who  # fixture-backed; principal reserved for future scoping
     if name == "get_workforce_pulse":
-        data = loader.pulse()
+        code = (args.get("company_code") or "").strip().upper() or None
+        data = loader.pulse(code)
         return {**data, "artifact": loader.artifact_for("pulse", data)}
     if name == "get_skills_gap":
         data = loader.skills()

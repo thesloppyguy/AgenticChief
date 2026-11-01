@@ -9,7 +9,7 @@ backend/   FastAPI + SQLAlchemy + Alembic, SQLite   (Python 3.12+, uv)
 frontend/  Next.js 16 App Router + Tailwind         (pnpm)
 seed/      OE-shaped L&T Group + IC fixtures
 e2e/       Playwright browser smoke test
-docker/    compose file (api + web)
+docker/             compose + Dokploy notes (api + web)
 ```
 
 ## Quick start
@@ -28,6 +28,15 @@ uv run uvicorn app.main:app --reload            # http://localhost:8000
 cd frontend
 pnpm install && pnpm dev                        # http://localhost:3000
 ```
+
+### Docker / Dokploy
+
+```bash
+# from repo root — API migrates + seeds L&T demo on first /data volume, then serves
+docker compose -f docker/docker-compose.yml up --build
+```
+
+Dokploy setup (two apps or Compose): [docker/README.md](docker/README.md).
 
 In the UI: **Settings → Company → Load L&T demo** (admin), or `POST /fixtures/lnt/load`.
 

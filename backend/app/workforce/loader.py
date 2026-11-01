@@ -37,8 +37,56 @@ def clear_cache() -> None:
     load_section.cache_clear()
 
 
-def pulse() -> dict[str, Any]:
-    return load_section("pulse")
+def pulse(company_code: str | None = None) -> dict[str, Any]:
+    """Group workforce pulse fixture, optionally narrowed to one IC.
+
+    Per-IC slices live under ``by_ic.<CODE>``. Unknown codes return an honest
+    empty payload rather than silently falling back to Group totals.
+    """
+    data = load_section("pulse")
+    code = (company_code or "").strip().upper()
+    if not code:
+        return data
+
+    by_ic = data.get("by_ic") or {}
+    slice_ = by_ic.get(code)
+    if not isinstance(slice_, dict):
+        return {
+            "as_of": data.get("as_of"),
+            "company_code": code,
+            "scope": "ic",
+            "available": False,
+            "missing": [
+                "narrative",
+                "insights",
+                "cells",
+                "top_issues",
+                "scorecard_exception",
+            ],
+            "narrative": "",
+            "insights": [
+                f"No workforce pulse fixture for IC '{code}'. "
+                "Do not invent IC pulse numbers."
+            ],
+            "cells": [],
+            "top_issues": [],
+            "scorecard_exception": None,
+        }
+
+    return {
+        "as_of": data.get("as_of"),
+        "company_code": code,
+        "scope": "ic",
+        "available": True,
+        "name": slice_.get("name"),
+        "aliases": slice_.get("aliases") or [],
+        "narrative": slice_.get("narrative") or "",
+        "synthesized_by": data.get("synthesized_by"),
+        "insights": slice_.get("insights") or [],
+        "cells": slice_.get("cells") or [],
+        "top_issues": slice_.get("top_issues") or [],
+        "scorecard_exception": slice_.get("scorecard_exception"),
+    }
 
 
 def skills() -> dict[str, Any]:
@@ -111,13 +159,23 @@ def artifact_for(section: str, payload: dict[str, Any]) -> dict[str, Any] | None
         cells = payload.get("cells") or []
         issues = payload.get("top_issues") or []
         exception = payload.get("scorecard_exception") or {}
+        scope = payload.get("scope") or "group"
+        ic_name = payload.get("name")
+        company_code = payload.get("company_code")
+        if scope == "ic":
+            subtitle = f"{ic_name or company_code or 'IC'} people signals for this briefing window."
+        else:
+            subtitle = "Group people signals for this briefing window."
         return {
             "kind": "workforce_pulse",
             "title": "Workforce pulse",
-            "subtitle": "Group people signals for this briefing window.",
+            "subtitle": subtitle,
             "source": "workforce.pulse",
             "export_key": "workforce_pulse",
             "schedule_key": "workforce_brief",
+            "scope": scope,
+            "company_code": company_code,
+            "available": payload.get("available", True),
             "narrative": _clean(payload.get("narrative")),
             "insights": [_clean(i) for i in (payload.get("insights") or []) if _clean(i)],
             "items": [
@@ -142,6 +200,9 @@ def artifact_for(section: str, payload: dict[str, Any]) -> dict[str, Any] | None
                     "tags": i.get("tags") or [],
                     "flagged_by": i.get("flagged_by") or [],
                     "recommendation": _clean(i.get("recommendation")),
+                    "company_code": i.get("company_code"),
+                    "company_codes": i.get("company_codes") or [],
+                    "action_key": i.get("action_key"),
                 }
                 for i in issues
             ],
@@ -153,6 +214,8 @@ def artifact_for(section: str, payload: dict[str, Any]) -> dict[str, Any] | None
                         "status": exception.get("status") or "red",
                         "detail": _clean(exception.get("detail")),
                         "action_key": exception.get("action_key"),
+                        "company_code": exception.get("company_code"),
+                        "company_codes": exception.get("company_codes") or [],
                     }
                 ]
                 if exception

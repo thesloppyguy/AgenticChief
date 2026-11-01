@@ -1,18 +1,19 @@
 # Synthetic Group workforce briefing pulse (HTML mockup-aligned). Not KPI-engine scores.
+# Group totals plus per-IC slices under by_ic.<CODE>. Issues name ICs and link draft action_key.
 as_of: "2026-10-07T07:12:00+05:30"
 narrative: >
   Group needs ~2,300 specialised engineers over 24 months for green H₂, electrolyser and
-  semiconductor programmes; external market can sustainably supply ~1,000. 34 critical roles
-  have thin succession. Hiring volume is high (78k applications for 1,540 engineering roles)
-  but future-skill fit is only ~9%. Early-career attrition ties to learning & growth, not pay.
-  Retention at Group is near target overall, but L&T Semiconductor Technologies (retention 52)
-  is the IC exception — career stagnation, manager quality and learning gaps, not compensation.
+  semiconductor programmes; external market can sustainably supply ~1,000. LTTS holds the
+  thinnest Green H₂ / ATMP benches (capability_green_h2 and atmp_leadership drafts ready).
+  34 of 130 critical roles have weak succession. Hiring volume is high but future-skill fit
+  is only ~9%. Retention at Group is near target overall — LTIM Semiconductor Technologies
+  (retention 52) is the IC exception; retention_semi corrective is ready for approval.
 synthesized_by: Executive Analytics
 insights:
-  - Overall the Group is close to target — Retention (score 73) is the weak spot holding it back.
-  - Of the 1,300 future-skill roles we need, about 70% can be filled by retraining and moving people we already have.
-  - Fewer critical roles have a ready backup than last year (down 5 points); green energy and semiconductors are thinnest.
-  - The weakest managers drive most of the regrettable exits — better pay alone will not fix that.
+  - Retention (73, Red) is the Group weak spot — exception traces to LTIM (IC retention 52); draft retention_semi awaits approval.
+  - ~70% of the 1,300 future-skill gap is buildable internally; LTTS owns the Green H₂ pinch point — draft capability_green_h2 is ready.
+  - Ready-now succession down 5 pts; LTTS Green Energy / Semiconductors and LTIM AI / ATMP are thinnest.
+  - Bottom-quartile managers (LTTS + LTIM) drive most regretted exits — manager_effectiveness_bq draft routes to both IC CHROs.
 cells:
   - key: core_headcount
     label: Core staff headcount
@@ -58,67 +59,495 @@ top_issues:
   - rank: 1
     title: Capability gap in green hydrogen & electrolysers
     priority_label: Defines the next 24 months
+    company_code: LTTS
+    company_codes: [LTTS, LTIM]
+    action_key: capability_green_h2
     summary: >
-      Demand for specialised engineers is outpacing supply. External hiring can meet less
-      than a third at a sustainable cost — and buying scarce skills at a premium doesn't build depth.
+      LTTS leads Green H₂ / electrolyser demand; external hiring covers less than a third
+      sustainably. Buying scarce skills at a premium does not build depth across LTTS → LTIM adjacency.
     severity: high
     tags: [New-business ramp, Scarce external supply, Premium cost]
     recommendation: >
-      build internally — reskill + mobility closes ~70% of the gap. Action is ready for your approval.
+      Approve capability_green_h2 — LTTS CHRO enrols the 12-week cohort; LTIM supports
+      mobility adjacency. Reskill + mobility closes ~70% of the gap.
     flagged_by: [Future Skills, Capability & Learning, Workforce Strategy]
   - rank: 2
     title: Thin succession in the new businesses
     priority_label: High
+    company_codes: [LTTS, LTIM]
+    action_key: atmp_leadership
     summary: >
-      34 of 130 critical roles have a weak or no ready successor, concentrated in green energy
-      and semiconductors — weak career architecture, not compensation, is the root cause.
+      34 of 130 critical roles have a weak or no ready successor — concentrated in LTTS
+      Green Energy / Semiconductors and LTIM AI / ATMP. Weak career architecture, not pay.
     severity: high
     tags: [Weak career architecture, Limited internal mobility, New-business depth]
     recommendation: >
-      Continuity risk in green energy and semiconductor leadership within 12–18 months.
-      Open senior search where needed and start internal development plans.
+      Approve atmp_leadership for LTIM ATMP (senior search + 2 IDPs); LTTS continues
+      Green H₂ successor plans under capability_green_h2.
     flagged_by: [Internal Mobility & Succession]
   - rank: 3
     title: Hiring quality, not volume
     priority_label: Medium
+    company_codes: [LTTS, LTIM]
     summary: >
-      78,000 applications for 1,540 engineering roles — the constraint is finding the right,
-      future-ready skills, not attracting applicants. Only 9% clear the future-skill bar.
+      78,000 applications for 1,540 engineering roles across LTTS and LTIM — constraint is
+      future-skill fit (~9%), not attraction. Volume hiring will not close the 24-month gap.
     severity: medium
     tags: [Skill-fit 9%, Changing job requirements, Time-to-productivity]
     recommendation: >
-      Raise the skill bar and prioritise adjacent internal moves over volume hiring.
+      Raise the skill bar at LTTS / LTIM TA and prioritise adjacent internal moves over
+      volume hiring — feed candidates into capability_green_h2 mobility lanes.
     flagged_by: [Talent Acquisition & Quality-of-Hire]
   - rank: 4
     title: Early-career attrition where growth stalls
     priority_label: Medium
+    company_code: LTIM
+    company_codes: [LTIM]
+    action_key: retention_semi
     summary: >
-      Attrition concentrates among 0–3 year engineers in units with the weakest
-      learning-and-growth signals — the third layer of the employee-experience framework.
+      Attrition concentrates among 0–3 year engineers in LTIM Semiconductor Technologies —
+      weakest learning-and-growth signals, not compensation.
     severity: medium
     tags: [Learning & growth, Career visibility, Manager quality]
     recommendation: >
-      Career pathways and manager coaching on growth conversations — not pay adjustments.
+      Approve retention_semi — LTIM CHRO activates pathways for 58 at-risk engineers and
+      COACH-Q3-SEMI; Group HR Operations arms the 90-day monitor.
     flagged_by: [Employee Experience & Retention]
   - rank: 5
     title: Manager effectiveness varies widely
     priority_label: Medium
+    company_codes: [LTTS, LTIM]
+    action_key: manager_effectiveness_bq
     summary: >
-      Goal-setting, feedback frequency and fairness scores vary sharply by manager cohort.
-      The bottom quartile of managers accounts for a disproportionate share of disengagement
-      and regretted exits — a capability gap higher pay won't close.
+      Goal-setting, feedback and fairness scores vary sharply by manager cohort at LTTS
+      and LTIM. Bottom quartile drives a disproportionate share of disengagement and exits.
     severity: medium
     tags: [Bottom quartile, Feedback gaps, Goal-setting variance]
     recommendation: >
-      Targeted coaching & feedback enablement for bottom-quartile managers.
+      Approve manager_effectiveness_bq — LTTS and LTIM CHROs launch coaching & feedback
+      enablement with HRBP 30-day check-ins.
     flagged_by: [Manager Effectiveness & Performance, Employee Experience]
 scorecard_exception:
   pillar: Retention
   score: 73
   status: red
+  company_code: LTIM
+  company_codes: [LTIM]
   title: Scorecard exception — Retention is off track (73, Red)
   detail: >
-    The copilot traced it to L&T Semiconductor Technologies (retention 52) — driven by
-    career stagnation, manager quality and learning gaps, not pay. A career-led corrective
-    action is drafted and ready for your approval.
+    Exception traces to LTIM Semiconductor Technologies (IC retention 52) — career
+    stagnation, manager quality and learning gaps, not pay. Draft retention_semi is
+    ready for your approval.
   action_key: retention_semi
+
+by_ic:
+  LTIM:
+    name: LTIMindtree
+    aliases: [LTIMindtree, "LNT Mindtree", "L&T Mindtree", Mindtree]
+    narrative: >
+      LTIM pulse is dominated by Semiconductor Technologies retention (52) and thin AI /
+      ATMP succession. Career stagnation, manager quality and learning — not pay — drive
+      exits. Drafts retention_semi and atmp_leadership are ready for Group CHRO approval.
+    insights:
+      - Retention exception at Semiconductor Technologies (52) pulls Group Retention to 73 Red.
+      - Head of AI / GenAI and ATMP leadership are single-point-of-failure risks.
+      - Internal fill 48% vs 60% — LTTS adjacency underused for digital / semi moves.
+      - Approve retention_semi this week; atmp_leadership due in 4 days.
+    cells:
+      - key: core_headcount
+        label: Core staff headcount
+        value: 9200
+        unit: ""
+        delta_pct: 4.2
+        delta_direction: up
+        note: YoY
+        tone: good
+      - key: future_skill_gap
+        label: Future-skill gap · 24mo
+        value: 280
+        unit: roles
+        delta_pct: null
+        delta_direction: flat
+        note: AI / semi / digital
+        tone: alert
+      - key: internal_fill_rate
+        label: Internal fill rate
+        value: 48
+        unit: "%"
+        delta_pct: null
+        delta_direction: flat
+        note: target 60%
+        tone: alert
+      - key: weak_successors
+        label: Weak / no successor
+        value: 7
+        unit: ""
+        delta_pct: null
+        delta_direction: flat
+        note: of 28 critical roles
+        tone: alert
+      - key: ex_index
+        label: Employee experience index
+        value: 68
+        unit: ""
+        delta_pct: -5
+        delta_direction: down
+        note: pts vs prior · semi drag
+        tone: alert
+    top_issues:
+      - rank: 1
+        title: Semiconductor retention exception
+        priority_label: Scorecard exception
+        company_code: LTIM
+        company_codes: [LTIM]
+        action_key: retention_semi
+        summary: >
+          IC retention 52 at Semiconductor Technologies — career stagnation, manager
+          quality and learning gaps. Top-talent retention 66; trainee retention 56 vs 80.
+        severity: high
+        tags: [Retention 52, Career stagnation, Learning gaps]
+        recommendation: >
+          Approve retention_semi — activate pathways for 58 at-risk engineers and start
+          COACH-Q3-SEMI; LTIM CHRO owns execution.
+        flagged_by: [Employee Experience & Retention]
+      - rank: 2
+        title: ATMP leadership continuity
+        priority_label: High
+        company_code: LTIM
+        company_codes: [LTIM]
+        action_key: atmp_leadership
+        summary: >
+          VP Semiconductor ATMP readiness is thin with no ready-now internal. Continuity
+          risk within 12–18 months if search and IDPs slip.
+        severity: high
+        tags: [ATMP, No ready internal, Flight risk]
+        recommendation: >
+          Approve atmp_leadership — open senior search and start 2 internal development
+          plans; LTIM CHRO + Group TA confirm within 4 days.
+        flagged_by: [Internal Mobility & Succession]
+      - rank: 3
+        title: Manager effectiveness — bottom quartile
+        priority_label: Medium
+        company_code: LTIM
+        company_codes: [LTIM, LTTS]
+        action_key: manager_effectiveness_bq
+        summary: >
+          Bottom-quartile managers at LTIM amplify early-career attrition in semi and
+          digital delivery units.
+        severity: medium
+        tags: [Bottom quartile, Feedback gaps]
+        recommendation: >
+          Approve manager_effectiveness_bq — LTIM CHRO enrols the cohort with L&D and
+          HRBP 30-day check-ins.
+        flagged_by: [Manager Effectiveness & Performance]
+    scorecard_exception:
+      pillar: Retention
+      score: 52
+      status: red
+      company_code: LTIM
+      company_codes: [LTIM]
+      title: Scorecard exception — LTIM Retention off track (52, Red)
+      detail: >
+        Semiconductor Technologies retention 52 — career, manager quality and learning,
+        not pay. Draft retention_semi ready for approval.
+      action_key: retention_semi
+
+  LTTS:
+    name: L&T Technology Services
+    aliases: [LTTS, "L&T Technology", "L&T Tech"]
+    narrative: >
+      LTTS carries the Group's Green H₂ / electrolyser capability gap and the thinnest
+      new-business succession benches. Internal fill 39% vs 60%. Draft capability_green_h2
+      (with LTIM adjacency) is ready; manager_effectiveness_bq also routes here.
+    insights:
+      - Green H₂ gap (~440 roles) is the strategic pinch — build path beats premium hire.
+      - VP Semiconductor ATMP / Green Energy successors are thin; EPC adjacency is the feed.
+      - Internal fill well below target; mobility architecture is the bottleneck.
+      - Approve capability_green_h2 this week — LTTS CHRO owns enrolment and mentoring.
+    cells:
+      - key: core_headcount
+        label: Core staff headcount
+        value: 14800
+        unit: ""
+        delta_pct: 2.8
+        delta_direction: up
+        note: YoY
+        tone: good
+      - key: future_skill_gap
+        label: Future-skill gap · 24mo
+        value: 620
+        unit: roles
+        delta_pct: null
+        delta_direction: flat
+        note: Green H₂ / power / digital
+        tone: alert
+      - key: internal_fill_rate
+        label: Internal fill rate
+        value: 39
+        unit: "%"
+        delta_pct: null
+        delta_direction: flat
+        note: target 60%
+        tone: alert
+      - key: weak_successors
+        label: Weak / no successor
+        value: 11
+        unit: ""
+        delta_pct: null
+        delta_direction: flat
+        note: of 36 critical roles
+        tone: alert
+      - key: ex_index
+        label: Employee experience index
+        value: 72
+        unit: ""
+        delta_pct: -2
+        delta_direction: down
+        note: pts vs prior
+        tone: alert
+    top_issues:
+      - rank: 1
+        title: Green H₂ & electrolyser capability gap
+        priority_label: Defines the next 24 months
+        company_code: LTTS
+        company_codes: [LTTS, LTIM]
+        action_key: capability_green_h2
+        summary: >
+          LTTS owns the largest unmet demand for electrolyser / Green H₂ engineers.
+          External supply covers less than a third; 46 EPC adjacency candidates are ready to build.
+        severity: high
+        tags: [Green H₂, Build vs buy, EPC adjacency]
+        recommendation: >
+          Approve capability_green_h2 — LTTS CHRO enrols 40 in the 12-week certification,
+          opens 12 mobility cases, and confirms PATHWAY GH2-TECH.
+        flagged_by: [Future Skills, Capability & Learning]
+      - rank: 2
+        title: Thin succession in Green Energy & Semiconductors
+        priority_label: High
+        company_code: LTTS
+        company_codes: [LTTS]
+        summary: >
+          11 of 36 critical LTTS roles have weak or no successor — Green Energy and
+          Semiconductors lead. Ready-now coverage 58%, down 6 pts.
+        severity: high
+        tags: [New-business depth, Ready-now 58%]
+        recommendation: >
+          Fast-track 3 Green H₂ successors via capability_green_h2; keep ATMP continuity
+          coordinated with LTIM atmp_leadership.
+        flagged_by: [Internal Mobility & Succession]
+      - rank: 3
+        title: Manager effectiveness — bottom quartile
+        priority_label: Medium
+        company_code: LTTS
+        company_codes: [LTTS, LTIM]
+        action_key: manager_effectiveness_bq
+        summary: >
+          Bottom-quartile managers at LTTS drive disengagement in delivery and new-business
+          units — pay will not close the gap.
+        severity: medium
+        tags: [Bottom quartile, Coaching]
+        recommendation: >
+          Approve manager_effectiveness_bq — LTTS CHRO launches coaching with L&D and
+          HRBP 30-day check-ins.
+        flagged_by: [Manager Effectiveness & Performance]
+
+  LTF:
+    name: L&T Finance
+    aliases: [LTF, "L&T Finance"]
+    narrative: >
+      LTF pulse is healthier than Group average — succession coverage 72%, internal fill
+      nearer target. Residual watch: credit-risk leadership depth. No red scorecard exception.
+    insights:
+      - Ready-now coverage above Group average; credit-risk leadership is the residual gap.
+      - Internal fill 55% vs 60% — closeable with one mobility cycle.
+      - No draft action required this briefing window; monitor credit-risk successor IDP.
+    cells:
+      - key: core_headcount
+        label: Core staff headcount
+        value: 4100
+        unit: ""
+        delta_pct: 1.4
+        delta_direction: up
+        note: YoY
+        tone: good
+      - key: future_skill_gap
+        label: Future-skill gap · 24mo
+        value: 45
+        unit: roles
+        delta_pct: null
+        delta_direction: flat
+        note: risk / digital finance
+        tone: good
+      - key: internal_fill_rate
+        label: Internal fill rate
+        value: 55
+        unit: "%"
+        delta_pct: null
+        delta_direction: flat
+        note: target 60%
+        tone: alert
+      - key: weak_successors
+        label: Weak / no successor
+        value: 3
+        unit: ""
+        delta_pct: null
+        delta_direction: flat
+        note: of 18 critical roles
+        tone: alert
+      - key: ex_index
+        label: Employee experience index
+        value: 79
+        unit: ""
+        delta_pct: 1
+        delta_direction: up
+        note: pts vs prior
+        tone: good
+    top_issues:
+      - rank: 1
+        title: Credit-risk leadership bench
+        priority_label: Watch
+        company_code: LTF
+        company_codes: [LTF]
+        summary: >
+          Three critical roles remain thin on ready-now successors, concentrated in
+          credit-risk leadership. Coverage otherwise healthier than Group.
+        severity: medium
+        tags: [Credit risk, Bench watch]
+        recommendation: >
+          LTF CHRO confirms IDP owners for the three thin roles this month — no Group
+          draft action required yet.
+        flagged_by: [Internal Mobility & Succession]
+
+  LTMR:
+    name: L&T Metro Rail
+    aliases: [LTMR, "L&T Metro", "Metro Rail"]
+    narrative: >
+      LTMR operations and safety benches are adequate; project-controls successors are thin.
+      Internal fill 44% vs 60%. Watch item only — no red exception this window.
+    insights:
+      - Operations / safety leadership covered; project-controls succession is the gap.
+      - Internal fill below target — mobility from Group EPC adjacency underused.
+      - No draft action this briefing; arm a watch if project-controls ready-now slips further.
+    cells:
+      - key: core_headcount
+        label: Core staff headcount
+        value: 6800
+        unit: ""
+        delta_pct: 0.8
+        delta_direction: up
+        note: YoY
+        tone: good
+      - key: future_skill_gap
+        label: Future-skill gap · 24mo
+        value: 90
+        unit: roles
+        delta_pct: null
+        delta_direction: flat
+        note: controls / systems
+        tone: alert
+      - key: internal_fill_rate
+        label: Internal fill rate
+        value: 44
+        unit: "%"
+        delta_pct: null
+        delta_direction: flat
+        note: target 60%
+        tone: alert
+      - key: weak_successors
+        label: Weak / no successor
+        value: 6
+        unit: ""
+        delta_pct: null
+        delta_direction: flat
+        note: of 22 critical roles
+        tone: alert
+      - key: ex_index
+        label: Employee experience index
+        value: 76
+        unit: ""
+        delta_pct: 0
+        delta_direction: flat
+        note: pts vs prior
+        tone: good
+    top_issues:
+      - rank: 1
+        title: Project-controls succession thin
+        priority_label: Watch
+        company_code: LTMR
+        company_codes: [LTMR]
+        summary: >
+          Six critical roles lack a ready successor; project-controls and planning leads
+          are the concentration. Operations / safety benches remain adequate.
+        severity: medium
+        tags: [Project controls, Bench watch]
+        recommendation: >
+          LTMR CHRO nominates ready-1–2y successors and requests Group EPC shadowing —
+          escalate to a draft directive only if ready-now falls further next quarter.
+        flagged_by: [Internal Mobility & Succession]
+
+  LTR:
+    name: L&T Realty
+    aliases: [LTR, "L&T Realty", Realty]
+    narrative: >
+      LTR development and sales leadership are covered; design-lead succession remains a
+      watch item. Coverage near Group peers; no red scorecard exception.
+    insights:
+      - Ready-now 69%; four thin roles, design-lead the residual risk.
+      - Internal fill 50% vs 60% — one mobility cycle should close.
+      - No draft action this briefing window.
+    cells:
+      - key: core_headcount
+        label: Core staff headcount
+        value: 2100
+        unit: ""
+        delta_pct: 2.1
+        delta_direction: up
+        note: YoY
+        tone: good
+      - key: future_skill_gap
+        label: Future-skill gap · 24mo
+        value: 35
+        unit: roles
+        delta_pct: null
+        delta_direction: flat
+        note: design / digital sales
+        tone: good
+      - key: internal_fill_rate
+        label: Internal fill rate
+        value: 50
+        unit: "%"
+        delta_pct: null
+        delta_direction: flat
+        note: target 60%
+        tone: alert
+      - key: weak_successors
+        label: Weak / no successor
+        value: 4
+        unit: ""
+        delta_pct: null
+        delta_direction: flat
+        note: of 16 critical roles
+        tone: alert
+      - key: ex_index
+        label: Employee experience index
+        value: 78
+        unit: ""
+        delta_pct: 1
+        delta_direction: up
+        note: pts vs prior
+        tone: good
+    top_issues:
+      - rank: 1
+        title: Design-lead succession watch
+        priority_label: Watch
+        company_code: LTR
+        company_codes: [LTR]
+        summary: >
+          Development and sales leadership covered; design-lead succession remains the
+          residual single-point watch across 16 critical roles.
+        severity: medium
+        tags: [Design lead, Bench watch]
+        recommendation: >
+          LTR CHRO confirms the design-lead IDP owner this month — no Group draft action
+          required yet.
+        flagged_by: [Internal Mobility & Succession]

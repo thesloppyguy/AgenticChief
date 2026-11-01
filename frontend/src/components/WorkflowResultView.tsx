@@ -52,15 +52,19 @@ function asStatus(v: unknown): Status {
   return v === "green" || v === "amber" || v === "red" ? v : null;
 }
 
-function pickCard(steps: Record<string, unknown> | undefined): CardStep | null {
+export function pickCard(steps: Record<string, unknown> | undefined): CardStep | null {
   if (!steps) return null;
   const raw = (steps.card || steps.scorecard || steps.collect) as CardStep | undefined;
   return raw && typeof raw === "object" ? raw : null;
 }
 
-function pickNarrative(steps: Record<string, unknown> | undefined, result: WorkflowResultDoc): string | null {
-  if (!steps) return result.summary || result.commentary?.text || null;
-  for (const key of ["chro", "summary", "brief", "commentary", "priorities"]) {
+/** Prefer the board-ready summarize step over the longer specialist draft. */
+export function pickNarrative(
+  steps: Record<string, unknown> | undefined,
+  result: WorkflowResultDoc,
+): string | null {
+  if (!steps) return result.commentary?.text || null;
+  for (const key of ["summary", "brief", "commentary", "chro", "priorities"]) {
     const step = steps[key] as AgentStep | string | undefined;
     if (!step) continue;
     if (typeof step === "string" && step.trim()) return step;
@@ -68,7 +72,11 @@ function pickNarrative(steps: Record<string, unknown> | undefined, result: Workf
       if (typeof step.text === "string" && step.text.trim()) return step.text;
     }
   }
-  return result.summary || result.commentary?.text || null;
+  return result.commentary?.text || null;
+}
+
+function hasScorecardSummary(artifacts: ChatArtifact[]): boolean {
+  return artifacts.some((a) => a.kind === "scorecard_summary");
 }
 
 function ScorecardStrip({ card }: { card: CardStep }) {
@@ -131,16 +139,28 @@ export default function WorkflowResultView({
   const narrative = pickNarrative(result.steps, result);
   const artifacts = result.artifacts || [];
   const skipped = result.skipped || [];
+  const glance = result.summary?.trim() || null;
+  const showStrip = !!card && !hasScorecardSummary(artifacts);
+  // Avoid duplicating the one-liner when the brief already opens with it.
+  const showGlance =
+    !!glance && (!narrative || !narrative.trim().startsWith(glance.slice(0, 40)));
 
   return (
     <div className="space-y-4">
-      {result.summary && narrative !== result.summary ? (
+      {showGlance ? (
         <Card title="At a glance">
-          <p className="text-sm leading-relaxed text-muted-foreground">{result.summary}</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">{glance}</p>
         </Card>
       ) : null}
 
-      {card ? (
+      {artifacts.length > 0 ? (
+        <div className="w-full space-y-2">
+          <h2 className="text-sm font-semibold tracking-tight">Infographics</h2>
+          <ChatArtifacts artifacts={artifacts} fullWidth />
+        </div>
+      ) : null}
+
+      {showStrip ? (
         <Card
           title="Scorecard"
           action={
@@ -157,7 +177,7 @@ export default function WorkflowResultView({
 
       {narrative ? (
         <Card
-          title="Brief"
+          title="Decision note"
           action={
             skipped.length > 0 ? (
               <Badge variant="outline" className="rounded-full text-[10px]">
@@ -166,17 +186,10 @@ export default function WorkflowResultView({
             ) : null
           }
         >
-          <div className="text-sm leading-relaxed">
+          <div className="max-h-72 overflow-y-auto text-sm leading-relaxed">
             <Markdown>{narrative}</Markdown>
           </div>
         </Card>
-      ) : null}
-
-      {artifacts.length > 0 ? (
-        <div className="space-y-2">
-          <h2 className="text-sm font-semibold tracking-tight">Infographics</h2>
-          <ChatArtifacts artifacts={artifacts} />
-        </div>
       ) : null}
 
       {!card && !narrative && artifacts.length === 0 ? (
