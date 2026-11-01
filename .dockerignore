@@ -12,13 +12,5 @@
 **/*.db-shm
 **/.env
 **/.env.local
-**/.env.*.local
 e2e
-frontend
-docker
 docs
-*.md
-!seed/**/*.md
-!backend/app/knowledge/**/*.md
-!backend/company/**/*.md
-!backend/scripts/**/*.md

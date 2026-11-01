@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{DATA_DIR / 'chro.db'}"
     jwt_secret: str = "dev-secret-change-me-dev-secret-change-me"
     jwt_algorithm: str = "HS256"
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: list[str] = ["http://localhost:3000", "https://chro.lokibots.ai"]
     anthropic_api_key: str | None = None
     default_model: str = "claude-sonnet-5-5"
     routing_model: str = "claude-haiku-5-5"

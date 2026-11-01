@@ -1,11 +1,11 @@
 # Docker / Dokploy
 
-Canonical images:
+Both services use **`https://chro.lokibots.ai`**.
 
-| Service | Dockerfile | Build context |
-|---|---|---|
-| API | `backend/Dockerfile` | repo root (`.`) |
-| Web | `frontend/Dockerfile` | `frontend/` |
+| Service | Dockerfile | Build context | Domain |
+|---|---|---|---|
+| API | `backend/Dockerfile` | `backend/` | `chro.lokibots.ai` |
+| Web | `frontend/Dockerfile` | `frontend/` | `chro.lokibots.ai` |
 
 ```bash
 # from repo root
@@ -16,23 +16,32 @@ docker compose -f docker/docker-compose.yml up --build
 
 **API**
 
-- Build type: Dockerfile
-- Dockerfile path: `backend/Dockerfile`
-- Docker context: `.`
-- Port: `8000`
-- Mount a persistent volume at `/data`
-- Env: `JWT_SECRET`, `ANTHROPIC_API_KEY`, `CORS_ORIGINS=["https://<web-domain>"]`, optional `SEED_ON_START=auto|true|false`
+| Field | Value |
+|---|---|
+| Dockerfile Path | `Dockerfile` |
+| Docker Context Path | `backend` |
+| Port | `8000` |
+| Domain | `chro.lokibots.ai` |
 
-On first boot the entrypoint runs migrations and `scripts.seed_lnt --reset`, then writes `/data/.lnt_seeded`. Set `SEED_ON_START=true` to force a re-seed (wipes demo org data).
+- Volume: `/data`
+- Env:
+  - `JWT_SECRET`
+  - `ANTHROPIC_API_KEY`
+  - `CORS_ORIGINS=["https://chro.lokibots.ai"]`
+  - optional `SEED_ON_START=auto|true|false`
+
+If web and API share the host, set the API app **path** to `/api` (strip prefix) in Dokploy, and web build arg `NEXT_PUBLIC_API_URL=https://chro.lokibots.ai/api`.
 
 **Web**
 
-- Build type: Dockerfile
-- Dockerfile path: `Dockerfile` (context `frontend`) or `frontend/Dockerfile` with context `frontend`
-- Docker context: `frontend`
-- Port: `3000`
-- Build-time arg: `NEXT_PUBLIC_API_URL=https://<api-domain>`
+| Field | Value |
+|---|---|
+| Dockerfile Path | `Dockerfile` |
+| Docker Context Path | `frontend` |
+| Port | `3000` |
+| Domain | `chro.lokibots.ai` |
+| Build arg | `NEXT_PUBLIC_API_URL=https://chro.lokibots.ai` |
 
-## Dokploy (Compose)
+## DNS
 
-Compose path: `docker/docker-compose.yml`. Uncomment `dokploy-network` + Traefik labels and set your hosts. Provide `JWT_SECRET`, `ANTHROPIC_API_KEY`, `CORS_ORIGINS`, and `NEXT_PUBLIC_API_URL` in the environment.
+Point `chro.lokibots.ai` (A/AAAA or CNAME) at the Dokploy host.

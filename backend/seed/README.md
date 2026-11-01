@@ -3,14 +3,14 @@
 OE-shaped packs consumed by `backend/app/fixtures/lnt_loader.py`.
 
 ```
-seed/
+backend/seed/
   lnt_group/          Group workspace profile, people, departments, memory, docs
   companies/
     lnt_finance/      LTF
     lnt_metro_rail/   LTMR
     lnt_realty/       LTR
     lnt_technology_services/  LTTS
-    ltimindtree/      LTIM
+    LTIMindtree/      LTIM
 ```
 
 Load:

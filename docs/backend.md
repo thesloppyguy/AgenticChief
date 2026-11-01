@@ -426,7 +426,7 @@ The Playwright smoke test in `e2e/` is the opposite: it drives the real UI with 
 - Live source adapters are verified against the AI-generated endpoints and mocks, **not a real tenant**.
 - No golden test against the original Excel workbook (only its image is in the repo).
 - Approved reminders queue in `outbound_message`; no email/chat delivery channel is wired up.
-- Root-level `seed/lnt_group` and `seed/companies/*` are the L&T Group CHRO fixtures (OE-shaped).
+- `backend/seed/lnt_group` and `backend/seed/companies/*` are the L&T Group CHRO fixtures (OE-shaped).
   Load with `uv run python -m scripts.seed_lnt --reset` or `POST /fixtures/lnt/load`.
 - Org model: `Person` / `Department` / `Goal` tables + `/people`, `/departments`, `/goals`.
 - Demo RNG: `/demo/rng/*` (admin; `STUB_DATA_ENABLED` or `DEMO_RNG_ENABLED`).

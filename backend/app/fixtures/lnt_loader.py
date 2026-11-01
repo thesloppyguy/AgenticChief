@@ -1,4 +1,4 @@
-"""Load L&T Group CHRO fixtures into SQLite (OE-shaped packs under seed/)."""
+"""Load L&T Group CHRO fixtures into SQLite (OE-shaped packs under backend/seed/)."""
 from __future__ import annotations
 
 import json

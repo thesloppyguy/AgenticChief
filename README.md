@@ -7,9 +7,9 @@ Demo shape: **L&T Group CHRO** with five Independent Companies (LTF, LTMR, LTR, 
 ```
 backend/   FastAPI + SQLAlchemy + Alembic, SQLite   (Python 3.12+, uv)
 frontend/  Next.js 16 App Router + Tailwind         (pnpm)
-seed/      OE-shaped L&T Group + IC fixtures
-e2e/       Playwright browser smoke test
-docker/             compose + Dokploy notes (api + web)
+backend/seed/  OE-shaped L&T Group + IC fixtures (Docker context = backend/)
+e2e/           Playwright browser smoke test
+docker/        compose + Dokploy notes (api + web)
 ```
 
 ## Quick start
@@ -36,7 +36,7 @@ pnpm install && pnpm dev                        # http://localhost:3000
 docker compose -f docker/docker-compose.yml up --build
 ```
 
-Dokploy setup (two apps or Compose): [docker/README.md](docker/README.md).
+Dokploy setup (two apps or Compose): [docker/README.md](docker/README.md) — both on `chro.lokibots.ai`.
 
 In the UI: **Settings → Company → Load L&T demo** (admin), or `POST /fixtures/lnt/load`.
 

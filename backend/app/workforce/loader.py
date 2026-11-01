@@ -1,4 +1,4 @@
-"""Load deterministic workforce YAML from seed/lnt_group/workforce/."""
+"""Load deterministic workforce YAML from backend/seed/lnt_group/workforce/."""
 from __future__ import annotations
 
 from functools import lru_cache

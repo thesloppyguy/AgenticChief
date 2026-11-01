@@ -1,25 +1,23 @@
 # Local / Dokploy Compose deploy for AgenticChief (api + web).
 #
+# Production host (web + API): https://chro.lokibots.ai
+#
 # SQLite is single-writer: run exactly ONE api container; keep /data on a volume.
 #
-# Dokploy: set Compose Path to docker/docker-compose.yml, attach both services to
-# dokploy-network, and add Traefik domain labels (see comments below).
-#
-# Required env (file or Dokploy Environment):
-#   JWT_SECRET, ANTHROPIC_API_KEY
-#   CORS_ORIGINS=["https://your-web.example.com"]
-#   NEXT_PUBLIC_API_URL=https://your-api.example.com   (build arg for web)
+# Dokploy Compose: uncomment networks + labels below, and ensure dokploy-network exists.
+# For two apps on one host, give the API router PathPrefix(`/api`) + stripprefix in Dokploy,
+# and set NEXT_PUBLIC_API_URL=https://chro.lokibots.ai/api.
 
 services:
   api:
     build:
-      context: ..
-      dockerfile: backend/Dockerfile
+      context: ../backend
+      dockerfile: Dockerfile
     environment:
       DATABASE_URL: "sqlite:////data/chro.db"
       VECTOR_STORE_PATH: "/data/chroma"
-      # JSON list for pydantic-settings:
-      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
+      SEED_ROOT: "/app/seed"
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000","https://chro.lokibots.ai"]}
       JWT_SECRET: ${JWT_SECRET:-change-me-to-a-random-string-of-at-least-32-characters}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       SEED_ON_START: ${SEED_ON_START:-auto}
@@ -29,33 +27,35 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
-    # Dokploy Traefik (uncomment + set host):
+    # Dokploy Traefik (same host as web — use /api path in Dokploy domain settings):
     # networks: [dokploy-network]
     # labels:
     #   - traefik.enable=true
-    #   - traefik.http.routers.agenticchief-api.rule=Host(`api.example.com`)
-    #   - traefik.http.routers.agenticchief-api.entrypoints=websecure
-    #   - traefik.http.routers.agenticchief-api.tls.certResolver=letsencrypt
-    #   - traefik.http.services.agenticchief-api.loadbalancer.server.port=8000
+    #   - traefik.http.routers.chro-api.rule=Host(`chro.lokibots.ai`) && PathPrefix(`/api`)
+    #   - traefik.http.routers.chro-api.entrypoints=websecure
+    #   - traefik.http.routers.chro-api.tls.certResolver=letsencrypt
+    #   - traefik.http.middlewares.chro-api-strip.stripprefix.prefixes=/api
+    #   - traefik.http.routers.chro-api.middlewares=chro-api-strip
+    #   - traefik.http.services.chro-api.loadbalancer.server.port=8000
 
   web:
     build:
       context: ../frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://chro.lokibots.ai}
     ports:
       - "3000:3000"
     depends_on: [api]
     restart: unless-stopped
-    # Dokploy Traefik (uncomment + set host):
+    # Dokploy Traefik:
     # networks: [dokploy-network]
     # labels:
     #   - traefik.enable=true
-    #   - traefik.http.routers.agenticchief-web.rule=Host(`app.example.com`)
-    #   - traefik.http.routers.agenticchief-web.entrypoints=websecure
-    #   - traefik.http.routers.agenticchief-web.tls.certResolver=letsencrypt
-    #   - traefik.http.services.agenticchief-web.loadbalancer.server.port=3000
+    #   - traefik.http.routers.chro-web.rule=Host(`chro.lokibots.ai`)
+    #   - traefik.http.routers.chro-web.entrypoints=websecure
+    #   - traefik.http.routers.chro-web.tls.certResolver=letsencrypt
+    #   - traefik.http.services.chro-web.loadbalancer.server.port=3000
 
 volumes:
   chrodata:
