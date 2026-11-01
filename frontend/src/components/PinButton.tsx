@@ -25,10 +25,16 @@ export default function PinButton({ kind, target, label }: { kind: string; targe
   }
   return (
     <span className="inline-flex items-center gap-2">
-      <Button variant={mine ? "secondary" : "outline"} onClick={toggle} disabled={busy || pins.loading} aria-pressed={!!mine}>
+      <Button
+        variant={mine ? "secondary" : "outline"}
+        onClick={toggle}
+        disabled={busy || pins.loading}
+        aria-pressed={!!mine}
+        className="h-11 px-4 text-base"
+      >
         {mine ? "★ Pinned" : "☆ Pin"}
       </Button>
-      {err && <span role="alert" className="text-xs text-destructive">{err}</span>}
+      {err && <span role="alert" className="text-sm text-destructive">{err}</span>}
     </span>
   );
 }

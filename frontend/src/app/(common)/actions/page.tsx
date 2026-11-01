@@ -169,16 +169,16 @@ function Queue() {
   const sel = selected ?? data?.[0]?.id ?? null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <Tabs value={tab} onValueChange={(v) => { setTab(String(v)); setSelected(null); }} className="gap-4">
         <PageHeader
           title="Actions"
           subtitle="Nothing consequential happens without a second admin approving it. The Copilot and workflows can only propose."
           actions={
-            <TabsList>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="executed">Done</TabsTrigger>
-              <TabsTrigger value="all">All</TabsTrigger>
+            <TabsList className="rounded-full">
+              <TabsTrigger value="pending" className="rounded-full">Pending</TabsTrigger>
+              <TabsTrigger value="executed" className="rounded-full">Done</TabsTrigger>
+              <TabsTrigger value="all" className="rounded-full">All</TabsTrigger>
             </TabsList>
           }
         />
@@ -191,15 +191,17 @@ function Queue() {
               )}
               {data?.map((a) => (
                 <button key={a.id} onClick={() => setSelected(a.id)}
-                  className={cn("w-full rounded-xl border bg-card p-3 text-left text-sm transition-colors hover:bg-muted/50",
-                    sel === a.id && "border-accent bg-secondary")}>
+                  className={cn(
+                    "w-full rounded-2xl bg-card p-3.5 text-left text-sm shadow-sm ring-1 ring-black/5 transition-colors hover:bg-muted/40 dark:ring-white/10",
+                    sel === a.id && "bg-neutral-900 text-white ring-0 hover:bg-neutral-900 dark:bg-neutral-100 dark:text-neutral-900",
+                  )}>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium">{a.summary}</span>
-                    <Badge variant="outline" className={cn("shrink-0", STATUS_STYLE[a.status])}>
+                    <Badge variant="outline" className={cn("shrink-0", STATUS_STYLE[a.status], sel === a.id && "border-white/20 text-white dark:border-neutral-900/20 dark:text-neutral-900")}>
                       {label(a.status)}
                     </Badge>
                   </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
+                  <div className={cn("mt-1 text-xs text-muted-foreground", sel === a.id && "text-white/70 dark:text-neutral-900/70")}>
                     {label(a.action)} · {a.requested_by} · {new Date(a.created_at).toLocaleDateString()}
                   </div>
                 </button>

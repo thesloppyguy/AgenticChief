@@ -1,6 +1,16 @@
 "use client";
 
-import { Bot, Box, Brain, SquareTerminal, Terminal } from "lucide-react";
+import { useState } from "react";
+import {
+  Bot,
+  Box,
+  Brain,
+  Building2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Terminal,
+  Wrench,
+} from "lucide-react";
 
 import {
   Dialog,
@@ -18,24 +28,24 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { useState } from "react";
-
-import AssetList from "@/components/assets/AssetList";
-import { Loading } from "@/components/ui";
-import { Badge } from "@/components/ui/badge";
-import { useApi } from "@/lib/hooks";
+import { Button } from "@/components/ui/button";
+import { AgentsPanel } from "@/components/settings/AgentsPanel";
+import { SkillsPanel } from "@/components/settings/SkillsPanel";
+import { ToolsPanel } from "@/components/settings/ToolsPanel";
+import { ConnectorsPanel } from "@/components/settings/ConnectorsPanel";
+import { CompanyProfilePanel } from "@/components/settings/CompanyProfilePanel";
 import { cn } from "@/lib/utils";
-import type { CapabilityRow, ConnectionRow } from "@/lib/types";
 
-const data = {
-  nav: [
-    { name: "Agents", icon: Bot, isActive: true },
-    { name: "Skills", icon: Brain },
-    { name: "Tools", icon: SquareTerminal },
-    { name: "Connectors", icon: Box },
-    { name: "MCP Tools", icon: Terminal },
-  ],
-};
+const nav = [
+  { name: "Company", icon: Building2 },
+  { name: "Agents", icon: Bot },
+  { name: "Skills", icon: Brain },
+  { name: "Tools", icon: Wrench },
+  { name: "Connectors", icon: Box },
+  { name: "MCP Tools", icon: Terminal },
+] as const;
+
+type Tab = (typeof nav)[number]["name"];
 
 export function SettingsDialog({
   open,
@@ -44,134 +54,100 @@ export function SettingsDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [activeTab, setActiveTab] = useState(data.nav[0].name);
+  const [activeTab, setActiveTab] = useState<Tab>("Company");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden p-0 md:max-h-[500px] md:max-w-[700px] lg:max-w-[800px]">
+      <DialogContent className="h-[820px] max-h-[820px] w-[1080px] max-w-[1080px] overflow-hidden p-0 sm:max-w-[1080px]">
         <DialogTitle className="sr-only">Settings</DialogTitle>
         <DialogDescription className="sr-only">
-          Customize your settings here.
+          Agents, skills, tools, and connectors.
         </DialogDescription>
-        <SidebarProvider className="items-start">
-          <Sidebar collapsible="none" className="hidden md:flex">
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {data.nav.map((item) => (
-                      <SidebarMenuItem key={item.name}>
-                        <SidebarMenuButton
-                          render={<a href="#" />}
-                          isActive={item.name === activeTab}
-                          onClick={() => setActiveTab(item.name)}
-                        >
-                          <item.icon />
-                          <span>{item.name}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
-          </Sidebar>
-          <main className="flex h-[480px] flex-1 flex-col overflow-hidden">
-            <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"></header>
-            <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 pt-0">
-              {activeTab === "Agents" && <Agents />}
-              {activeTab === "Skills" && <Skills />}
-              {activeTab === "Tools" && <Tools />}
-              {activeTab === "Connectors" && <Connectors />}
-              {activeTab === "MCP Tools" && <MCPTools />}
+        <SidebarProvider className="h-full min-h-0 items-stretch">
+          {sidebarOpen && (
+            <Sidebar collapsible="none" className="hidden h-full border-r border-black/5 bg-white md:flex dark:border-white/10 dark:bg-background">
+              <SidebarContent className="h-full overflow-hidden">
+                <SidebarGroup>
+                  <div className="px-4 pb-3 pt-4">
+                    <div className="text-sm font-semibold text-foreground">Settings</div>
+                    <p className="text-pretty text-xs leading-relaxed text-muted-foreground">
+                      Agents, skills, tools, connectors
+                    </p>
+                  </div>
+                  <SidebarGroupContent className="px-2">
+                    <SidebarMenu>
+                      {nav.map((item) => (
+                        <SidebarMenuItem key={item.name}>
+                          <SidebarMenuButton
+                            render={<button type="button" />}
+                            isActive={item.name === activeTab}
+                            onClick={() => setActiveTab(item.name)}
+                            className={cn(
+                              "rounded-xl",
+                              item.name === activeTab &&
+                                "bg-muted font-medium text-foreground shadow-none",
+                            )}
+                          >
+                            <item.icon />
+                            <span>{item.name}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              </SidebarContent>
+            </Sidebar>
+          )}
+          <main className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-[#F4F5F4] dark:bg-background">
+            <header className="flex h-11 shrink-0 items-center gap-2 border-b border-black/5 bg-white/80 px-3 backdrop-blur-sm dark:border-white/10 dark:bg-background/80">
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                aria-label={sidebarOpen ? "Hide settings menu" : "Show settings menu"}
+                onClick={() => setSidebarOpen((v) => !v)}
+              >
+                {sidebarOpen ? <PanelLeftClose /> : <PanelLeftOpen />}
+              </Button>
+              {!sidebarOpen && (
+                <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto pb-0.5">
+                  {nav.map((item) => (
+                    <Button
+                      key={item.name}
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className={cn(
+                        "shrink-0",
+                        item.name === activeTab
+                          ? "bg-muted font-medium text-foreground ring-1 ring-border"
+                          : "text-foreground/70",
+                      )}
+                      onClick={() => setActiveTab(item.name)}
+                    >
+                      <item.icon />
+                      {item.name}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              {sidebarOpen && (
+                <div className="text-sm font-semibold text-foreground">{activeTab}</div>
+              )}
+            </header>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 md:p-5">
+              {activeTab === "Company" && <CompanyProfilePanel />}
+              {activeTab === "Agents" && <AgentsPanel />}
+              {activeTab === "Skills" && <SkillsPanel />}
+              {activeTab === "Tools" && <ToolsPanel />}
+              {activeTab === "Connectors" && <ConnectorsPanel />}
+              {activeTab === "MCP Tools" && <ConnectorsPanel mcpOnly />}
             </div>
           </main>
         </SidebarProvider>
       </DialogContent>
     </Dialog>
   );
-}
-
-/** Skills and agents already have a full authoring UI; it just had no home after the rewrite. */
-function Agents() {
-  return <AssetList kind="agent" />;
-}
-
-function Skills() {
-  return <AssetList kind="skill" />;
-}
-
-const RISK_STYLE: Record<string, string> = {
-  read: "border-success/30 bg-success/10 text-success",
-  internal_write: "border-warning/30 bg-warning/10 text-warning",
-  external_message: "border-warning/30 bg-warning/10 text-warning",
-  destructive: "border-destructive/30 bg-destructive/10 text-destructive",
-};
-
-function Tools() {
-  const { data, error, loading } = useApi<CapabilityRow[]>("/capabilities");
-  return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
-        Capabilities discovered from connected systems. Only a published, read-only one an admin has
-        allowed can be offered to the Copilot.
-      </p>
-      <Loading error={error} loading={loading && !data} />
-      {data?.length === 0 && <p className="text-sm text-muted-foreground">Nothing discovered yet.</p>}
-      <ul className="divide-y">
-        {data?.map((c) => (
-          <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
-            <div className="min-w-0">
-              <div className="truncate font-medium">{c.name}</div>
-              <div className="truncate text-xs text-muted-foreground">{c.key}</div>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <Badge variant="outline" className={cn(RISK_STYLE[c.risk])}>{c.risk.replace(/_/g, " ")}</Badge>
-              <Badge variant="outline">
-                {c.published_version ? `published v${c.published_version}` : "unpublished"}
-              </Badge>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function ConnectionList({ only }: { only?: string }) {
-  const { data, error, loading } = useApi<ConnectionRow[]>("/connections");
-  const rows = only ? data?.filter((c) => c.type === only) : data;
-  return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
-        Credentials are referenced by environment-variable name and are never stored or shown here.
-      </p>
-      <Loading error={error} loading={loading && !data} />
-      {rows?.length === 0 && <p className="text-sm text-muted-foreground">No connections yet.</p>}
-      <ul className="divide-y">
-        {rows?.map((c) => (
-          <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
-            <div className="min-w-0">
-              <div className="truncate font-medium">{c.name}</div>
-              <div className="truncate text-xs text-muted-foreground">
-                {c.type} · {c.capability_count} capabilities
-              </div>
-            </div>
-            <Badge variant="outline"
-              className={cn(c.health_status === "healthy" && "border-success/30 bg-success/10 text-success",
-                c.health_status === "unhealthy" && "border-destructive/30 bg-destructive/10 text-destructive")}>
-              {c.health_status}
-            </Badge>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function Connectors() {
-  return <ConnectionList />;
-}
-
-function MCPTools() {
-  return <ConnectionList only="mcp" />;
 }

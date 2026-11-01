@@ -38,6 +38,8 @@ PARAMS: dict[str, set[str]] = {
     "monthly_review": {"period"},
     "watch": {"period", "watch_id"},
     "workflow": {"period", "workflow_key"},
+    "morning_brief": set(),
+    "end_of_day_digest": set(),
 }
 
 

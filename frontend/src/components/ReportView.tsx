@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -66,7 +65,7 @@ export default function ReportView({ r }: { r: ReportDoc }) {
 
       <Card title="Exceptions">
         <ul className="space-y-1 text-sm">
-          {r.exceptions.no_source.length > 0 && <li><strong>No source ({r.exceptions.no_source.length}):</strong> {r.exceptions.no_source.map(label).join(", ")}. <Link href="/connections" className="underline">Connections</Link></li>}
+          {r.exceptions.no_source.length > 0 && <li><strong>No source ({r.exceptions.no_source.length}):</strong> {r.exceptions.no_source.map(label).join(", ")}. Check Settings → Connectors.</li>}
           {r.exceptions.missing.slice(0, 8).map((m) => <li key={m.kpi}>Missing: {label(m.kpi)} for {m.missing_count} companies (e.g. {m.sample.slice(0, 4).join(", ")})</li>)}
           {r.exceptions.not_due.length > 0 && <li>Not yet due: {r.exceptions.not_due.map(label).join(", ")}</li>}
           {r.exceptions.low_coverage.count > 0 && <li>{r.exceptions.low_coverage.count} companies have a pillar with nothing scoreable</li>}

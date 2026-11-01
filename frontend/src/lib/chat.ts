@@ -2,7 +2,8 @@ import { API_URL, getToken } from "./api";
 
 export interface ChatBody {
   message?: string; session_id?: number | null; period?: string;
-  skill_key?: string; skill_inputs?: Record<string, unknown>; agent_key?: string; allow_draft?: boolean;
+  skill_name?: string; skill_key?: string; skill_inputs?: Record<string, unknown>;
+  agent_key?: string; allow_draft?: boolean;
 }
 export interface ChatHandlers {
   onChunk: (text: string) => void; onTool: (name: string) => void; onDone: (sessionId: number) => void; onError: (message: string) => void;

@@ -279,7 +279,7 @@ function Builder({ onSaved }: { onSaved: () => void }) {
         <Field>
           <FieldLabel htmlFor="desc">What should it do?</FieldLabel>
           <Textarea id="desc" rows={3} value={description}
-            placeholder="Each month, build the group scorecard, find companies missing L&D data, and summarise what needs chasing."
+            placeholder="Each month, build the group overview, find companies missing L&D data, and summarise what needs chasing."
             onChange={(e) => setDescription(e.target.value)} />
         </Field>
         <Button onClick={plan} disabled={busy || description.trim().length < 10}>
@@ -403,16 +403,16 @@ function Definitions() {
 
 export default function WorkflowsPage() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <Tabs defaultValue="workflows" className="gap-4">
         <PageHeader
           title="Workflows"
           subtitle="Repeatable work the platform runs for you. Anything consequential is still only ever proposed."
           actions={
-            <TabsList>
-              <TabsTrigger value="workflows">Workflows</TabsTrigger>
-              <TabsTrigger value="watches">Watches</TabsTrigger>
-              <TabsTrigger value="runs">Runs</TabsTrigger>
+            <TabsList className="rounded-full">
+              <TabsTrigger value="workflows" className="rounded-full">Workflows</TabsTrigger>
+              <TabsTrigger value="watches" className="rounded-full">Watches</TabsTrigger>
+              <TabsTrigger value="runs" className="rounded-full">Runs</TabsTrigger>
             </TabsList>
           }
         />

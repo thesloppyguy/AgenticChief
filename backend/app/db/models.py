@@ -234,88 +234,6 @@ class AlertRead(Base):
     user_id: Mapped[str] = mapped_column(String(128), index=True)
 
 
-class Connection(Base):
-    """An MCP server, an OpenAPI-described API, or the built-in function tools. Holds no secrets: auth
-    config names environment variables, never their values."""
-
-    __tablename__ = "connection"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    slug: Mapped[str] = mapped_column(String(48), unique=True)
-    name: Mapped[str] = mapped_column(String(120))
-    type: Mapped[str] = mapped_column(String(12))  # mcp | api | function
-    config: Mapped[dict] = mapped_column(JSON)
-    active: Mapped[bool] = mapped_column(default=True)
-    health_status: Mapped[str] = mapped_column(String(12), default="unknown")  # unknown|healthy|unhealthy
-    health_checked_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
-    health_detail: Mapped[str | None] = mapped_column(String(200))
-    last_discovered_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
-    created_by: Mapped[str] = mapped_column(String(128))
-    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
-
-
-class Capability(Base):
-    """One normalized tool. `version` is the latest discovered definition; `published_version` is what
-    production actually runs, so a changed upstream schema never goes live unreviewed."""
-
-    __tablename__ = "capability"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    connection_id: Mapped[int] = mapped_column(ForeignKey("connection.id"), index=True)
-    key: Mapped[str] = mapped_column(String(160), unique=True)  # stable id: <connection slug>.<tool name>
-    name: Mapped[str] = mapped_column(String(120))
-    description: Mapped[str] = mapped_column(String)
-    input_schema: Mapped[dict] = mapped_column(JSON)
-    output_schema: Mapped[dict | None] = mapped_column(JSON)
-    implementation: Mapped[dict] = mapped_column(JSON)
-    risk: Mapped[str] = mapped_column(String(24))  # effective: read | internal_write | external_message | destructive
-    risk_override: Mapped[str | None] = mapped_column(String(24))  # an admin's reclassification; survives rediscovery
-    permissions: Mapped[list] = mapped_column(JSON)  # roles allowed to invoke
-    version: Mapped[int] = mapped_column(Integer, default=1)
-    validated_version: Mapped[int | None] = mapped_column(Integer)
-    published_version: Mapped[int | None] = mapped_column(Integer)
-    removed: Mapped[bool] = mapped_column(default=False)  # no longer offered by its connection
-    deprecated: Mapped[bool] = mapped_column(default=False)
-    lifecycle: Mapped[str] = mapped_column(String(24), index=True)
-    schema_hash: Mapped[str] = mapped_column(String(64))
-    validation: Mapped[dict | None] = mapped_column(JSON)
-    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
-
-
-class CapabilityVersion(Base):
-    __tablename__ = "capability_version"
-    __table_args__ = (UniqueConstraint("capability_id", "version", name="uq_capability_version"),)
-    id: Mapped[int] = mapped_column(primary_key=True)
-    capability_id: Mapped[int] = mapped_column(ForeignKey("capability.id"), index=True)
-    version: Mapped[int] = mapped_column(Integer)
-    description: Mapped[str] = mapped_column(String)
-    input_schema: Mapped[dict] = mapped_column(JSON)
-    output_schema: Mapped[dict | None] = mapped_column(JSON)
-    implementation: Mapped[dict] = mapped_column(JSON)
-    risk: Mapped[str] = mapped_column(String(24))
-    schema_hash: Mapped[str] = mapped_column(String(64))
-    validated: Mapped[bool] = mapped_column(default=False)  # a version can be (re)published only if validated
-    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
-
-
-class KpiMapping(Base):
-    """Which capability supplies a KPI's raw counts, reviewed by an admin before production use."""
-
-    __tablename__ = "kpi_mapping"
-    __table_args__ = (UniqueConstraint("kpi_key", "capability_id", name="uq_kpi_mapping"),)
-    id: Mapped[int] = mapped_column(primary_key=True)
-    kpi_key: Mapped[str] = mapped_column(String(64), index=True)
-    capability_id: Mapped[int] = mapped_column(ForeignKey("capability.id"), index=True)
-    field_map: Mapped[dict] = mapped_column(JSON)  # raw field -> path in the capability's output
-    arg_template: Mapped[dict] = mapped_column(JSON)  # capability argument -> "{company_code}" etc.
-    status: Mapped[str] = mapped_column(String(16), index=True)  # recommended|approved|rejected|superseded
-    score: Mapped[float] = mapped_column(Float, default=0.0)
-    reasons: Mapped[list | None] = mapped_column(JSON)
-    created_by: Mapped[str] = mapped_column(String(128))
-    approved_by: Mapped[str | None] = mapped_column(String(128))
-    approved_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
-    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
-
-
 class ScorecardConfigVersion(Base):
     """A version of the scoring rules. Exactly one is active; with none stored, the built-in defaults
     (version 1) apply. Activation needs a second admin's approval."""
@@ -370,13 +288,13 @@ class DocumentChunk(Base):
 
 
 class Asset(Base):
-    """A skill (a reusable task) or an agent (a specialist configuration). Versioned and governed like a
-    capability: draft -> validated -> published, with publication approved by a second admin."""
+    """Versioned workflow definition (kind='workflow'). Skills and agents live as Markdown/code
+    registries (OpenExecutive port), not in this table."""
 
     __tablename__ = "asset"
     __table_args__ = (UniqueConstraint("kind", "key", name="uq_asset_key"),)
     id: Mapped[int] = mapped_column(primary_key=True)
-    kind: Mapped[str] = mapped_column(String(8), index=True)  # skill | agent
+    kind: Mapped[str] = mapped_column(String(8), index=True)  # workflow
     key: Mapped[str] = mapped_column(String(64))
     name: Mapped[str] = mapped_column(String(120))
     description: Mapped[str] = mapped_column(String(500), default="")
@@ -478,4 +396,76 @@ class UserMemory(Base):
     summary: Mapped[str] = mapped_column(String(400))
     session_id: Mapped[int | None] = mapped_column(Integer)
     pinned: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
+
+
+class HistoryNote(Base):
+    """Always-in-the-loop private note grounded in the user's own words."""
+
+    __tablename__ = "history_note"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(128), index=True)
+    kind: Mapped[str] = mapped_column(String(16))  # promised|agreed|declined|answered|asked|shared
+    summary: Mapped[str] = mapped_column(String(400))
+    quote: Mapped[str] = mapped_column(String(600))
+    due_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), index=True)
+    session_id: Mapped[int | None] = mapped_column(Integer)
+    pinned: Mapped[bool] = mapped_column(default=False)
+    correction: Mapped[str | None] = mapped_column(String(400))
+    expires_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), index=True)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
+
+
+class HistorySettings(Base):
+    """Per-user toggle for always-in-the-loop note extraction."""
+
+    __tablename__ = "history_settings"
+    user_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    enabled: Mapped[bool] = mapped_column(default=True)
+    updated_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
+
+
+class Reminder(Base):
+    """Fixed-text private reminder created via remind_me."""
+
+    __tablename__ = "reminder"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(128), index=True)
+    text: Mapped[str] = mapped_column(String(400))
+    due_at: Mapped[datetime] = mapped_column(UtcDateTime(), index=True)
+    session_id: Mapped[int | None] = mapped_column(Integer)
+    claimed_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    sent_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    cancelled_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
+
+
+class OpenLoop(Base):
+    """Tracked commitment / open loop extracted from chat or assigned explicitly."""
+
+    __tablename__ = "open_loop"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(128), index=True)
+    description: Mapped[str] = mapped_column(String(400))
+    quote: Mapped[str] = mapped_column(String(600), default="")
+    due_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), index=True)
+    status: Mapped[str] = mapped_column(String(16), default="open")  # open | closed
+    scope_key: Mapped[str] = mapped_column(String(160), index=True)
+    session_id: Mapped[int | None] = mapped_column(Integer)
+    last_nudged_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
+    closed_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+
+
+class BriefArtifact(Base):
+    """Persisted morning brief / EOD digest for in-app delivery."""
+
+    __tablename__ = "brief_artifact"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kind: Mapped[str] = mapped_column(String(24), index=True)  # morning_brief | end_of_day_digest
+    user_id: Mapped[str | None] = mapped_column(String(128), index=True)  # None = workspace-wide
+    period_date: Mapped[str] = mapped_column(String(10), index=True)  # YYYY-MM-DD local
+    fingerprint: Mapped[str] = mapped_column(String(64))
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())

@@ -19,7 +19,6 @@ from pydantic import BaseModel
 
 from app.alerts.engine import prev_period
 from app.approvals import service as approvals
-from app.assets import service as asset_service
 from app.reports import commentary
 from app.services import scorecard as sc
 
@@ -102,25 +101,52 @@ def _tool(ctx: StepCtx, a) -> dict:
     return run_tool(ctx.db, ctx.who, a.name, dict(a.args), None)
 
 
-def _asset(ctx: StepCtx, kind: str, key: str, message: str, inputs: dict | None) -> dict:
-    client = ctx.deps.get("allm")
-    if client is None:  # mirrors commentary.generate: no client is a skip, not a failure
-        return {**NO_LLM, "ran": f"{kind}:{key}"}
-    try:
-        spec = asset_service.resolve(ctx.db, ctx.who, kind, key, inputs)
-    except asset_service.AssetError as e:
-        return {"error": e.message, "ran": f"{kind}:{key}"}
-    text, called = asyncio.run(asset_service.run_headless(
-        client, ctx.db, ctx.who, spec, message, ctx.run.period))
-    return {"text": text, "tools_called": sorted(called), "version": spec.version, "ran": f"{kind}:{key}"}
-
-
 def _skill(ctx: StepCtx, a) -> dict:
-    return _asset(ctx, "skill", a.key, f'Run the "{a.key}" skill.', dict(a.inputs))
+    """Load a Markdown playbook and ask the Executive to follow it."""
+    from app.knowledge.skills_repo import SkillNotFoundError, get_skill
+    from app.orchestrator.executive import chat_turn
+
+    client = ctx.deps.get("allm")
+    if client is None:
+        return {**NO_LLM, "ran": f"skill:{a.key}"}
+    try:
+        skill = get_skill(a.key)
+    except SkillNotFoundError as e:
+        return {"error": str(e), "ran": f"skill:{a.key}"}
+    message = (
+        f"Follow the playbook `{skill.frontmatter.name}`.\n\n{skill.body}\n\n"
+        f"Inputs: {dict(a.inputs)}"
+    )
+
+    async def _run() -> str:
+        parts: list[str] = []
+        async for ev in chat_turn(
+            client, ctx.db, ctx.who, [], message, ctx.run.period, None, None, max_rounds=4
+        ):
+            if ev.get("type") == "chunk":
+                parts.append(ev.get("content") or "")
+        return "".join(parts)
+
+    text = asyncio.run(_run())
+    return {"text": text, "ran": f"skill:{a.key}"}
 
 
 def _agent(ctx: StepCtx, a) -> dict:
-    return _asset(ctx, "agent", a.key, a.message, None)
+    """Consult a code-registered specialist by key."""
+    from app.orchestrator.router import SPECIALIST_REGISTRY
+
+    agent = SPECIALIST_REGISTRY.get(a.key)
+    if agent is None:
+        return {"error": f"unknown specialist '{a.key}'", "ran": f"agent:{a.key}"}
+
+    async def _run() -> str:
+        return await agent.analyze(query=a.message)
+
+    try:
+        text = asyncio.run(_run())
+    except Exception as e:  # noqa: BLE001
+        return {"error": f"{type(e).__name__}: {e}", "ran": f"agent:{a.key}"}
+    return {"text": text, "ran": f"agent:{a.key}"}
 
 
 def _summarize(ctx: StepCtx, a) -> dict:

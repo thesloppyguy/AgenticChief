@@ -64,8 +64,41 @@ class Settings(BaseSettings):
     stub_generator_model: str = "claude-opus-5-5"
     integrations: dict[str, IntegrationConfig] = Field(default_factory=dict)
 
+    # OpenExecutive-style agents / skills / MCP
+    specialist_effort: Literal["low", "medium", "high", "xhigh", "max"] = "low"
+    company_dir: str = str(DATA_DIR.parent / "company")
+    vector_store_path: str = str(DATA_DIR / "chroma")
+    mcp_enabled: bool = False
+    mcp_servers_path: str = str(DATA_DIR.parent / "company" / "mcp_servers.json")
+    mcp_tool_timeout_s: float = 120.0
+    mcp_client_actions: bool = False
+
+    # Web search (Anthropic native server tool)
+    enable_web_search: bool = False
+    web_search_max_uses: int = 2
+    web_search_allowed_domains: list[str] = Field(default_factory=list)
+    web_search_blocked_domains: list[str] = Field(default_factory=list)
+
+    user_timezone: str = "UTC"
+    morning_brief_hour: int = 8
+    eod_digest_hour: int = 18
+    history_retention_days: int = 90
+    reminder_max_pending: int = 25
+
     def integration(self, source: str) -> IntegrationConfig:
         return self.integrations.get(source, IntegrationConfig())
+
+    @property
+    def company_profile_path(self):
+        from pathlib import Path
+
+        return Path(self.company_dir) / "profile.yaml"
+
+    @property
+    def company_skills_path(self):
+        from pathlib import Path
+
+        return Path(self.company_dir) / "skills"
 
 
 settings = Settings()

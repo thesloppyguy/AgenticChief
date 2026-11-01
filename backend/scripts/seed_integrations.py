@@ -61,11 +61,9 @@ def main() -> None:
 
     upgrade_head()
     with SessionLocal() as db:
-        from app.assets.builtin import seed_builtin as seed_assets
         from app.knowledge.builtin import seed_builtin as seed_docs
 
         seed_docs(db)
-        seed_assets(db)
         ensure_companies(db)
         extractors = registry.build_extractors(db=db)
         for period in fiscal_periods(a.through):

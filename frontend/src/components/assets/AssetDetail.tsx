@@ -41,7 +41,7 @@ function RunForm({ asset, kind }: { asset: Detail; kind: Kind }) {
       if (v === "" || v === undefined) return [];
       return [[k, p.type === "integer" ? parseInt(String(v), 10) : p.type === "number" ? Number(v) : v]];
     }));
-    await streamChat({ skill_key: asset.key, skill_inputs: inputs, period, allow_draft: draft }, {
+    await streamChat({ skill_name: asset.key, skill_key: asset.key, skill_inputs: inputs, period, allow_draft: draft }, {
       onChunk: (c) => setOut((o) => o + c), onTool: (n) => setTools((t) => [...t, n]),
       onError: setErr, onDone: setSid,
     });

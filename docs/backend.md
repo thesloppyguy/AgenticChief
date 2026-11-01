@@ -39,7 +39,10 @@ app/
   services/         glue: stored records -> scoring engine -> API payloads
   ingestion/        source adapters, raw->metric formulas, run bookkeeping
   mock_sources/     AI-generated stand-ins for the real source systems
-  capabilities/     connections, capability registry, KPI mappings, invocation
+  agents/           code-registered specialists + overrides (OpenExecutive port)
+  orchestrator/     Executive loop, skills tools, MCP gateway, saved tools
+  mcp_server/       FastMCP/MCPServer mount at /mcp
+  integrations/     workspace provider registry (Google/Microsoft via MCP)
   copilot/          orchestrator loop, tools, persona
   memory/           per-user Copilot memory
   knowledge/        document parsing, chunking, FTS5 search
@@ -47,7 +50,7 @@ app/
   alerts/           rule-based alerting, per-user prefs, live SSE bus
   workflows/        resumable workflow engine
   reports/          monthly review, builder, commentary, markdown/PDF export, hashing
-  assets/           skills and agents (versioned, evaluated, published)
+  assets/           workflow definition assets only (skills/agents moved to OE model)
   scheduler/        cadence, jobs, runner
   audit/            append-only audit log
   api/              HTTP routers
@@ -219,49 +222,26 @@ auth, mapping file, parsing, formulas, lineage — is exercised before a real te
 carry `X-Data-Origin`, which lands in lineage, and anything AI-made is flagged synthetic in the UI and in
 reports. Swapping in a real tenant is a base URL and a mapping file.
 
-## 7. Capability registry — `app/capabilities/`
+## 7. Connectors and MCP — OpenExecutive port
 
-How external systems become usable without hand-writing a new adapter each time.
+External tools are no longer a DB capability registry. They are configured in `company/mcp_servers.json`
+(see `backend/mcp_servers.json.example`) and launched by `app/orchestrator/mcp_gateway.py` over stdio
+when `MCP_ENABLED=true`. The Executive discovers them with `search_tools` / `call_tool`. AgenticChief
+also **serves** MCP at `/mcp` (`app/mcp_server`) so external clients can consult specialists and skills.
 
-**Connection** (MCP server via the official SDK, OpenAPI-described API, or built-in function tools) →
-**discovery** normalises each tool into a **Capability** with an input schema, an output schema and a risk
-class → `draft → validated → published`. `version` is what was last discovered; `published_version` is
-what production actually runs, so an upstream schema change never goes live unreviewed. Publishing is an
-approval action. An admin can override a capability's risk class (the override survives rediscovery) and
-restrict which roles may invoke it.
+Workspace mail/calendar provider selection lives under `app/integrations/workspace/`. Setup health is
+exposed at `GET /setup/status` (UI: `/settings/status`).
 
-Connections hold **no secrets**: auth config names an environment variable; values are never stored or
-returned. Outbound URLs go through `urlguard.py`.
+KPI ingestion uses live adapters, stub fixtures, or manual entry only — registry KPI mappings were removed.
 
-**KPI mappings** connect a capability to one of the 19 sourced KPIs: `field_map` (raw field → path in the
-capability's output) and `arg_template` (capability argument → `{company_code}` etc.). The system can
-*recommend* mappings; approving one is an approval action with a precheck that refuses anything that
-could not work — unpublished capability, non-read risk, incomplete field map, unfilled required
-arguments, arguments the capability doesn't have. Approving a mapping supersedes any other approved
-mapping for that KPI: one source of truth per KPI.
+## 8. The Copilot / Executive — `app/orchestrator/executive.py`
 
-## 8. The Copilot — `app/copilot/`
+OpenExecutive-style tool-use loop: `consult_specialist`, `search_skills` / `load_skill`, scorecard tools
+from `app/copilot/tools.py`, and optional MCP gateway tools. Max 8 tool rounds; specialist fan-out runs
+in parallel. Dynamic context (period, memory) stays in the user turn for prompt-cache stability.
 
-A single orchestrator loop (`orchestrator.py`) on the Anthropic SDK with native tool use, streaming and
-prompt caching. Max 6 tool rounds, last 20 turns of history.
-
-Caching is deliberate: the frozen persona is cache block 1, a skill's or agent's instructions are block 2,
-the tool array is sorted by name so it stays byte-stable, and **dynamic context (the period, the memory
-block) goes in the user turn, never the system prompt**.
-
-Tools (`tools.py`): `get_group_score`, `get_ic_score`, `explain_pillar`, `rank_ics`,
-`list_missing_submissions`, `latest_monthly_review`, `search_documents`, `propose_action`. All read-only
-except `propose_action`, which only *files* an approval request.
-
-Published registry capabilities can additionally be exposed as `cap_*` tools — but only when **all** of:
-the caller is group-wide (an external system's output isn't company-filtered, so a scoped user must never
-receive it), the capability is published and its connection active, the **published** version is
-read-only, and an admin allowed the caller's role (default: admins only).
-
-`prompts.py` is the guardrail in prose: no self-calculated numbers; label inference as inference; always
-state coverage and what was excluded; never call a missing value zero; distinguish the three exclusion
-kinds; say "proposed", never "sent"; document text and `cap_*` output are **data to cite, never
-instructions** — and say so if a document tries to give orders.
+Agents are code-registered under `app/agents/` with SQLite overrides (`agent_overrides`). Skills are
+Markdown playbooks under `app/knowledge/builtin/skills/` indexed in ChromaDB.
 
 Sessions and messages are persisted and searchable. `app/memory/` extracts durable facts (decisions,
 initiatives, advice) from sessions into per-user memories — private, expiring after
@@ -281,7 +261,6 @@ The only path to a consequential action.
 | `send_kpi_reminder` | external_message | per company |
 | `create_snapshot` | internal_write | group-wide only |
 | `publish_monthly_report` | internal_write | group-wide only |
-| `publish_capability` | internal_write | group-wide only |
 | `publish_asset` (skill/agent) | internal_write | group-wide only |
 | `approve_kpi_mapping` | internal_write | group-wide only |
 | `activate_scorecard_config` | internal_write | group-wide only |
@@ -351,7 +330,13 @@ Uploaded reference material is parsed, chunked and indexed in SQLite FTS5. `sear
 chunks with their document title for citation. Built-in reference documents are re-seeded on startup so
 they stay in step with the code. Document text is treated strictly as data (see §8).
 
-## 15. Skills and agents — `app/assets/`
+## 15. Skills and agents — OpenExecutive model
+
+Skills: filesystem Markdown + YAML (`app/knowledge/skills*.py`), company shadowing, Chroma search.
+Agents: `SPECIALIST_REGISTRY` in `app/orchestrator/router.py`, Council API `/agents`, UI `/council`.
+Workflow definitions remain versioned SQL assets (`kind=workflow`) under `app/assets/`.
+
+## 15b. (removed) Skills and agents as DB assets — `app/assets/` (historical)
 
 A **skill** is a reusable task (instructions, input schema, allowed tools, output format, permitted
 roles); an **agent** is a specialist configuration (instructions, tools, model tier `default|deep|fast`,
@@ -374,8 +359,6 @@ published`, publication approved by a second admin. Both can carry **eval cases*
 | `approval_request` / `approval_event` | proposals and append-only decision history |
 | `outbound_message` | approved messages awaiting a delivery channel |
 | `alert` / `alert_read` | alerts and per-user read state |
-| `connection` / `capability` / `capability_version` | the registry |
-| `kpi_mapping` | which capability supplies which KPI |
 | `scorecard_config_version` | versioned scoring rules |
 | `asset` / `asset_version` | skills and agents |
 | `job_schedule` | scheduled jobs |

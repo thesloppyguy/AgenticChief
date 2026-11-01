@@ -112,5 +112,25 @@ def job_workflow(db: Session, params: dict, now: datetime, deps: dict[str, Any])
     return f"{period}: {a.key} run #{run.id} completed"
 
 
-JOBS = {"ingest": job_ingest, "monthly_review": job_monthly_review, "watch": job_watch,
-        "workflow": job_workflow}
+def job_morning_brief(db: Session, params: dict, now: datetime, deps: dict[str, Any]) -> str:
+    del params, now, deps
+    from app.workflows.briefs import run_morning_brief
+
+    return run_morning_brief(db)
+
+
+def job_end_of_day_digest(db: Session, params: dict, now: datetime, deps: dict[str, Any]) -> str:
+    del params, now, deps
+    from app.workflows.briefs import run_eod_digest
+
+    return run_eod_digest(db)
+
+
+JOBS = {
+    "ingest": job_ingest,
+    "monthly_review": job_monthly_review,
+    "watch": job_watch,
+    "workflow": job_workflow,
+    "morning_brief": job_morning_brief,
+    "end_of_day_digest": job_end_of_day_digest,
+}

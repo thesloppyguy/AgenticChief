@@ -21,7 +21,7 @@ import { fmt, label } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import type { DocumentDetail, DocumentRow, KpiCatalog } from "@/lib/types";
 
-const ACCEPT = ".pdf,.doc,.docx,.xls,.xlsx,.csv,.md,.txt";
+const ACCEPT = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.md,.txt,.markdown";
 const size = (n: number) => (n < 1024 * 1024 ? `${(n / 1024).toFixed(1)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB");
 
@@ -131,7 +131,7 @@ function Documents({ data, error, loading, reload }: ReturnType<typeof useApi<Do
             over ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
           <p className="text-sm text-muted-foreground">Drop files here to add them</p>
           <p className="mt-1 text-xs text-muted-foreground/70">
-            PDF, Word, Excel, CSV, Markdown or text, up to 50 MB each
+            PDF, Word, PowerPoint, Excel, CSV, Markdown or text, up to 50 MB each
           </p>
         </div>
       )}

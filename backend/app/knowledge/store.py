@@ -77,6 +77,18 @@ def add_document(db: Session, who: Principal, title: str, filename: str, data: b
         db.execute(text("INSERT INTO chunk_fts(text, chunk_id, document_id) VALUES (:t, :c, :d)"),
                    # The title is indexed with every passage so a search by a document's name finds it.
                    {"t": f"{doc.title}\n{c}", "c": row.id, "d": doc.id})
+    try:
+        from app.knowledge.loader import mirror_document_chunks
+
+        mirror_document_chunks(
+            document_id=doc.id,
+            title=doc.title,
+            domain=domain,
+            chunks=chunks,
+            builtin=builtin,
+        )
+    except Exception:
+        pass
     audit(db, who, "document_added", f"{doc.id}:{doc.title}", {"chunks": len(chunks), "builtin": builtin})
     if commit:
         db.commit()
@@ -86,6 +98,19 @@ def add_document(db: Session, who: Principal, title: str, filename: str, data: b
 def delete_document(db: Session, who: Principal, doc: Document, commit: bool = True) -> None:
     db.execute(text("DELETE FROM chunk_fts WHERE document_id = :d"), {"d": doc.id})
     db.execute(delete(DocumentChunk).where(DocumentChunk.document_id == doc.id))
+    try:
+        from app.knowledge.chroma_store import ChromaDBStore
+        from app.core.config import settings
+
+        store = ChromaDBStore(settings.vector_store_path)
+        coll = (
+            ChromaDBStore.BUILTIN_COLLECTION
+            if doc.builtin
+            else ChromaDBStore.COMPANY_COLLECTION
+        )
+        store.delete_documents(coll, {"document_id": doc.id})
+    except Exception:
+        pass
     audit(db, who, "document_deleted", f"{doc.id}:{doc.title}")
     db.delete(doc)
     if commit:

@@ -79,6 +79,26 @@ def release_orphans(factory: sessionmaker, now: datetime) -> int:
     return n
 
 
+def _proactive_tick(factory: sessionmaker) -> None:
+    from app.scheduler.reminders import nudge_open_loops, send_due_reminders
+
+    with factory() as db:
+        try:
+            n = send_due_reminders(db)
+            if n:
+                log.info("delivered %d reminder(s)", n)
+        except Exception:
+            log.exception("reminder tick failed")
+            db.rollback()
+        try:
+            n = nudge_open_loops(db)
+            if n:
+                log.info("nudged %d open loop(s)", n)
+        except Exception:
+            log.exception("open-loop nudge failed")
+            db.rollback()
+
+
 async def loop(factory: sessionmaker, deps_factory) -> None:
     """The in-process scheduler. Runs the (blocking) tick in a worker thread so requests are not stalled."""
     await asyncio.to_thread(release_orphans, factory, datetime.now(UTC))
@@ -87,6 +107,7 @@ async def loop(factory: sessionmaker, deps_factory) -> None:
             ran = await asyncio.to_thread(tick, factory, datetime.now(UTC), deps_factory())
             if ran:
                 log.info("scheduled jobs ran: %s", ran)
+            await asyncio.to_thread(_proactive_tick, factory)
         except Exception:
             log.exception("scheduler tick failed")
         await asyncio.sleep(settings.scheduler_poll_s)

@@ -75,7 +75,7 @@ def test_tools_run_off_the_event_loop(client, monkeypatch):
     """A slow tool (a scorecard over 88 companies) must not stall every other request."""
     import threading
 
-    import app.copilot.orchestrator as orch
+    import app.orchestrator.executive as executive
 
     seen = {}
 
@@ -83,7 +83,7 @@ def test_tools_run_off_the_event_loop(client, monkeypatch):
         seen["thread"] = threading.current_thread().name
         return {"ok": True}
 
-    monkeypatch.setattr(orch, "run_tool", spy)
+    monkeypatch.setattr(executive, "run_tool", spy)
     fake = FakeClient()
     app.dependency_overrides[get_anthropic] = lambda: fake
     client.post("/copilot/chat", json={"message": "x", "period": "2026-10"}, headers=auth(Role.VIEWER, [1]))

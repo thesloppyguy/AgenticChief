@@ -151,12 +151,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
     <>
       <SidebarProvider>
         <AppSidebar open={open} onOpenChange={setOpen} />
-        <SidebarInset>
-          <header className="flex h-12 shrink-0 items-center justify-between gap-2 px-4">
+        <SidebarInset className="bg-[#F4F5F4] dark:bg-background">
+          <header className="flex h-14 shrink-0 items-center justify-between gap-2 px-5">
             <SidebarTrigger className="-ml-1" />
             <ThemeToggle />
           </header>
-          <div className="flex min-h-0 flex-1 flex-col gap-4 px-5 pb-5">{children}</div>
+          <div className="flex min-h-0 flex-1 flex-col gap-5 px-5 pb-6 md:px-6">
+            {children}
+          </div>
         </SidebarInset>
       </SidebarProvider>
       <SettingsDialog open={open} onOpenChange={setOpen} />

@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from enum import StrEnum
 
 from pydantic import BaseModel, Field, field_validator
@@ -16,21 +15,15 @@ from sqlalchemy.orm import Session
 
 from app.assets import service as asset_service
 from app.assets.definitions import MODELS as ASSET_MODELS
-from app.capabilities import service as cap_service
 from app.core.security import Principal
 from app.db.models import (
     ApprovalRequest,
     Asset,
-    Capability,
-    CapabilityVersion,
-    Connection,
-    KpiMapping,
     OutboundMessage,
     ReportSnapshot,
     ScorecardConfigVersion,
     WorkflowRun,
 )
-from app.ingestion.raw import SPECS
 from app.kpi_registry.seed import KPIS
 from app.reports.integrity import canonical_hash
 from app.scorecard_config import service as config_service
@@ -139,90 +132,7 @@ def _publish(db: Session, req: ApprovalRequest, a: PublishArgs, approver: Princi
     return {"snapshot_id": snap.id, "content_hash": snap.content_hash}
 
 
-# --- publish_capability (also rollback: publish an older validated version) ------------------
-
-class PublishCapabilityArgs(BaseModel):
-    capability_id: int = Field(gt=0)
-    version: int | None = Field(default=None, gt=0, description="defaults to the latest version")
-
-
-def _precheck_publish_capability(db: Session, who: Principal, a: PublishCapabilityArgs) -> dict:
-    cap = db.get(Capability, a.capability_id)
-    if cap is None:
-        raise ValueError("unknown capability")
-    version = a.version or cap.version
-    ver = db.scalar(select(CapabilityVersion).where(CapabilityVersion.capability_id == cap.id,
-                                                    CapabilityVersion.version == version))
-    if ver is None:
-        raise ValueError("unknown version")
-    if not ver.validated:
-        raise ValueError("that version has not passed validation")
-    if cap.removed or cap.deprecated:
-        raise ValueError("a removed or deprecated capability cannot be published")
-    if cap.published_version == version:
-        raise ValueError("that version is already published")
-    conn = db.get(Connection, cap.connection_id)
-    if conn is None or not conn.active:
-        raise ValueError("its connection is not active")
-    return {"capability": cap.key, "version": version, "risk": ver.risk, "previous_published_version": cap.published_version,
-            "kpis_using_it": cap_service.dependents(db, cap), "description": ver.description[:300],
-            "is_rollback": cap.published_version is not None and version < cap.published_version}
-
-
-def _publish_capability(db: Session, req: ApprovalRequest, a: PublishCapabilityArgs, approver: Principal) -> dict:
-    cap = db.get(Capability, a.capability_id)
-    version = a.version or cap.version
-    cap_service.publish_version(db, approver, cap, version)
-    return {"capability": cap.key, "published_version": version}
-
-
-# --- approve_kpi_mapping -----------------------------------------------------------------------
-
-class ApproveMappingArgs(BaseModel):
-    mapping_id: int = Field(gt=0)
-
-
-def _precheck_approve_mapping(db: Session, who: Principal, a: ApproveMappingArgs) -> dict:
-    m = db.get(KpiMapping, a.mapping_id)
-    if m is None:
-        raise ValueError("unknown mapping")
-    if m.status != "recommended":
-        raise ValueError("only a recommended mapping can be approved")
-    if m.kpi_key not in SPECS:
-        raise ValueError("only the 19 sourced KPIs can be mapped")
-    cap = db.get(Capability, m.capability_id)
-    if cap.removed or cap.deprecated:
-        raise ValueError("the capability is removed or deprecated")
-    if cap.published_version is None:
-        raise ValueError("publish the capability first")
-    ver = db.scalar(select(CapabilityVersion).where(CapabilityVersion.capability_id == cap.id,
-                                                    CapabilityVersion.version == cap.published_version))
-    if ver.risk != "read":
-        raise ValueError("only read capabilities can supply KPI data")
-    missing = [f for f in SPECS[m.kpi_key].fields if not m.field_map.get(f)]
-    if missing:
-        raise ValueError("field mapping incomplete: " + ", ".join(missing))
-    required = set(ver.input_schema.get("required", []))
-    unfilled = sorted(required - set(m.arg_template))
-    if unfilled:
-        raise ValueError("required arguments not filled: " + ", ".join(unfilled))
-    unknown = sorted(set(m.arg_template) - set(ver.input_schema.get("properties", {})))
-    if unknown:
-        raise ValueError("arguments the capability does not have: " + ", ".join(unknown))
-    return {"kpi": m.kpi_key, "capability": cap.key, "published_version": ver.version, "field_map": m.field_map,
-            "arg_template": m.arg_template, "score": m.score, "reasons": m.reasons}
-
-
-def _approve_mapping(db: Session, req: ApprovalRequest, a: ApproveMappingArgs, approver: Principal) -> dict:
-    m = db.get(KpiMapping, a.mapping_id)
-    for other in db.scalars(select(KpiMapping).where(KpiMapping.kpi_key == m.kpi_key, KpiMapping.status == "approved",
-                                                     KpiMapping.id != m.id)):
-        other.status = "superseded"  # one approved source per KPI
-    m.status, m.approved_by, m.approved_at = "approved", approver.user_id, datetime.now(UTC)
-    return {"kpi": m.kpi_key, "mapping_id": m.id}
-
-
-# --- publish_asset (a skill or an agent) -------------------------------------------------------
+# --- publish_asset (workflow definitions) -------------------------------------------------------
 
 class PublishAssetArgs(BaseModel):
     asset_id: int = Field(gt=0)
@@ -232,23 +142,24 @@ class PublishAssetArgs(BaseModel):
 def _precheck_publish_asset(db: Session, who: Principal, a: PublishAssetArgs) -> dict:
     asset = db.get(Asset, a.asset_id)
     if asset is None:
-        raise ValueError("unknown skill or agent")
+        raise ValueError("unknown workflow")
+    if asset.kind != "workflow":
+        raise ValueError("only workflow assets can be published")
     version = a.version or asset.version
     row = asset_service.version_row(db, asset, version)
     if row is None:
         raise ValueError("unknown version")
     if asset.deprecated:
-        raise ValueError("a deprecated skill or agent cannot be published")
+        raise ValueError("a deprecated workflow cannot be published")
     if not row.validated:
         raise ValueError("that version has not passed validation")
     if asset.published_version == version:
         raise ValueError("that version is already published")
     d = ASSET_MODELS[asset.kind](**row.definition)
-    if d.eval_cases and not row.eval_passed:
-        raise ValueError("this version has eval cases that have not passed: run its evals first")
     return {"kind": asset.kind, "key": asset.key, "name": asset.name, "version": version,
-            "previous_published_version": asset.published_version, "tools": d.tools, "who_can_use_it": d.permissions,
-            "evals": "passed" if d.eval_cases else "none defined", "instructions": d.instructions[:600],
+            "previous_published_version": asset.published_version,
+            "tools": getattr(d, "tools", []),
+            "title": getattr(d, "title", asset.name),
             "is_rollback": asset.published_version is not None and version < asset.published_version}
 
 
@@ -309,24 +220,14 @@ ACTIONS: dict[str, ActionDef] = {
             PublishArgs, lambda a: f"Publish monthly review (run #{a.run_id})",
             lambda a: [], _publish, group_wide_only=True, precheck=_precheck_publish),
         ActionDef(
-            "publish_capability", Risk.INTERNAL_WRITE,
-            "Make a validated capability version live for production use (or roll back to an older one).",
-            PublishCapabilityArgs, lambda a: f"Publish capability #{a.capability_id} v{a.version or 'latest'}",
-            lambda a: [], _publish_capability, group_wide_only=True, precheck=_precheck_publish_capability),
-        ActionDef(
             "publish_asset", Risk.INTERNAL_WRITE,
-            "Make a validated skill or agent version available to users (or roll back to an older one).",
-            PublishAssetArgs, lambda a: f"Publish skill/agent #{a.asset_id} v{a.version or 'latest'}",
+            "Make a validated workflow version available (or roll back to an older one).",
+            PublishAssetArgs, lambda a: f"Publish workflow #{a.asset_id} v{a.version or 'latest'}",
             lambda a: [], _publish_asset, group_wide_only=True, precheck=_precheck_publish_asset),
         ActionDef(
             "activate_scorecard_config", Risk.INTERNAL_WRITE,
             "Make a drafted set of scoring rules the active rules for every score and report.",
             ActivateConfigArgs, lambda a: f"Activate scorecard rules v{a.version}",
             lambda a: [], _activate_config, group_wide_only=True, precheck=_precheck_activate_config),
-        ActionDef(
-            "approve_kpi_mapping", Risk.INTERNAL_WRITE,
-            "Approve a KPI-to-capability mapping so scorecard data is pulled through the registry.",
-            ApproveMappingArgs, lambda a: f"Approve KPI mapping #{a.mapping_id}",
-            lambda a: [], _approve_mapping, group_wide_only=True, precheck=_precheck_approve_mapping),
     )
 }

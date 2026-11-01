@@ -192,15 +192,15 @@ function CompanyView() {
   const [tab, setTab] = useState(params.get("tab") === "pillars" ? "pillars" : "companies");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <Tabs value={tab} onValueChange={(v) => setTab(String(v))} className="gap-4">
         <PageHeader
-          title="Companies"
-          subtitle="Drill from the Group number into one company, or into one pillar across every company."
+          title="Company"
+          subtitle="Drill from the group overview into one company, or into one pillar across every company."
           actions={
-            <TabsList>
-              <TabsTrigger value="companies">By company</TabsTrigger>
-              <TabsTrigger value="pillars">By pillar</TabsTrigger>
+            <TabsList className="rounded-full">
+              <TabsTrigger value="companies" className="rounded-full">By company</TabsTrigger>
+              <TabsTrigger value="pillars" className="rounded-full">By pillar</TabsTrigger>
             </TabsList>
           }
         />

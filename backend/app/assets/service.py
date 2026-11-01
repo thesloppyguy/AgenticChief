@@ -18,7 +18,7 @@ from app.core.config import settings
 from app.core.security import Principal, Role
 from app.db.models import Asset, AssetVersion
 
-from .definitions import MODELS, AgentDef, SkillDef
+from .definitions import MODELS
 
 KEY_RE = re.compile(r"^[a-z][a-z0-9_]{1,62}$")
 PLACEHOLDER = re.compile(r"\{([a-z_][a-z0-9_]*)\}")
@@ -65,6 +65,8 @@ def parse_definition(kind: str, raw: dict):
 
 def create(db: Session, who: Principal, kind: str, key: str, name: str, description: str, raw: dict,
            builtin: bool = False) -> Asset:
+    if kind != "workflow":
+        raise AssetError(422, "Only workflow assets are supported")
     if not KEY_RE.match(key):
         raise AssetError(422, "key must be lowercase letters, digits and underscores, starting with a letter")
     if db.scalar(select(Asset.id).where(Asset.kind == kind, Asset.key == key)):
@@ -160,99 +162,43 @@ def workflow_checks(spec) -> list[dict]:
 
 
 def reference_checks(db: Session, spec) -> list[dict]:
-    """Every skill or agent a workflow names must be published right now. Re-run at publication, so a
-    workflow validated last month whose skill was since deprecated cannot go live."""
+    """Skills are Markdown playbooks; agents are code-registered specialists."""
+    from app.knowledge.skills_repo import SkillNotFoundError, get_skill
+    from app.orchestrator.router import SPECIALIST_REGISTRY
+
+    del db  # no longer DB-backed for skills/agents
     out = []
     for ref in spec.tools:
         if ":" not in ref:
             continue
         kind, key = ref.split(":", 1)
-        row = db.scalar(select(Asset).where(Asset.kind == kind, Asset.key == key))
-        ok = row is not None and row.published_version is not None and not row.deprecated
-        out.append({"name": f"uses:{ref}", "ok": ok,
-                    "detail": "" if ok else f"no published {kind} with the key '{key}'"})
+        if kind == "skill":
+            try:
+                get_skill(key)
+                ok, detail = True, ""
+            except SkillNotFoundError:
+                ok, detail = False, f"no skill named '{key}'"
+        elif kind == "agent":
+            ok = key in SPECIALIST_REGISTRY
+            detail = "" if ok else f"no specialist '{key}'"
+        else:
+            ok, detail = False, f"unknown kind '{kind}'"
+        out.append({"name": f"uses:{ref}", "ok": ok, "detail": detail})
     return out
 
 
-def static_checks(kind: str, d: SkillDef | AgentDef) -> list[dict]:
-    checks: list[dict] = []
-
-    def add(name: str, ok: bool, detail: str = "") -> None:
-        checks.append({"name": name, "ok": ok, "detail": detail})
-
-    # A workflow is checked on its own terms: its `tools` is a derived list of what the plan reaches,
-    # and a plan of scorecard and summarize steps legitimately reaches no tool at all.
+def static_checks(kind: str, d) -> list[dict]:
     if kind == "workflow":
         return workflow_checks(d)
-
-    unknown = sorted(set(d.tools) - tool_names())
-    add("tools_exist", not unknown, f"unknown tools: {', '.join(unknown)}" if unknown else "")
-    add("has_tools", bool(d.tools), "" if d.tools else "with no tools it can only talk; give it the tools it needs")
-    if "propose_action" in d.tools:
-        add("action_proposals_are_gated", True, "can file requests, which still need a human's approval")
-    if isinstance(d, AgentDef):
-        # Delegation and the supervisor flag must agree, in both directions: the roster is what the
-        # approver reviews, so it must never be possible to delegate without declaring to whom.
-        add("delegate_requires_supervisor", "delegate" not in d.tools or d.supervisor,
-            "" if "delegate" not in d.tools or d.supervisor
-            else "it has the delegate tool but is not marked as a supervisor")
-        add("a_supervisor_has_a_roster", not d.supervisor or (bool(d.delegates_to) and "delegate" in d.tools),
-            "" if not d.supervisor or (d.delegates_to and "delegate" in d.tools)
-            else "a supervisor needs the delegate tool and at least one specialist")
-        add("a_roster_needs_the_supervisor_flag", not d.delegates_to or d.supervisor,
-            "" if not d.delegates_to or d.supervisor else "it names specialists but is not a supervisor")
-        dupes = len(d.delegates_to) != len(set(d.delegates_to))
-        add("roster_has_no_duplicates", not dupes, "the same specialist is listed twice" if dupes else "")
-    if isinstance(d, SkillDef):
-        try:
-            Draft202012Validator.check_schema(d.inputs)
-            add("inputs_schema_is_valid", True)
-        except SchemaError as e:
-            add("inputs_schema_is_valid", False, e.message[:120])
-            return checks
-        props = d.inputs.get("properties", {})
-        bad = sorted(k for k, v in props.items() if v.get("type") not in FLAT_TYPES)
-        add("inputs_are_flat", not bad, f"inputs must be string, number, integer or boolean: {', '.join(bad)}" if bad else "")
-        used = set(PLACEHOLDER.findall(d.instructions))
-        missing = sorted(used - set(props))
-        add("placeholders_match_inputs", not missing, f"instructions use {{{'}, {'.join(missing)}}} which is not an input" if missing else "")
-        for case in d.eval_cases:
-            errs = list(Draft202012Validator(d.inputs).iter_errors(case.inputs))
-            add(f"eval_case_inputs:{case.name}", not errs, errs[0].message[:100] if errs else "")
-    for case in d.eval_cases:
-        unk = sorted(set(case.must_call) - tool_names())
-        add(f"eval_case_tools:{case.name}", not unk, f"unknown tools: {', '.join(unk)}" if unk else "")
-    return checks
-
-
-def roster_checks(db: Session, d: SkillDef | AgentDef) -> list[dict]:
-    """The part of a roster that needs the database. Kept out of static_checks so that stays pure.
-
-    A specialist may not itself be a supervisor: that is what keeps the delegation graph one level
-    deep and free of cycles, without a runtime depth count having to be correct.
-    """
-    if not isinstance(d, AgentDef) or not d.delegates_to:
-        return []
-    checks = []
-    for key in d.delegates_to:
-        target = db.scalar(select(Asset).where(Asset.kind == "agent", Asset.key == key))
-        if target is None or target.published_version is None or target.deprecated:
-            checks.append({"name": f"specialist:{key}", "ok": False,
-                           "detail": "no published agent with that key"})
-            continue
-        row = version_row(db, target, target.published_version)
-        nested = AgentDef(**row.definition)
-        checks.append({"name": f"specialist:{key}", "ok": not nested.supervisor,
-                       "detail": "a supervisor cannot be someone else's specialist" if nested.supervisor else ""})
-    return checks
+    return [{"name": "unsupported_kind", "ok": False, "detail": f"kind '{kind}' is no longer an asset"}]
 
 
 def validate(db: Session, who: Principal, a: Asset) -> dict:
+    if a.kind != "workflow":
+        raise AssetError(422, "Only workflow assets are supported; skills and agents use the OE registry")
     row = latest(db, a)
     d = MODELS[a.kind](**row.definition)
-    checks = static_checks(a.kind, d) + roster_checks(db, d)
-    if a.kind == "workflow":
-        checks += reference_checks(db, d)
+    checks = static_checks(a.kind, d) + reference_checks(db, d)
     ok = all(c["ok"] for c in checks)
     a.validation = {"checked_at": _now().isoformat(timespec="seconds"), "ok": ok, "version": a.version, "checks": checks}
     if ok:

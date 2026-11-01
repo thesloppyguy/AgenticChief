@@ -46,12 +46,12 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
         title="Reports"
-        subtitle="The monthly leadership review, and the immutable snapshots published from it."
+        subtitle="Monthly leadership reviews and the immutable snapshots published from them."
         actions={me?.companies === null && (
-          <Button onClick={generate} disabled={busy}>
+          <Button className="rounded-full" onClick={generate} disabled={busy}>
             {busy ? "Starting…" : `Generate review for ${period}`}
           </Button>
         )}

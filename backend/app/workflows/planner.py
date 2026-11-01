@@ -14,13 +14,11 @@ import re
 from typing import Any
 
 from pydantic import ValidationError
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.approvals.actions import ACTIONS
 from app.assets.service import reference_checks, workflow_checks
 from app.core.security import Principal
-from app.db.models import Asset
 from app.kpi_registry.seed import PILLAR_WEIGHTS
 
 from .spec import MAX_STEPS, WorkflowSpec
@@ -62,13 +60,14 @@ Rules you must follow:
 def catalogue(db: Session) -> dict:
     """The dynamic inventory. Goes in the user turn, never the cached system block."""
     from app.copilot.tools import TOOLS
+    from app.knowledge.skills_repo import list_skills
+    from app.orchestrator.router import SPECIALIST_REGISTRY
 
-    published = db.scalars(select(Asset).where(
-        Asset.published_version.is_not(None), Asset.deprecated.is_(False))).all()
+    del db
     return {
         "tools": sorted(t["name"] for t in TOOLS if t["name"] not in ("propose_action", "delegate")),
-        "skills": sorted(a.key for a in published if a.kind == "skill"),
-        "agents": sorted(a.key for a in published if a.kind == "agent"),
+        "skills": sorted(s.frontmatter.name for s in list_skills()),
+        "agents": sorted(SPECIALIST_REGISTRY.keys()),
         "actions": {k: a.description for k, a in sorted(ACTIONS.items())},
         "pillars": sorted(PILLAR_WEIGHTS),
         "max_steps": MAX_STEPS,

@@ -23,7 +23,7 @@ import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
 import { streamChat } from "@/lib/chat";
 import { label } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
-import { SESSIONS_CHANGED, type AssetRow } from "@/lib/types";
+import { SESSIONS_CHANGED } from "@/lib/types";
 
 const EXAMPLES = [
   { title: "Group score", body: "What is the Group score this month, and what moved?" },
@@ -32,15 +32,16 @@ const EXAMPLES = [
   { title: "Weakest pillar", body: "Summarise the weakest pillar and its lowest-scoring KPIs." },
 ];
 
+
 interface Msg { role: "user" | "assistant"; content: string; tools: string[]; done: boolean }
 
-/** A delegate call is a sub-agent doing the work, so it reads differently from an ordinary tool. */
+/** Specialist consults read differently from ordinary tools. */
 function ToolTrace({ tools, live }: { tools: string[]; live: boolean }) {
   if (tools.length === 0) return null;
   return (
     <Trace className="mb-2">
       {[...new Set(tools)].map((t) => {
-        const delegated = t === "delegate";
+        const delegated = t === "consult_specialist" || t === "delegate";
         return (
           <TraceLine key={t} status={live ? "running" : undefined}>
             <TraceIcon>
@@ -64,7 +65,7 @@ function Chat() {
   const [text, setText] = useState("");
   const [sid, setSid] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
-  const agents = useApi<AssetRow[]>("/agents");
+  const agents = useApi<{ name: string; role: string }[]>("/agents");
 
   const patch = (fn: (m: Msg) => Msg) =>
     setMsgs((all) => all.map((m, i) => (i === all.length - 1 ? fn(m) : m)));
@@ -93,20 +94,22 @@ function Chat() {
     setBusy(false);
   }
 
-  const options = [{ value: "", label: "Copilot (default)" },
-    ...(agents.data ?? []).map((a) => ({ value: a.key, label: a.name }))];
-  const hasSupervisor = agents.data?.some((a) => a.key === "chro_supervisor");
+  const options = [{ value: "", label: "Executive (default)" },
+    ...(agents.data ?? [])
+      .filter((a) => a.name !== "executive")
+      .map((a) => ({ value: a.name, label: a.role }))];
+  const hasSupervisor = false;
 
   const composer = (
-    <InputGroup className="rounded-xl border-transparent bg-muted/60">
-      <InputGroupTextarea rows={2} value={text} placeholder="Ask about the scorecard…"
+    <InputGroup className="rounded-2xl border-transparent bg-muted/70 shadow-sm ring-1 ring-black/5">
+      <InputGroupTextarea rows={2} value={text} placeholder="Ask anything about the group…"
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
         }} />
       <InputGroupAddon align="block-end">
         <span className="text-xs text-muted-foreground">Period {period}</span>
-        <InputGroupButton variant="default" size="icon-sm" className="ml-auto rounded-full bg-accent text-accent-foreground hover:bg-accent/85"
+        <InputGroupButton variant="default" size="icon-sm" className="ml-auto rounded-full bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900"
           disabled={busy || !text.trim()} onClick={() => void send()} aria-label="Send">
           <ArrowUp className="size-4" />
         </InputGroupButton>
@@ -115,19 +118,19 @@ function Chat() {
   );
 
   return (
-    <div className="flex h-[calc(100svh-5.5rem)] min-h-0 flex-col gap-3">
+    <div className="flex h-[calc(100svh-5.5rem)] min-h-0 flex-col gap-4">
       <PageHeader
-        title="Ask"
-        subtitle="Every number comes from a tool result. Nothing here is calculated by the model."
+        title="Chat"
+        subtitle="Ask the Executive. Numbers come from tools — nothing is invented by the model."
         actions={
           <>
             <Select items={options} value={agent} onValueChange={(v) => setAgent(String(v))}>
-              <SelectTrigger size="sm" className="w-56"><SelectValue /></SelectTrigger>
+              <SelectTrigger size="sm" className="w-56 rounded-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm"
+            <Button variant="outline" size="sm" className="rounded-full"
               onClick={() => { setSid(null); setMsgs([]); }}>
               <Plus className="size-4" />New session
             </Button>
@@ -143,25 +146,27 @@ function Chat() {
         </p>
       )}
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-card shadow-xs ring-1 ring-border">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
         {msgs.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto p-6">
             <div className="w-full max-w-3xl space-y-6">
               <div className="space-y-2 text-center">
-                <div className="mx-auto size-16 rounded-full bg-[radial-gradient(circle_at_30%_30%,#e4f9d2,#9FE870_45%,#062F28)]" />
-                <p className="text-muted-foreground">Good to see you!</p>
-                <h2 className="text-2xl font-semibold tracking-tight">How can I help with your HR scorecard?</h2>
+                <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-neutral-900 text-white shadow-sm dark:bg-neutral-100 dark:text-neutral-900">
+                  <Bot className="size-6" />
+                </div>
+                <p className="text-muted-foreground">Good to see you</p>
+                <h2 className="text-2xl font-semibold tracking-tight">How can I help today?</h2>
                 <p className="text-sm text-muted-foreground">
-                  Ask about scores, companies and pillars. Answers come straight from the scorecard data.
+                  Ask about scores, companies, pillars, or anything in your knowledge base.
                 </p>
               </div>
               {composer}
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Get started with an example below</p>
+                <p className="text-sm text-muted-foreground">Try an example</p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {EXAMPLES.map((ex) => (
                     <button key={ex.title} type="button" disabled={busy} onClick={() => void send(ex.body)}
-                      className="rounded-xl border bg-muted/30 p-4 text-left transition-colors hover:bg-secondary">
+                      className="rounded-2xl bg-muted/50 p-4 text-left shadow-sm ring-1 ring-black/5 transition-colors hover:bg-white dark:ring-white/10">
                       <div className="font-medium">{ex.title}</div>
                       <div className="mt-1 text-sm text-muted-foreground">{ex.body}</div>
                     </button>

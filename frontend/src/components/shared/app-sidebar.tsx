@@ -9,7 +9,6 @@ import {
   FileText,
   Workflow,
   Building,
-  Brain,
   Box,
   Cloud,
   FileBarChart,
@@ -76,25 +75,13 @@ const data = {
     },
     {
       title: "Knowledge",
-      url: "#",
-      icon: Brain,
-      items: [
-        {
-          title: "Documents",
-          url: "/documents",
-          icon: FileText,
-        },
-        {
-          title: "Memory Store",
-          url: "/memory",
-          icon: Box,
-        },
-        {
-          title: "Scorecard",
-          url: "/knowledge",
-          icon: Brain,
-        },
-      ],
+      url: "/documents",
+      icon: FileText,
+    },
+    {
+      title: "Memory Store",
+      url: "/memory",
+      icon: Box,
     },
     {
       title: "Dream",
@@ -118,12 +105,12 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/home" prefetch />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-full bg-accent text-accent-foreground">
-                <Logo label={false} className="p-1" />
+              <div className="flex aspect-square size-10 items-center justify-center rounded-2xl bg-neutral-900 text-white shadow-sm dark:bg-neutral-100 dark:text-neutral-900">
+                <Logo label={false} className="p-1.5" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate text-base font-semibold">Lokibots</span>
-                <span className="truncate text-xs text-muted-foreground">CHRO Copilot</span>
+              <div className="grid flex-1 text-left text-base leading-tight">
+                <span className="truncate text-lg font-semibold">Lokibots</span>
+                <span className="truncate text-sm text-muted-foreground">Executive Copilot</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
