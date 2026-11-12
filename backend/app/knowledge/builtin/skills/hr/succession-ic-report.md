@@ -15,7 +15,7 @@ Call or receive from earlier workflow steps:
 
 1. **Scope** — company_code (e.g. LTIM) or Group
 2. **Period** — YYYY-MM; check fixture `freshness.as_of` and flag if stale
-3. **get_succession_coverage** payload — headline, by_function, bench (with readiness, nine_box, incumbent_flight_risk, vacancy_exposure)
+3. **get_succession_coverage** payload — headline, by_function, bench (with readiness, nine_box, incumbent_flight_risk, vacancy_exposure). Pass `focus` so the chat chart matches the ask: `overview` for coverage dashboards, `weak_gaps` for thin/empty benches, `c_suite` for C-level, `bench` for the role table.
 
 If `available` is false or `missing` is non-empty, stop and state exactly which succession inputs are absent. Do **not** invent coverage from scorecard pillars or document search alone.
 

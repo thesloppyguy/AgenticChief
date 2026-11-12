@@ -140,6 +140,49 @@ def test_succession_bench_alias_matches_coverage(client):
     a = workforce_tools.dispatch("get_succession_bench", {"company_code": "LTIM"}, db, who)
     b = workforce_tools.dispatch("get_succession_coverage", {"company_code": "LTIM"}, db, who)
     assert a["headline"] == b["headline"]
+    # Bench tool defaults to a role-table chart; coverage defaults to overview.
+    assert a["focus"] == "bench"
+    assert b["focus"] == "overview"
+    assert a["artifact"]["focus"] == "bench"
+    assert b["artifact"]["focus"] == "overview"
+    assert a["artifact"]["functions"] == []
+    assert b["artifact"]["functions"]
+
+
+def test_succession_focus_builds_distinct_charts(client):
+    loader.clear_cache()
+    db = next(app.dependency_overrides[get_db]())
+    who = Principal("admin", Role.ADMIN, None)
+
+    overview = workforce_tools.dispatch("get_succession_coverage", {}, db, who)
+    weak = workforce_tools.dispatch(
+        "get_succession_coverage", {"focus": "weak_gaps"}, db, who
+    )
+    c_suite = workforce_tools.dispatch(
+        "get_succession_coverage", {"focus": "c_suite"}, db, who
+    )
+
+    assert overview["artifact"]["title"] == "Succession coverage by function"
+    assert overview["artifact"]["headline"][0]["value"] == 130
+
+    assert weak["focus"] == "weak_gaps"
+    assert "Weak / no successor" in weak["artifact"]["title"]
+    assert weak["artifact"]["headline"][0]["label"] == "Roles in view"
+    assert weak["artifact"]["headline"][0]["value"] == len(weak["artifact"]["bench"])
+    assert weak["artifact"]["bench"]
+    assert all(
+        b.get("readiness") in ("no_ready", "ready_1_2y")
+        or b.get("status") in ("thin", "no_ready_internal", "gap")
+        for b in weak["artifact"]["bench"]
+    )
+    # Narrow views must not reuse the Group overview KPI strip (130 / 63% / 34 / 41%).
+    assert weak["artifact"]["headline"][0]["value"] != overview["artifact"]["headline"][0]["value"]
+
+    assert c_suite["focus"] == "c_suite"
+    assert "C-suite" in c_suite["artifact"]["title"]
+    assert c_suite["artifact"]["functions"] == []
+    assert any("CHRO" in str(b.get("role")) for b in c_suite["artifact"]["bench"])
+    assert c_suite["artifact"]["title"] != overview["artifact"]["title"]
 
 
 def test_send_directive_queues_to_named_people(client):

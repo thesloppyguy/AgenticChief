@@ -1,6 +1,7 @@
 """Load deterministic workforce YAML from backend/seed/lnt_group/workforce/."""
 from __future__ import annotations
 
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,13 @@ from app.fixtures.paths import GROUP_DIR
 
 WORKFORCE_DIR = GROUP_DIR / "workforce"
 SECTIONS = ("pulse", "skills", "succession", "actions")
+
+SUCCESSION_FOCUSES = frozenset({"overview", "weak_gaps", "c_suite", "bench"})
+_WEAK_READINESS = frozenset({"no_ready", "ready_1_2y"})
+_WEAK_STATUS = frozenset({"thin", "no_ready_internal", "gap"})
+_C_SUITE_RE = re.compile(
+    r"(?i)\b(CHRO|CEO|CFO|CTO|CMO|COO|CPO|CIO|CXO|Chief\s+\w+|C-[A-Z]{2,})\b"
+)
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:
@@ -153,7 +161,286 @@ def draft_actions() -> dict[str, Any]:
     return load_section("actions")
 
 
-def artifact_for(section: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+def normalize_succession_focus(focus: str | None) -> str:
+    key = (focus or "overview").strip().lower().replace("-", "_")
+    aliases = {
+        "weak": "weak_gaps",
+        "gaps": "weak_gaps",
+        "weak_or_no": "weak_gaps",
+        "no_successor": "weak_gaps",
+        "clevel": "c_suite",
+        "c_level": "c_suite",
+        "csuite": "c_suite",
+        "executive": "c_suite",
+        "roles": "bench",
+        "critical_roles": "bench",
+    }
+    key = aliases.get(key, key)
+    return key if key in SUCCESSION_FOCUSES else "overview"
+
+
+def _is_weak_bench(row: dict[str, Any]) -> bool:
+    readiness = str(row.get("readiness") or "").strip().lower()
+    status = str(row.get("status") or "").strip().lower()
+    return readiness in _WEAK_READINESS or status in _WEAK_STATUS
+
+
+def _is_c_suite_bench(row: dict[str, Any]) -> bool:
+    return bool(_C_SUITE_RE.search(str(row.get("role") or "")))
+
+
+def _bench_item(b: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "role": b.get("role"),
+        "business": b.get("business"),
+        "company_code": b.get("company_code"),
+        "ready_pct": b.get("ready_pct"),
+        "readiness": b.get("readiness"),
+        "status": b.get("status"),
+        "nine_box": b.get("nine_box"),
+        "incumbent_flight_risk": b.get("incumbent_flight_risk"),
+        "vacancy_exposure": b.get("vacancy_exposure"),
+        "successor": b.get("successor"),
+        "development_move": b.get("development_move"),
+        "note": b.get("note"),
+    }
+
+
+def _function_items(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "function": r.get("function"),
+            "ready_now": r.get("ready_now"),
+            "ready_1_2y": r.get("ready_1_2y"),
+            "no_successor": r.get("no_successor"),
+            "is_new": "new" in str(r.get("function") or "").lower(),
+        }
+        for r in rows
+    ]
+
+
+def _scope_label(payload: dict[str, Any]) -> str:
+    if (payload.get("scope") or "group") == "ic":
+        return str(payload.get("name") or payload.get("company_code") or "IC")
+    return "Group"
+
+
+def _overview_headline(headline: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "label": "Critical roles tracked",
+            "value": headline.get("critical_roles_tracked"),
+            "note": "leadership & technical",
+        },
+        {
+            "label": "Ready-now coverage",
+            "value": headline.get("ready_now_coverage_pct"),
+            "unit": "%",
+            "delta_pct": headline.get("ready_now_delta_pts"),
+            "delta_direction": "down"
+            if (headline.get("ready_now_delta_pts") or 0) < 0
+            else "flat",
+            "note": "vs last year",
+            "tone": "alert",
+        },
+        {
+            "label": "Weak / no successor",
+            "value": headline.get("weak_or_no_successor"),
+            "note": "new businesses lead",
+            "tone": "alert",
+        },
+        {
+            "label": "Internal fill rate",
+            "value": headline.get("internal_fill_rate_pct"),
+            "unit": "%",
+            "note": f"target {headline.get('internal_fill_target_pct', 60)}%",
+            "tone": "alert",
+        },
+    ]
+
+
+def _bench_headline(bench: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    no_ready = sum(
+        1 for b in bench if str(b.get("readiness") or "").lower() == "no_ready"
+    )
+    thin = sum(
+        1 for b in bench if str(b.get("readiness") or "").lower() == "ready_1_2y"
+    )
+    high_flight = sum(
+        1
+        for b in bench
+        if str(b.get("incumbent_flight_risk") or "").lower() == "high"
+    )
+    return [
+        {
+            "label": "Roles in view",
+            "value": len(bench),
+            "note": "from succession fixture",
+        },
+        {
+            "label": "No ready successor",
+            "value": no_ready,
+            "tone": "alert" if no_ready else "good",
+        },
+        {
+            "label": "Ready in 1–2 years",
+            "value": thin,
+            "tone": "alert" if thin else None,
+        },
+        {
+            "label": "High flight risk",
+            "value": high_flight,
+            "tone": "alert" if high_flight else "good",
+        },
+    ]
+
+
+def _succession_artifact(
+    payload: dict[str, Any],
+    *,
+    focus: str = "overview",
+) -> dict[str, Any]:
+    """Build a chat chart for succession — shape depends on ``focus``."""
+    focus = normalize_succession_focus(focus)
+    scope = _scope_label(payload)
+    all_bench = list(payload.get("bench") or [])
+    all_functions = list(payload.get("by_function") or [])
+    headline = payload.get("headline") or {}
+    default_insights = [
+        _clean(i) for i in (payload.get("insights") or []) if _clean(i)
+    ]
+
+    if focus == "weak_gaps":
+        bench = [b for b in all_bench if _is_weak_bench(b)]
+        functions = [
+            r for r in all_functions if int(r.get("no_successor") or 0) > 0
+        ]
+        title = f"Weak / no successor · {scope}"
+        subtitle = (
+            f"{len(bench)} critical roles with thin or empty benches"
+            if bench
+            else f"No weak-bench roles in the {scope} succession fixture."
+        )
+        insights = [
+            f"{len(bench)} of {len(all_bench) or headline.get('critical_roles_tracked') or '—'} "
+            f"listed critical roles are weak or have no ready successor.",
+            *default_insights[:2],
+        ]
+        return {
+            "kind": "succession_stack",
+            "title": title,
+            "subtitle": subtitle,
+            "source": "workforce.succession",
+            "export_key": "workforce_succession",
+            "schedule_key": "workforce_brief",
+            "focus": focus,
+            "insights": [_clean(i) for i in insights if _clean(i)],
+            "headline": _bench_headline(bench),
+            "functions": _function_items(functions),
+            "bench": [_bench_item(b) for b in bench],
+            "company_code": payload.get("company_code"),
+            "scope": payload.get("scope") or "group",
+            "as_of": payload.get("as_of"),
+            "available": payload.get("available", True),
+            "missing": payload.get("missing") or [],
+        }
+
+    if focus == "c_suite":
+        bench = [b for b in all_bench if _is_c_suite_bench(b)]
+        title = f"C-suite succession · {scope}"
+        subtitle = (
+            f"{len(bench)} C-level role(s) in the succession fixture"
+            if bench
+            else f"No C-suite roles listed in the {scope} succession fixture."
+        )
+        insights = [
+            (
+                f"{sum(1 for b in bench if _is_weak_bench(b))} of {len(bench)} "
+                "C-suite roles are weak or thin."
+                if bench
+                else "C-suite bench rows are empty for this scope."
+            ),
+            *default_insights[:1],
+        ]
+        return {
+            "kind": "succession_stack",
+            "title": title,
+            "subtitle": subtitle,
+            "source": "workforce.succession",
+            "export_key": "workforce_succession",
+            "schedule_key": "workforce_brief",
+            "focus": focus,
+            "insights": [_clean(i) for i in insights if _clean(i)],
+            "headline": _bench_headline(bench),
+            "functions": [],
+            "bench": [_bench_item(b) for b in bench],
+            "company_code": payload.get("company_code"),
+            "scope": payload.get("scope") or "group",
+            "as_of": payload.get("as_of"),
+            "available": payload.get("available", True),
+            "missing": payload.get("missing") or [],
+        }
+
+    if focus == "bench":
+        title = f"Succession bench · {scope}"
+        subtitle = (
+            _clean(payload.get("subtitle"))
+            or f"Critical-role successors for {scope}."
+        )
+        return {
+            "kind": "succession_stack",
+            "title": title,
+            "subtitle": subtitle,
+            "source": "workforce.succession",
+            "export_key": "workforce_succession",
+            "schedule_key": "workforce_brief",
+            "focus": focus,
+            "insights": default_insights,
+            "headline": _bench_headline(all_bench) if all_bench else _overview_headline(headline),
+            "functions": [],
+            "bench": [_bench_item(b) for b in all_bench],
+            "company_code": payload.get("company_code"),
+            "scope": payload.get("scope") or "group",
+            "as_of": payload.get("as_of"),
+            "available": payload.get("available", True),
+            "missing": payload.get("missing") or [],
+        }
+
+    # overview — full coverage dashboard
+    title = (
+        f"Succession coverage by function · {scope}"
+        if (payload.get("scope") or "group") == "ic"
+        else "Succession coverage by function"
+    )
+    return {
+        "kind": "succession_stack",
+        "title": title,
+        "subtitle": _clean(
+            payload.get("subtitle")
+            or "Green energy and semiconductors — the growth engines — have the thinnest ready-now benches."
+        ),
+        "source": "workforce.succession",
+        "export_key": "workforce_succession",
+        "schedule_key": "workforce_brief",
+        "focus": "overview",
+        "insights": default_insights,
+        "headline": _overview_headline(headline),
+        "functions": _function_items(all_functions),
+        "bench": [_bench_item(b) for b in all_bench],
+        "company_code": payload.get("company_code"),
+        "scope": payload.get("scope") or "group",
+        "as_of": payload.get("as_of"),
+        "available": payload.get("available", True),
+        "missing": payload.get("missing") or [],
+    }
+
+
+def artifact_for(
+    section: str,
+    payload: dict[str, Any],
+    *,
+    focus: str | None = None,
+) -> dict[str, Any] | None:
     """Structured chart payload for chat SSE (dashboard-style widgets)."""
     if section == "pulse":
         cells = payload.get("cells") or []
@@ -287,83 +574,7 @@ def artifact_for(section: str, payload: dict[str, Any]) -> dict[str, Any] | None
             "capacity": payload.get("internal_build_capacity") or [],
         }
     if section == "succession":
-        rows = payload.get("by_function") or []
-        headline = payload.get("headline") or {}
-        return {
-            "kind": "succession_stack",
-            "title": "Succession coverage by function",
-            "subtitle": _clean(
-                payload.get("subtitle")
-                or "Green energy and semiconductors — the growth engines — have the thinnest ready-now benches."
-            ),
-            "source": "workforce.succession",
-            "export_key": "workforce_succession",
-            "schedule_key": "workforce_brief",
-            "insights": [_clean(i) for i in (payload.get("insights") or []) if _clean(i)],
-            "headline": [
-                {
-                    "label": "Critical roles tracked",
-                    "value": headline.get("critical_roles_tracked"),
-                    "note": "leadership & technical",
-                },
-                {
-                    "label": "Ready-now coverage",
-                    "value": headline.get("ready_now_coverage_pct"),
-                    "unit": "%",
-                    "delta_pct": headline.get("ready_now_delta_pts"),
-                    "delta_direction": "down"
-                    if (headline.get("ready_now_delta_pts") or 0) < 0
-                    else "flat",
-                    "note": "vs last year",
-                    "tone": "alert",
-                },
-                {
-                    "label": "Weak / no successor",
-                    "value": headline.get("weak_or_no_successor"),
-                    "note": "new businesses lead",
-                    "tone": "alert",
-                },
-                {
-                    "label": "Internal fill rate",
-                    "value": headline.get("internal_fill_rate_pct"),
-                    "unit": "%",
-                    "note": f"target {headline.get('internal_fill_target_pct', 60)}%",
-                    "tone": "alert",
-                },
-            ],
-            "functions": [
-                {
-                    "function": r.get("function"),
-                    "ready_now": r.get("ready_now"),
-                    "ready_1_2y": r.get("ready_1_2y"),
-                    "no_successor": r.get("no_successor"),
-                    "is_new": "new" in str(r.get("function") or "").lower(),
-                }
-                for r in rows
-            ],
-            "bench": [
-                {
-                    "role": b.get("role"),
-                    "business": b.get("business"),
-                    "company_code": b.get("company_code"),
-                    "ready_pct": b.get("ready_pct"),
-                    "readiness": b.get("readiness"),
-                    "status": b.get("status"),
-                    "nine_box": b.get("nine_box"),
-                    "incumbent_flight_risk": b.get("incumbent_flight_risk"),
-                    "vacancy_exposure": b.get("vacancy_exposure"),
-                    "successor": b.get("successor"),
-                    "development_move": b.get("development_move"),
-                    "note": b.get("note"),
-                }
-                for b in (payload.get("bench") or [])
-            ],
-            "company_code": payload.get("company_code"),
-            "scope": payload.get("scope") or "group",
-            "as_of": payload.get("as_of"),
-            "available": payload.get("available", True),
-            "missing": payload.get("missing") or [],
-        }
+        return _succession_artifact(payload, focus=normalize_succession_focus(focus))
     if section == "actions":
         drafts = payload.get("drafts") or []
         return {

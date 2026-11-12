@@ -57,6 +57,7 @@ export type ChatArtifact = {
     | string;
   title?: string;
   subtitle?: string;
+  focus?: string;
   source?: string;
   export_key?: string | null;
   schedule_key?: string | null;

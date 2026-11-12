@@ -860,10 +860,7 @@ function SuccessionBody({ artifact }: { artifact: ChatArtifact }) {
 
       {functions.length > 0 ? (
         <div className="rounded-2xl border border-border/70 bg-background p-4 shadow-sm">
-          <div className="text-sm font-semibold">{artifact.title}</div>
-          {artifact.subtitle ? (
-            <p className="mt-0.5 text-xs text-muted-foreground">{artifact.subtitle}</p>
-          ) : null}
+          <div className="text-sm font-semibold">Coverage by function</div>
           <div className="mt-4 space-y-3">
             {functions.map((f) => {
               const ready = Number(f.ready_now) || 0;

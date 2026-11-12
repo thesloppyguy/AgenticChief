@@ -43,7 +43,9 @@ def _context(db: Session) -> dict[str, Any]:
             reds.append(f"Group score {card['group']['score']:.1f} is red")
         for c in card.get("companies") or []:
             if c.get("status") == "red":
-                reds.append(f"{c['code']} is red ({c.get('score')})")
+                score = c.get("score")
+                score_s = f"{score:.1f}" if isinstance(score, (int, float)) else score
+                reds.append(f"{c['code']} is red ({score_s})")
     except Exception:
         pass
 

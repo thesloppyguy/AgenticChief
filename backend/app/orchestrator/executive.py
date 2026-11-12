@@ -291,11 +291,18 @@ async def chat_turn(
                 yield {"type": "artifact", "artifact": out["artifact"], "tool": block.name}
             yield tool_ev
             audit(db, who, "copilot_tool", block.name, {"input": dict(block.input)})
+            # Chart payloads are for the UI only — keep them out of the model context
+            # so follow-ups pick a fresh focus instead of reusing the overview widget.
+            out_for_model = (
+                {k: v for k, v in out.items() if k != "artifact"}
+                if isinstance(out, dict)
+                else out
+            )
             results.append(
                 {
                     "type": "tool_result",
                     "tool_use_id": block.id,
-                    "content": json.dumps(out, default=str),
+                    "content": json.dumps(out_for_model, default=str),
                 }
             )
         for block in consults:

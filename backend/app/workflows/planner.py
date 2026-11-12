@@ -105,8 +105,10 @@ def catalogue(db: Session) -> dict:
         "companies": companies,
         "domain_notes": {
             "succession": (
-                "Use get_succession_coverage(company_code, period). Returns critical roles, "
-                "readiness, 9-box, flight risk. Not the talent_management pillar."
+                "Use get_succession_coverage(company_code, period, focus). "
+                "focus=overview|weak_gaps|c_suite|bench — match the ask so chat charts differ "
+                "per question. Returns critical roles, readiness, 9-box, flight risk. "
+                "Not the talent_management pillar."
             ),
             "scorecard_talent_management": (
                 "Top Talent Review / IDPs / PLI = process compliance only; never a succession proxy."

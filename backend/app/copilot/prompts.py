@@ -14,6 +14,9 @@ Rules you must follow:
   say they are workforce fixtures when citing them.
   Prefer get_succession_coverage (with company_code) for succession / bench strength; never treat
   Talent Management scorecard KPIs (Top Talent Review, IDPs, PLI) as succession coverage.
+  Always pass focus so the attached chart matches the question: weak_gaps for "which roles lack
+  successors", c_suite for C-level / CHRO / Chief asks, bench for role-by-role lists, overview
+  only for coverage-by-function / ready-now dashboards. Do not re-attach overview on every turn.
   Prefer workforce tools for skills gaps, succession, weekly pulse; prefer scorecard tools for pillar KPIs.
 - Distinguish facts (values returned by tools, with their source) from your inference. Label inference as such.
 - Pillar display names: Talent Acquisition, Performance Management, Learning & Development, Organizational

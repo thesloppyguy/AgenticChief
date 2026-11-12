@@ -37,13 +37,19 @@ def get_skills(_: Principal = Depends(get_principal)) -> dict[str, Any]:
 @router.get("/succession")
 def get_succession(
     company_code: str | None = None,
+    focus: str | None = None,
     _: Principal = Depends(get_principal),
 ) -> dict[str, Any]:
     code = (company_code or "").strip().upper() or None
     data = loader.succession(code)
     if not data:
         raise HTTPException(404, "workforce succession fixture not found")
-    return {**data, "artifact": loader.artifact_for("succession", data)}
+    focus_key = loader.normalize_succession_focus(focus)
+    return {
+        **data,
+        "focus": focus_key,
+        "artifact": loader.artifact_for("succession", data, focus=focus_key),
+    }
 
 
 @router.get("/actions")

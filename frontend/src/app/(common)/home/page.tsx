@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { usePeriod } from "@/components/AppShell";
 import { Donut } from "@/components/charts";
+import { BriefCard } from "@/components/BriefCard";
 import { Card, Loading, PageHeader, ScoreTile, StatusBadge } from "@/components/ui";
 import PinButton from "@/components/PinButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -181,13 +182,7 @@ function Dashboard() {
         <FreshnessLine freshness={data.freshness} />
       )} */}
       <Loading error={error} loading={loading} />
-      {brief.data?.brief && (
-        <Card title={brief.data.brief.title}>
-          <pre className="max-h-48 overflow-y-auto whitespace-pre-wrap text-sm text-muted-foreground">
-            {brief.data.brief.body}
-          </pre>
-        </Card>
-      )}
+      {brief.data?.brief && <BriefCard brief={brief.data.brief} />}
       {pulse.data?.cells && pulse.data.cells.length > 0 && (
         <Card title="Workforce pulse">
           <div className="grid gap-3 rounded-[1.35rem] bg-muted/70 p-3 sm:grid-cols-2 lg:grid-cols-5">

@@ -21,6 +21,17 @@ _PULSE_SCHEMA = {
     },
 }
 
+_SUCCESSION_FOCUS_PROP = {
+    "type": "string",
+    "enum": ["overview", "weak_gaps", "c_suite", "bench"],
+    "description": "Which chart to attach for this answer. "
+    "overview = coverage-by-function dashboard (default for get_succession_coverage). "
+    "weak_gaps = roles with thin / no successor (use for 'which roles lack successors'). "
+    "c_suite = C-level / Chief roles only. "
+    "bench = full critical-role bench table (default for get_succession_bench). "
+    "Always set focus to match the question — do not reuse overview for narrow asks.",
+}
+
 _SUCCESSION_SCHEMA = {
     "type": "object",
     "properties": {
@@ -30,6 +41,7 @@ _SUCCESSION_SCHEMA = {
             "description": "YYYY-MM period for freshness check against fixture as_of. "
             "Optional; defaults to the run period.",
         },
+        "focus": _SUCCESSION_FOCUS_PROP,
     },
 }
 
@@ -53,13 +65,17 @@ WORKFORCE_TOOLS: list[dict[str, Any]] = sorted(
             "name": "get_succession_coverage",
             "description": "Succession coverage for Group or one IC: critical roles, nominated "
             "successors with readiness (ready_now / ready_1_2y / no_ready), 9-box, incumbent "
-            "flight-risk, and vacancy exposure. Fixture-backed. Use this for succession reports. "
+            "flight-risk, and vacancy exposure. Fixture-backed. Pass focus to choose the chart: "
+            "overview (by-function dashboard), weak_gaps, c_suite, or bench. "
             "Do NOT substitute Talent Management scorecard KPIs (Top Talent Review, IDPs, PLI).",
             "input_schema": _SUCCESSION_SCHEMA,
         },
         {
             "name": "get_succession_bench",
-            "description": "Alias of get_succession_coverage. Prefer get_succession_coverage in new plans.",
+            "description": "Same succession data as get_succession_coverage, but the attached chart "
+            "defaults to the critical-role bench table (focus=bench). Pass focus=weak_gaps or "
+            "c_suite when the question is about gaps or C-level only. Prefer this over overview "
+            "when listing specific roles.",
             "input_schema": _SUCCESSION_SCHEMA,
         },
         {
@@ -81,16 +97,16 @@ WORKFORCE_TOOLS: list[dict[str, Any]] = sorted(
 )
 
 _WORKFORCE_NAMES = {t["name"] for t in WORKFORCE_TOOLS}
-_SUCCESSION_NAMES = {"get_succession_coverage", "get_succession_bench"}
 
 
 def is_workforce_tool(name: str) -> bool:
     return name in _WORKFORCE_NAMES
 
 
-def _succession_payload(args: dict) -> dict:
+def _succession_payload(args: dict, *, default_focus: str = "overview") -> dict:
     code = (args.get("company_code") or "").strip().upper() or None
     period = (args.get("period") or "").strip() or None
+    focus = loader.normalize_succession_focus(args.get("focus") or default_focus)
     data = loader.succession(code)
     as_of = data.get("as_of")
     freshness = {
@@ -103,7 +119,12 @@ def _succession_payload(args: dict) -> dict:
             else (f"Fixture as_of {as_of}." if as_of else "Fixture-backed demo snapshot.")
         ),
     }
-    out = {**data, "freshness": freshness, "artifact": loader.artifact_for("succession", data)}
+    out = {
+        **data,
+        "freshness": freshness,
+        "focus": focus,
+        "artifact": loader.artifact_for("succession", data, focus=focus),
+    }
     return out
 
 
@@ -116,8 +137,10 @@ def dispatch(name: str, args: dict, db: Session, who: Principal) -> dict:
     if name == "get_skills_gap":
         data = loader.skills()
         return {**data, "artifact": loader.artifact_for("skills", data)}
-    if name in _SUCCESSION_NAMES:
-        return _succession_payload(args)
+    if name == "get_succession_coverage":
+        return _succession_payload(args, default_focus="overview")
+    if name == "get_succession_bench":
+        return _succession_payload(args, default_focus="bench")
     if name == "list_draft_actions":
         data = loader.draft_actions()
         key = (args.get("key") or "").strip()
