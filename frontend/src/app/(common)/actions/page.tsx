@@ -217,6 +217,7 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
 
   if (!data) return <Loading error={error} loading={loading} />;
 
+  const actionName = data.action;
   const ownRequest = data.requested_by === me?.sub;
   const selfOk = Boolean(
     (data as { allow_self_approval?: boolean }).allow_self_approval,
@@ -302,7 +303,7 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
       setComment("");
       if (
         (out.status === "executed" || out.status === "approved") &&
-        data.action === "update_dashboard_layout"
+        actionName === "update_dashboard_layout"
       ) {
         window.dispatchEvent(new Event("dashboard-layout:changed"));
       }
