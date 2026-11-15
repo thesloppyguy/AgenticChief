@@ -19,12 +19,12 @@ const EXAMPLES = [
     body: "Show the workforce pulse and top issues for this week.",
   },
   {
-    title: "Skills gap",
-    body: "Where is the future-skills demand vs supply gap, and what draft action closes it?",
+    title: "List workflows",
+    body: "List the saved workflows and their publish status.",
   },
   {
-    title: "Succession",
-    body: "Which critical roles have weak or no successors?",
+    title: "Plan a workflow",
+    body: "Plan a weekly workforce brief workflow I can save and run later.",
   },
 ];
 

@@ -125,10 +125,11 @@ def decide(db: Session, who: Principal, approval_id: int, decision: str, comment
         raise ApprovalError(409, "this request is no longer pending")
     if decision != "approve" and not (comment or "").strip():
         raise ApprovalError(422, "a comment is required to reject or request changes")
-    if req.requested_by == who.user_id and not settings.approval_allow_self_approval:
+    action = ACTIONS[req.action]
+    self_ok = settings.approval_allow_self_approval or action.allow_self_approval
+    if req.requested_by == who.user_id and not self_ok:
         raise ApprovalError(403, "you cannot decide your own request")
 
-    action = ACTIONS[req.action]
     if decision == "approve":
         args = action.args_model(**req.args)
         visible = {c.code for c in visible_companies(db, who)}

@@ -38,6 +38,7 @@ export function StatusBadge({
 
 export function ScoreTile(props: {
   title: string;
+  shortTitle?: string;
   score: number | null;
   status: Status;
   withheld?: boolean;
@@ -47,36 +48,38 @@ export function ScoreTile(props: {
 }) {
   const empty = props.score == null;
   const emptyLabel = props.withheld ? "Low coverage" : "No data";
+  const displayTitle = props.shortTitle || props.title;
 
   const body = (
     <ShadCard
       className={cn(
-        "gap-0 rounded-[1.25rem] py-5 shadow-md ring-black/[0.04] [--card-spacing:--spacing(4)]",
+        "h-full min-w-0 gap-0 overflow-visible rounded-[1.25rem] py-5 shadow-md ring-black/[0.04] [--card-spacing:--spacing(4)]",
         empty && !props.accent && "bg-muted/50",
         props.accent &&
           "bg-brand-gradient text-white shadow-lg ring-0",
         props.href && "transition-all hover:-translate-y-0.5 hover:shadow-lg",
       )}
     >
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex min-w-0 flex-col gap-3">
         <div
           className={cn(
-            "text-sm font-medium leading-snug",
+            "line-clamp-2 min-w-0 text-sm font-medium leading-snug",
             props.accent ? "text-white/80" : "text-muted-foreground",
           )}
+          title={props.title}
         >
-          {props.title}
+          {displayTitle}
         </div>
 
         {empty ? (
-          <div className="flex flex-col gap-1.5 pt-0.5">
+          <div className="flex min-w-0 flex-col gap-1.5 pt-0.5">
             <div className="text-xl font-semibold tracking-tight">
               {emptyLabel}
             </div>
             {props.note && (
               <p
                 className={cn(
-                  "text-xs leading-snug",
+                  "line-clamp-2 text-xs leading-snug",
                   props.accent ? "text-white/70" : "text-muted-foreground",
                 )}
               >
@@ -85,11 +88,11 @@ export function ScoreTile(props: {
             )}
           </div>
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex min-w-0 flex-col gap-2.5">
             <div className="text-3xl font-semibold tracking-tight tabular-nums">
               {fmt(props.score)}
             </div>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
               <StatusBadge
                 status={props.status}
                 withheld={props.withheld}
@@ -98,7 +101,7 @@ export function ScoreTile(props: {
               {props.note && (
                 <span
                   className={cn(
-                    "text-xs leading-snug",
+                    "min-w-0 text-xs leading-snug",
                     props.accent ? "text-white/70" : "text-muted-foreground",
                   )}
                 >
@@ -113,7 +116,7 @@ export function ScoreTile(props: {
   );
 
   return props.href ? (
-    <Link href={props.href} className="block">
+    <Link href={props.href} className="block min-w-0">
       {body}
     </Link>
   ) : (

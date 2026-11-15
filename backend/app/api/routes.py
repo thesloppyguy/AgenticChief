@@ -37,14 +37,26 @@ def companies(db: Session = Depends(get_db), who: Principal = Depends(get_princi
 
 @router.get("/kpis")
 def kpi_definitions(db: Session = Depends(get_db), _: Principal = Depends(get_principal)):
+    from app.services.manual_inputs import all_manual_kpi_keys
+
     cfg = sc.active_config(db)
+    defaults = {d.key: d for d in KPIS}
+    manual = all_manual_kpi_keys(db)
     return {
         "calc_version": cfg.version,
         "pillar_weights": cfg.pillar_weights,
         "thresholds": {"green_min": cfg.green_min, "amber_min": cfg.amber_min},
-        "kpis": [{**asdict(k), "direction": k.direction.value, "manual": k.key in MANUAL_KPIS,
-                  "default_weight": d.weight, "default_target": d.target}  # the defaults let an editor see what was changed
-                 for k, d in zip(sc.active_kpis(db), KPIS, strict=True)],
+        "kpis": [
+            {
+                **asdict(k),
+                "direction": k.direction.value,
+                "manual": k.key in manual,
+                "default_weight": defaults[k.key].weight if k.key in defaults else None,
+                "default_target": defaults[k.key].target if k.key in defaults else None,
+                "added": k.key not in defaults,
+            }
+            for k in sc.active_kpis(db)
+        ],
     }
 
 

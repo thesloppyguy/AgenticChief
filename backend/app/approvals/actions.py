@@ -16,7 +16,8 @@ from sqlalchemy.orm import Session
 
 from app.assets import service as asset_service
 from app.assets.definitions import MODELS as ASSET_MODELS
-from app.core.security import Principal
+from app.core.security import Principal, Role
+from app.dashboard import layout as layout_service
 from app.db.models import (
     ApprovalRequest,
     Asset,
@@ -56,6 +57,8 @@ class ActionDef:
     targets: Callable[[BaseModel], list[str]]  # company codes the action touches (for scope + bulk checks)
     execute: Callable[[Session, ApprovalRequest, BaseModel, Principal], dict]
     group_wide_only: bool = False  # needs group-wide scope from both requester and approver
+    # Personal / requester-scoped actions may skip four-eyes (e.g. Home layout).
+    allow_self_approval: bool = False
     # Rejects a request that can never succeed (raise ValueError) before anyone is asked to approve it.
     precheck: Callable[[Session, Principal, BaseModel], dict | None] | None = None
 
@@ -596,6 +599,165 @@ def _activate_config(db: Session, req: ApprovalRequest, a: ActivateConfigArgs, a
     return {"active_version": a.version}
 
 
+# --- update_dashboard_layout ---------------------------------------------------------------
+
+class UpdateDashboardLayoutArgs(BaseModel):
+    """Full desired Home layout for the requester (sections + widgets + pulse KPIs)."""
+
+    sections: list[dict] = Field(default_factory=list)
+    widgets: list[dict] = Field(default_factory=list)
+    pulse_cells: list[dict] = Field(default_factory=list)
+    pulse_hidden: list[str] = Field(default_factory=list)
+
+
+def _layout_args_dict(a: UpdateDashboardLayoutArgs) -> dict:
+    return {
+        "sections": a.sections,
+        "widgets": a.widgets,
+        "pulse_cells": a.pulse_cells,
+        "pulse_hidden": a.pulse_hidden,
+    }
+
+
+def _summarize_layout(a: UpdateDashboardLayoutArgs) -> str:
+    try:
+        payload = layout_service.parse_layout(_layout_args_dict(a))
+    except ValueError:
+        return "Update Home dashboard layout"
+    hidden = [s.key for s in payload.sections if not s.visible]
+    n_widgets = len(payload.widgets)
+    n_pulse = len(payload.pulse_cells)
+    bits: list[str] = []
+    if hidden:
+        bits.append(f"hide {', '.join(hidden)}")
+    if n_widgets:
+        bits.append(f"{n_widgets} pinned widget{'s' if n_widgets != 1 else ''}")
+    if n_pulse:
+        bits.append(f"{n_pulse} pulse KPI{'s' if n_pulse != 1 else ''}")
+    if payload.pulse_hidden:
+        bits.append(f"hide built-in pulse: {', '.join(payload.pulse_hidden)}")
+    if not bits:
+        bits.append("reorder / reset sections")
+    return "Update Home layout: " + "; ".join(bits)
+
+
+def _precheck_dashboard_layout(
+    db: Session, who: Principal, a: UpdateDashboardLayoutArgs
+) -> dict:
+    try:
+        payload = layout_service.parse_layout(_layout_args_dict(a))
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+    before = layout_service.get_layout(db, who.user_id)
+    changes = layout_service.diff_layout(before, payload)
+    if not changes:
+        raise ValueError("this layout matches what is already on Home")
+    return {
+        "changes": changes,
+        "sections": payload.model_dump()["sections"],
+        "widgets_count": len(payload.widgets),
+        "pulse_cells_count": len(payload.pulse_cells),
+        "effect": "After approval, your Home page uses this layout. Other users are unchanged.",
+    }
+
+
+def _update_dashboard_layout(
+    db: Session, req: ApprovalRequest, a: UpdateDashboardLayoutArgs, approver: Principal
+) -> dict:
+    del approver  # personal layout belongs to the requester
+    payload = layout_service.parse_layout(_layout_args_dict(a))
+    applied = layout_service.apply_layout(db, req.requested_by, payload)
+    return {"layout": applied}
+
+
+# --- run_workflow ------------------------------------------------------------------------------
+
+class RunWorkflowArgs(BaseModel):
+    key: str = Field(min_length=1, max_length=64)
+    period: str = Field(pattern=PERIOD_RE)
+    allow_draft: bool = False
+
+    @field_validator("key")
+    @classmethod
+    def _key(cls, v: str) -> str:
+        return v.strip()
+
+
+def _precheck_run_workflow(db: Session, who: Principal, a: RunWorkflowArgs) -> dict:
+    from app.workflows import ops as wf_ops
+
+    err = wf_ops.require_author(who)
+    if err:
+        raise ValueError(err)
+    if a.allow_draft and who.role.value != "admin":
+        raise ValueError("only an admin may run an unpublished draft")
+    try:
+        asset, version, wf = wf_ops.resolve_run_version(
+            db, who, a.key, allow_draft=a.allow_draft
+        )
+    except wf_ops.WorkflowOpsError as e:
+        raise ValueError(e.message) from e
+    return {
+        "workflow_key": asset.key,
+        "workflow_name": asset.name,
+        "title": getattr(wf, "title", asset.name),
+        "version": version,
+        "lifecycle": asset.lifecycle,
+        "period": a.period,
+        "effect": f"After approval, run '{asset.key}' v{version} for {a.period} will be queued.",
+    }
+
+
+def _run_workflow(
+    db: Session, req: ApprovalRequest, a: RunWorkflowArgs, approver: Principal
+) -> dict:
+    import threading
+    import time
+
+    from sqlalchemy.orm import sessionmaker
+
+    from app.core.config import settings
+    from app.workflows import ops as wf_ops
+
+    # Attribute the run to the requester; approver only unlocks execution.
+    requester = Principal(
+        user_id=req.requested_by,
+        role=Role.ADMIN,  # group-wide author gate already passed at submit
+        company_ids=None,
+    )
+    if a.allow_draft and approver.role.value != "admin":
+        raise ValueError("only an admin may run an unpublished draft")
+
+    llm = allm = None
+    if settings.anthropic_api_key:
+        from anthropic import Anthropic, AsyncAnthropic
+
+        llm = Anthropic(api_key=settings.anthropic_api_key)
+        allm = AsyncAnthropic(api_key=settings.anthropic_api_key)
+
+    # Flush into the approvals session (no mid-txn commit); queue execute after
+    # the outer decide() commits so background workers see the run row.
+    run, wf = wf_ops.start_run(
+        db, requester, a.key, a.period, allow_draft=a.allow_draft, commit=False
+    )
+    run_id = run.id
+    summary = wf_ops.run_summary(run)
+    factory = sessionmaker(bind=db.get_bind(), expire_on_commit=False)
+
+    def _deferred() -> None:
+        for _ in range(50):
+            with factory() as s:
+                if s.get(WorkflowRun, run_id) is not None:
+                    break
+            time.sleep(0.02)
+        else:
+            return
+        wf_ops.queue_execute(factory, wf, run_id, llm, allm)
+
+    threading.Thread(target=_deferred, name=f"workflow-queue-{run_id}", daemon=True).start()
+    return {"run": summary, "queued": True}
+
+
 ACTIONS: dict[str, ActionDef] = {
     d.key: d
     for d in (
@@ -655,5 +817,29 @@ ACTIONS: dict[str, ActionDef] = {
             "Make a drafted set of scoring rules the active rules for every score and report.",
             ActivateConfigArgs, lambda a: f"Activate scorecard rules v{a.version}",
             lambda a: [], _activate_config, group_wide_only=True, precheck=_precheck_activate_config),
+        ActionDef(
+            "update_dashboard_layout", Risk.INTERNAL_WRITE,
+            "Change the requester's Home layout: show/hide/reorder built-in sections "
+            "(brief, pulse, scorecard, exception, issues, pinned_widgets); pin/unpin "
+            "chat artifact widgets; add/update/remove personal Workforce Pulse KPI tiles "
+            "(pulse_cells with source pending_approvals|draft_chro_actions); hide built-in "
+            "pulse keys via pulse_hidden. Pass the full desired layout.",
+            UpdateDashboardLayoutArgs,
+            _summarize_layout,
+            lambda a: [],
+            _update_dashboard_layout,
+            precheck=_precheck_dashboard_layout,
+            allow_self_approval=True,  # personal layout — requester may approve their own change
+        ),
+        ActionDef(
+            "run_workflow", Risk.INTERNAL_WRITE,
+            "Queue a published workflow run for a period (Copilot path; requires approval).",
+            RunWorkflowArgs,
+            lambda a: f"Run workflow '{a.key}' for {a.period}",
+            lambda a: [],
+            _run_workflow,
+            group_wide_only=True,
+            precheck=_precheck_run_workflow,
+        ),
     )
 }

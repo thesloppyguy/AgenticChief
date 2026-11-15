@@ -97,7 +97,18 @@ def catalogue(db: Session) -> dict:
         companies.append({"code": code, "name": name, "aliases": aliases})
 
     return {
-        "tools": sorted(t["name"] for t in TOOLS if t["name"] not in ("propose_action", "delegate")),
+        "tools": sorted(
+            t["name"]
+            for t in TOOLS
+            if t["name"]
+            not in (
+                "propose_action",
+                "delegate",
+                "draft_workflow",
+                "save_workflow",
+                "list_workflows",
+            )
+        ),
         "skills": sorted(s.frontmatter.name for s in list_skills()),
         "agents": sorted(SPECIALIST_REGISTRY.keys()),
         "actions": {k: a.description for k, a in sorted(ACTIONS.items())},

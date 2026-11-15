@@ -32,7 +32,7 @@ const data = {
   user: {
     name: "Lokibots",
     email: "admin@lokibots.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: "/logo.png",
   },
   navMain: [
     {
@@ -45,11 +45,11 @@ const data = {
       url: "/chat",
       icon: SquareTerminal,
     },
-    {
-      title: "Company",
-      url: "/company",
-      icon: Building,
-    },
+    // {
+    //   title: "Company",
+    //   url: "/company",
+    //   icon: Building,
+    // },
     {
       title: "Work",
       url: "#",
@@ -103,7 +103,10 @@ export function AppSidebar({
       <SidebarHeader className="pt-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/home" prefetch />}>
+            <SidebarMenuButton
+              size="lg"
+              render={<Link href="/home" prefetch />}
+            >
               <div className="flex aspect-square size-10 items-center justify-center overflow-hidden rounded-2xl bg-[#e3e0de] p-2 shadow-sm ring-1 ring-black/[0.04]">
                 <Logo label={false} />
               </div>

@@ -2,6 +2,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePeriod } from "@/components/AppShell";
+import { SelectableSurface } from "@/components/chat/ui-selection";
 import { Card, Loading, PageHeader, ScoreTile, StatusBadge } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -65,20 +66,79 @@ function Companies({ period }: { period: string }) {
 
       <div className="space-y-4">
         {selected && <Loading error={detail.error} loading={detail.loading && !detail.data} />}
-        {detail.data && (
+        {detail.data && (() => {
+          const d = detail.data;
+          return (
           <>
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight">{detail.data.company.name}</h2>
+            <SelectableSurface
+              selection={{
+                type: "company_detail_header",
+                id: `company.${d.company.id}.header`,
+                label: `${d.company.code} · ${d.company.name}`,
+                route: `/company?company=${d.company.id}`,
+                period,
+                refs: {
+                  company_id: d.company.id,
+                  company_code: d.company.code,
+                },
+                dataSnapshot: {
+                  score: d.score,
+                  status: d.status,
+                  pillar_coverage: d.pillar_coverage,
+                },
+              }}
+              className="rounded-xl"
+            >
+              <h2 className="text-lg font-semibold tracking-tight">{d.company.name}</h2>
               <p className="text-sm text-muted-foreground">
-                {detail.data.company.code} · scored on{" "}
-                {Math.round(detail.data.pillar_coverage * 100)}% of the scorecard&apos;s weight
+                {d.company.code} · scored on{" "}
+                {Math.round(d.pillar_coverage * 100)}% of the scorecard&apos;s weight
               </p>
-            </div>
+            </SelectableSurface>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <ScoreTile accent title="Overall" score={detail.data.score} status={detail.data.status}
-                withheld={detail.data.status_withheld} />
-              {detail.data.pillars.map((p) => (
-                <ScoreTile key={p.pillar} title={label(p.pillar)} score={p.score} status={p.status} />
+              <SelectableSurface
+                selection={{
+                  type: "company_pillar_tile",
+                  id: `company.${d.company.id}.overall`,
+                  label: `${d.company.code} overall`,
+                  route: `/company?company=${d.company.id}`,
+                  period,
+                  refs: {
+                    company_id: d.company.id,
+                    company_code: d.company.code,
+                  },
+                  dataSnapshot: {
+                    score: d.score,
+                    status: d.status,
+                  },
+                }}
+              >
+                <ScoreTile accent title="Overall" score={d.score} status={d.status}
+                  withheld={d.status_withheld} />
+              </SelectableSurface>
+              {d.pillars.map((p) => (
+                <SelectableSurface
+                  key={p.pillar}
+                  selection={{
+                    type: "company_pillar_tile",
+                    id: `company.${d.company.id}.pillar.${p.pillar}`,
+                    label: `${d.company.code} · ${label(p.pillar)}`,
+                    route: `/company?company=${d.company.id}`,
+                    period,
+                    refs: {
+                      company_id: d.company.id,
+                      company_code: d.company.code,
+                      pillar: p.pillar,
+                    },
+                    dataSnapshot: {
+                      pillar: p.pillar,
+                      score: p.score,
+                      status: p.status,
+                    },
+                  }}
+                >
+                  <ScoreTile title={label(p.pillar)} score={p.score} status={p.status} />
+                </SelectableSurface>
               ))}
             </div>
             <Card title="Every KPI" contentClassName="[&_[data-slot=table-container]]:max-h-[28rem] [&_[data-slot=table-container]]:overflow-y-auto [&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-muted">
@@ -94,13 +154,37 @@ function Companies({ period }: { period: string }) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {detail.data.pillars.flatMap((p) =>
+                    {d.pillars.flatMap((p) =>
                       p.kpis.map((k) => (
-                        <TableRow key={k.key}>
+                        <SelectableSurface
+                          as="tr"
+                          key={k.key}
+                          selection={{
+                            type: "kpi_row",
+                            id: `kpi.${k.key}@company.${d.company.id}`,
+                            label: `${label(k.key)} · ${d.company.code}`,
+                            route: `/company?company=${d.company.id}`,
+                            period,
+                            refs: {
+                              company_id: d.company.id,
+                              company_code: d.company.code,
+                              pillar: p.pillar,
+                              kpi_key: k.key,
+                            },
+                            dataSnapshot: {
+                              key: k.key,
+                              pillar: p.pillar,
+                              score: k.score,
+                              excluded_reason: k.excluded_reason,
+                              achievement: d.values[k.key]?.achievement ?? null,
+                            },
+                          }}
+                          className="border-b transition-colors hover:bg-muted/40 data-[selected=true]:bg-primary/5"
+                        >
                           <TableCell className="font-medium">{label(k.key)}</TableCell>
                           <TableCell className="text-muted-foreground">{label(p.pillar)}</TableCell>
                           <TableCell className="text-right tabular-nums">
-                            {fmt(detail.data?.values[k.key]?.achievement ?? null)}
+                            {fmt(d.values[k.key]?.achievement ?? null)}
                           </TableCell>
                           <TableCell className="text-right tabular-nums">{fmt(k.score)}</TableCell>
                           <TableCell>
@@ -110,7 +194,7 @@ function Companies({ period }: { period: string }) {
                               </Badge>
                             )}
                           </TableCell>
-                        </TableRow>
+                        </SelectableSurface>
                       )),
                     )}
                   </TableBody>
@@ -122,7 +206,8 @@ function Companies({ period }: { period: string }) {
               </p>
             </Card>
           </>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

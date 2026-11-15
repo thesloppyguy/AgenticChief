@@ -16,7 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { api, getClaims } from "@/lib/api";
-import { label } from "@/lib/format";
+import { friendlyRef, label } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import type {
@@ -370,7 +370,8 @@ function Definitions() {
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {w.steps.length} steps
-                    {w.uses.length > 0 && ` · reaches ${w.uses.join(", ")}`}
+                    {w.uses.length > 0 &&
+                      ` · uses ${w.uses.map(friendlyRef).join(", ")}`}
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-1">

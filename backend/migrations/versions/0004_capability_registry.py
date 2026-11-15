@@ -104,7 +104,10 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("kpi_mapping")
-    op.drop_table("capability_version")
-    op.drop_table("capability")
-    op.drop_table("connection")
+    # 0010 already drops these on upgrade and does not fully rebuild them on
+    # downgrade — guard so a full upgrade→downgrade cycle still cleans up.
+    bind = op.get_bind()
+    existing = set(sa.inspect(bind).get_table_names())
+    for name in ("kpi_mapping", "capability_version", "capability", "connection"):
+        if name in existing:
+            op.drop_table(name)

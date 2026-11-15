@@ -217,7 +217,10 @@ def _tool(ctx: StepCtx, a) -> dict:
     from app.copilot.tools import run_tool
 
     # No client and no delegation budget: a workflow step can never reach a sub-agent this way.
-    return run_tool(ctx.db, ctx.who, a.name, dict(a.args), None)
+    # Workflow documents still want charts; chat opts in via include_artifact.
+    args = dict(a.args or {})
+    args.setdefault("include_artifact", True)
+    return run_tool(ctx.db, ctx.who, a.name, args, None)
 
 
 def _skill(ctx: StepCtx, a) -> dict:

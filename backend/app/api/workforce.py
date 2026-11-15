@@ -7,8 +7,11 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
 
 from app.core.security import Principal, get_principal
+from app.dashboard import layout as layout_service
+from app.db.session import get_db
 from app.workforce import loader
 
 router = APIRouter(prefix="/workforce", tags=["workforce"])
@@ -17,12 +20,17 @@ router = APIRouter(prefix="/workforce", tags=["workforce"])
 @router.get("/pulse")
 def get_pulse(
     company_code: str | None = None,
-    _: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    who: Principal = Depends(get_principal),
 ) -> dict[str, Any]:
     code = (company_code or "").strip().upper() or None
     data = loader.pulse(code)
     if not data:
         raise HTTPException(404, "workforce pulse fixture not found")
+    # Personal pulse KPIs only on Group Home (not IC-narrowed slices).
+    if not code:
+        cells = layout_service.merge_pulse_cells(data.get("cells") or [], db, who)
+        data = {**data, "cells": cells}
     return {**data, "artifact": loader.artifact_for("pulse", data)}
 
 

@@ -64,7 +64,10 @@ def preview(version: int, period: str | None = PERIOD, db: Session = Depends(get
     period = period or sc.current_period()
     now = sc.build_scorecard(db, who, period)
     cfg = to_scoring_config(ScorecardRules(**row.rules), row.version, sc.registry.no_source_kpis(db=db))
-    then = sc.build_scorecard(db, who, period, cfg, effective_kpis(ScorecardRules(**row.rules).kpi_overrides))
+    draft_rules = ScorecardRules(**row.rules)
+    then = sc.build_scorecard(
+        db, who, period, cfg, effective_kpis(draft_rules.kpi_overrides, draft_rules.added_kpis)
+    )
 
     def summary(card: dict) -> dict:
         d = Counter(c["status"] or ("withheld" if c["status_withheld"] else "none") for c in card["companies"])

@@ -186,6 +186,21 @@ async def _dispatch_tool(
         from app.orchestrator import org_tools
 
         return org_tools.dispatch(name, args, db, who)
+    if name == "draft_workflow":
+        from app.services.scorecard import current_period
+        from app.workflows import ops as wf_ops
+        from app.workflows import planner as wf_planner
+
+        err = wf_ops.require_author(who)
+        if err:
+            return {"error": err}
+        description = str(args.get("description") or "").strip()
+        if len(description) < 10:
+            return {"error": "description must be at least 10 characters"}
+        if client is None:
+            return {"error": "Workflow planning is not configured (no model client)"}
+        period = args.get("period") or current_period()
+        return await wf_planner.draft(client, db, who, description, period)
     from app.workforce.tools import is_workforce_tool
 
     if is_workforce_tool(name):

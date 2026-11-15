@@ -53,8 +53,14 @@ export type ChatArtifact = {
     | "succession_stack"
     | "scorecard_summary"
     | "action_drafts"
+    | "approval_request"
     | "table"
     | string;
+  approval_id?: number;
+  allow_self_approval?: boolean;
+  summary?: string;
+  changes?: string[] | Record<string, unknown>;
+  action?: string;
   title?: string;
   subtitle?: string;
   focus?: string;

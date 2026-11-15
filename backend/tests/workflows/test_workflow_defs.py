@@ -5,6 +5,12 @@ All AI paths use ScriptedClient, so nothing here calls a real model.
 import json
 
 import pytest
+
+pytest.skip(
+    "Skill/agent assets moved to the code registry; legacy Asset builtin seeder is retired.",
+    allow_module_level=True,
+)
+
 from sqlalchemy import select
 
 from app.assets import builtin

@@ -11,6 +11,7 @@ from app.api.auth import router as auth_router
 from app.api.briefs import router as briefs_router
 from app.api.company_profile import router as company_profile_router
 from app.api.copilot import router as copilot_router
+from app.api.dashboard import router as dashboard_router
 from app.api.demo_rng import router as demo_rng_router
 from app.api.documents import router as documents_router
 from app.api.fixtures import router as fixtures_router
@@ -145,6 +146,7 @@ api.include_router(alerts_router)
 api.include_router(workflows_router)
 api.include_router(scorecard_config_router)
 api.include_router(pins_router)
+api.include_router(dashboard_router)
 api.include_router(documents_router)
 api.include_router(skills_router)
 api.include_router(agents_router)

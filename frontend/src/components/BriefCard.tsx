@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card } from "@/components/ui";
 import { Button } from "@/components/ui/button";
+import { friendlyRef } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type Brief = {
@@ -92,7 +93,7 @@ function parseItem(item: string): ParsedItem {
     return {
       kind: "approval",
       id: approval[1],
-      action: approval[2].replaceAll("_", " "),
+      action: friendlyRef(approval[2].trim().replaceAll(" ", "_")),
     };
   }
 

@@ -3,6 +3,9 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { usePeriod } from "@/components/AppShell";
+import { AskCopilotButton } from "@/components/chat/ask-copilot-button";
+import { SelectableSurface } from "@/components/chat/ui-selection";
 import { Loading, PageHeader } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { api, getClaims } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
-import { label } from "@/lib/format";
+import { friendlyRef, label } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Approval } from "@/lib/types";
 
@@ -77,10 +80,13 @@ function ArgsSummary({ action, args }: { action: string; args: Record<string, un
     });
   }
   if (typeof args.program_key === "string") {
-    rows.push({ label: "Programme", value: args.program_key });
+    rows.push({ label: "Programme", value: friendlyRef(args.program_key) });
   }
   if (typeof args.report_key === "string") {
     rows.push({ label: "Report", value: args.report_key });
+  }
+  if (action === "run_workflow" && typeof args.key === "string") {
+    rows.push({ label: "Workflow", value: args.key });
   }
   if (typeof args.company_code === "string") {
     rows.push({ label: "IC", value: args.company_code });
@@ -90,6 +96,51 @@ function ArgsSummary({ action, args }: { action: string; args: Record<string, un
   }
   if (typeof args.version === "number") {
     rows.push({ label: "Config version", value: String(args.version) });
+  }
+  if (action === "update_dashboard_layout") {
+    if (Array.isArray(args.sections)) {
+      const hidden = args.sections
+        .filter((s): s is { key: string; visible?: boolean } => !!s && typeof s === "object")
+        .filter((s) => s.visible === false)
+        .map((s) => String(s.key).replace(/_/g, " "));
+      if (hidden.length) {
+        rows.push({ label: "Hidden", value: hidden.join(", ") });
+      }
+      rows.push({
+        label: "Order",
+        value: args.sections
+          .filter((s): s is { key: string } => !!s && typeof s === "object" && "key" in s)
+          .map((s) => String(s.key).replace(/_/g, " "))
+          .join(" → "),
+      });
+    }
+    if (Array.isArray(args.widgets)) {
+      const titles = args.widgets
+        .filter((w): w is { title?: string; kind?: string } => !!w && typeof w === "object")
+        .map((w) => w.title || w.kind || "widget");
+      rows.push({
+        label: "Pinned",
+        value: titles.length ? titles.join(", ") : "none",
+      });
+    }
+    if (Array.isArray(args.pulse_cells)) {
+      const labels = args.pulse_cells
+        .filter(
+          (c): c is { label?: string; key?: string; source?: string } =>
+            !!c && typeof c === "object",
+        )
+        .map((c) => c.label || c.key || c.source || "KPI");
+      rows.push({
+        label: "Pulse KPIs",
+        value: labels.length ? labels.join(", ") : "none",
+      });
+    }
+    if (Array.isArray(args.pulse_hidden) && args.pulse_hidden.length) {
+      rows.push({
+        label: "Hidden pulse",
+        value: args.pulse_hidden.map((k) => String(k).replace(/_/g, " ")).join(", "),
+      });
+    }
   }
 
   const known = new Set([
@@ -114,6 +165,12 @@ function ArgsSummary({ action, args }: { action: string; args: Record<string, un
     "at_risk_count",
     "cadence",
     "name",
+    "sections",
+    "widgets",
+    "pulse_cells",
+    "pulse_hidden",
+    "key",
+    "allow_draft",
   ]);
   const extras = Object.entries(args).filter(([k]) => !known.has(k));
 
@@ -153,6 +210,7 @@ function ArgsSummary({ action, args }: { action: string; args: Record<string, un
 
 function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
   const { data, error, loading, reload } = useApi<Approval>(`/approvals/${id}`);
+  const [period] = usePeriod();
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const me = getClaims();
@@ -160,7 +218,13 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
   if (!data) return <Loading error={error} loading={loading} />;
 
   const ownRequest = data.requested_by === me?.sub;
-  const canDecide = me?.role === "admin" && data.status === "pending" && !ownRequest;
+  const selfOk = Boolean(
+    (data as { allow_self_approval?: boolean }).allow_self_approval,
+  );
+  const canDecide =
+    me?.role === "admin" &&
+    data.status === "pending" &&
+    (!ownRequest || selfOk);
   const reason =
     data.context && typeof data.context === "object" && "reason" in data.context
       ? String((data.context as { reason?: unknown }).reason ?? "")
@@ -236,6 +300,12 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
       });
       toast.success(`Request ${out.status}.`);
       setComment("");
+      if (
+        (out.status === "executed" || out.status === "approved") &&
+        data.action === "update_dashboard_layout"
+      ) {
+        window.dispatchEvent(new Event("dashboard-layout:changed"));
+      }
       reload();
       onDecided();
     } catch (e) {
@@ -245,8 +315,30 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
     }
   }
 
+  const selection = {
+    type: "approval",
+    id: `approval.${data.id}`,
+    label: data.summary,
+    route: `/actions?id=${data.id}`,
+    period:
+      typeof data.args?.period === "string" ? String(data.args.period) : period,
+    refs: { approval_id: data.id },
+    dataSnapshot: {
+      id: data.id,
+      action: data.action,
+      summary: data.summary,
+      status: data.status,
+      risk: data.risk,
+      args: data.args,
+      context: data.context,
+    },
+  };
+
   return (
-    <div className="overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+    <SelectableSurface
+      selection={selection}
+      className="overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+    >
       <div className="space-y-4 border-b border-black/5 px-6 py-5 dark:border-white/10">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className={cn(STATUS_STYLE[data.status])}>
@@ -263,17 +355,23 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
           <span className="text-xs text-muted-foreground">{label(data.risk)}</span>
           <span className="text-xs text-muted-foreground">·</span>
           <span className="text-xs text-muted-foreground">#{data.id}</span>
+          <AskCopilotButton
+            size="sm"
+            variant="outline"
+            className="ml-auto rounded-full"
+            selection={selection}
+          />
         </div>
         <div className="space-y-1.5">
           <h2 className="text-lg font-semibold tracking-tight text-foreground">
             {data.summary}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            {blurb || RISK_NOTE[data.risk] || label(data.action)}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Requested by {data.requested_by}
-            {data.via ? ` · ${data.via}` : ""} · {shortDateTime(data.created_at)}
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {detail ||
+              (reason && reason !== data.summary ? reason : "") ||
+              blurb ||
+              RISK_NOTE[data.risk] ||
+              label(data.action)}
           </p>
         </div>
       </div>
@@ -283,11 +381,6 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
           <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             What this would do
           </h3>
-          {(detail || (reason && reason !== data.summary)) ? (
-            <p className="text-sm leading-relaxed text-foreground">
-              {detail || reason}
-            </p>
-          ) : null}
           {routesTo.length > 0 ? (
             <p className="text-xs text-muted-foreground">
               Routes to {routesTo.join(", ")}
@@ -428,7 +521,7 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
 
       {data.status === "pending" && (
         <div className="border-t border-black/5 bg-muted/20 px-6 py-5 dark:border-white/10">
-          {ownRequest ? (
+          {ownRequest && !selfOk ? (
             <p className="text-sm text-muted-foreground">
               You asked for this, so you cannot approve it. A second admin must decide.
             </p>
@@ -476,7 +569,7 @@ function Detail({ id, onDecided }: { id: number; onDecided: () => void }) {
           )}
         </div>
       )}
-    </div>
+    </SelectableSurface>
   );
 }
 
@@ -530,11 +623,15 @@ function Queue() {
               <ul className="divide-y divide-black/5 dark:divide-white/10">
                 {data?.map((a) => {
                   const active = sel === a.id;
+                  const ctx =
+                    a.context && typeof a.context === "object"
+                      ? (a.context as Record<string, unknown>)
+                      : {};
                   const blurb =
-                    typeof a.context?.blurb === "string" ? a.context.blurb.trim() : "";
+                    typeof ctx.blurb === "string" ? ctx.blurb.trim() : "";
                   const sla =
-                    typeof a.context?.sla === "string" ? a.context.sla.trim() : "";
-                  const plainSla = a.context?.sla_style === "plain";
+                    typeof ctx.sla === "string" ? ctx.sla.trim() : "";
+                  const plainSla = ctx.sla_style === "plain";
                   return (
                     <li key={a.id}>
                       <button

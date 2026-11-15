@@ -1,11 +1,8 @@
-"use client";
-
-import { ChatSessionProvider } from "@/components/chat/chat-session-context";
-
 export default function ChatLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <ChatSessionProvider>{children}</ChatSessionProvider>;
+  // ChatSessionProvider lives in AppShell so the right-rail Copilot shares state.
+  return children;
 }

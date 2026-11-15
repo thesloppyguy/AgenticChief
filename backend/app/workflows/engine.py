@@ -54,13 +54,22 @@ def emit(db: Session, run_id: int, step: str, status: str, message: str, data: d
     db.add(WorkflowEvent(run_id=run_id, seq=seq, step=step, status=status, message=message[:300], data=data))
 
 
-def create_run(db: Session, who: Principal, wf: WorkflowDef, period: str, params: dict | None = None) -> WorkflowRun:
+def create_run(
+    db: Session,
+    who: Principal,
+    wf: WorkflowDef,
+    period: str,
+    params: dict | None = None,
+    *,
+    commit: bool = True,
+) -> WorkflowRun:
     run = WorkflowRun(workflow=wf.key, period=period, status="queued", params=params,
                       requested_by=who.user_id, role=who.role.value, state={})
     db.add(run)
     db.flush()
     emit(db, run.id, "run", "done", f"{wf.title} queued for {period}")
-    db.commit()
+    if commit:
+        db.commit()
     return run
 
 

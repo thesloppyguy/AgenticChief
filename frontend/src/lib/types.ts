@@ -63,16 +63,28 @@ export interface Approval {
     reason?: string;
     title?: string;
     blurb?: string;
+    detail?: string;
     sla?: string;
     sla_style?: string;
     draft_key?: string;
     severity?: string;
+    insights?: string[];
+    routes_to?: string[];
+    drivers?: string[];
+    roi?: Record<string, number> | null;
   } | null;
   created_at: string;
   decided_by: string | null; decision_comment: string | null; result: Record<string, unknown> | null;
+  allow_self_approval?: boolean;
   events?: { at: string; actor: string; event: string; comment: string | null }[];
 }
-export interface ActionDef { key: string; risk: string; description: string; group_wide_only: boolean }
+export interface ActionDef {
+  key: string;
+  risk: string;
+  description: string;
+  group_wide_only: boolean;
+  allow_self_approval?: boolean;
+}
 export interface UnreadSummary { alerts: number; approvals_pending: number }
 
 export interface RunSummary { id: number; workflow: string; period: string; status: string; error: string | null; requested_by: string; created_at: string; finished_at: string | null }

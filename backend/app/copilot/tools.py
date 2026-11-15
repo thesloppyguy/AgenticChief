@@ -15,8 +15,13 @@ from app.knowledge import store as knowledge
 from app.kpi_registry.seed import DEFAULT_CONFIG
 from app.services import scorecard as sc
 from app.services import sources_status as src_status
-from app.workforce.tools import WORKFORCE_TOOLS, is_workforce_tool
 from app.workforce import tools as workforce_tools
+from app.workforce.tools import (
+    INCLUDE_ARTIFACT_PROP,
+    WORKFORCE_TOOLS,
+    is_workforce_tool,
+    want_artifact,
+)
 
 PERIOD_PROP = {"type": "string", "description": "Fiscal period as YYYY-MM. Defaults to the current month."}
 
@@ -27,23 +32,37 @@ TOOLS: list[dict[str, Any]] = sorted(
         DELEGATE,
         {
             "name": "get_group_score",
-            "description": "Group HR score, status, pillar scores and company coverage for a period.",
-            "input_schema": {"type": "object", "properties": {"period": PERIOD_PROP}},
+            "description": "Group HR score, status, pillar scores and company coverage for a period. "
+                           "Prose by default; set include_artifact=true to show the scorecard card.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "period": PERIOD_PROP,
+                    "include_artifact": INCLUDE_ARTIFACT_PROP,
+                },
+            },
         },
         {
             "name": "get_ic_score",
-            "description": "One company's overall score, pillar scores and per-KPI scores with exclusions.",
+            "description": "One company's overall score, pillar scores and per-KPI scores with exclusions. "
+                           "Prose by default; set include_artifact=true to show the scorecard card.",
             "input_schema": {"type": "object", "properties": {
-                "company_code": {"type": "string", "description": "e.g. LTTS, LTMR"}, "period": PERIOD_PROP},
+                "company_code": {"type": "string", "description": "e.g. LTTS, LTMR"},
+                "period": PERIOD_PROP,
+                "include_artifact": INCLUDE_ARTIFACT_PROP,
+            },
                 "required": ["company_code"]},
         },
         {
             "name": "explain_pillar",
             "description": "Drill into one pillar: each sub-KPI's weight, target, group achievement, score, "
-                           "coverage and which companies are missing or excluded.",
+                           "coverage and which companies are missing or excluded. "
+                           "Prose by default; set include_artifact=true to show the KPI bars.",
             "input_schema": {"type": "object", "properties": {
                 "pillar": {"type": "string", "enum": sorted(DEFAULT_CONFIG.pillar_weights)},
-                "period": PERIOD_PROP}, "required": ["pillar"]},
+                "period": PERIOD_PROP,
+                "include_artifact": INCLUDE_ARTIFACT_PROP,
+            }, "required": ["pillar"]},
         },
         {
             "name": "latest_monthly_review",
@@ -78,7 +97,16 @@ TOOLS: list[dict[str, Any]] = sorted(
                              "send_directive (subject, body, person_ids|recipient_emails|company_codes, channel); "
                              "launch_capability_program / launch_retention_corrective (see list_draft_actions); "
                              "schedule_report (report_key: workforce_brief|monthly_review|scorecard_snapshot); "
-                             "create_snapshot (period); publish_monthly_report (run_id).",
+                             "create_snapshot (period); publish_monthly_report (run_id); "
+                             "publish_asset (asset_id, optional version); "
+                             "run_workflow (key, period, optional allow_draft for admins — "
+                             "queues a run only after approval); "
+                             "update_dashboard_layout (sections: [{key, visible}], widgets: "
+                             "[{id, title, kind, artifact}], pulse_cells: "
+                             "[{id, key, label, source: pending_approvals|draft_chro_actions, "
+                             "optional unit/note/tone/visible}], pulse_hidden: [built-in pulse keys] "
+                             "— full desired Home layout; call get_dashboard_layout first); "
+                             "activate_scorecard_config (version) after draft_scorecard_config.",
             "input_schema": {"type": "object", "properties": {
                 "action": {"type": "string", "enum": sorted(ACTIONS)},
                 "args": {"type": "object"},
@@ -86,11 +114,80 @@ TOOLS: list[dict[str, Any]] = sorted(
                 "required": ["action", "args"]},
         },
         {
+            "name": "get_dashboard_layout",
+            "description": "Read the signed-in user's Home layout: section visibility/order, pinned "
+                           "widgets, personal pulse_cells, pulse_hidden, and allowed pulse_sources. "
+                           "Call this before propose_action update_dashboard_layout so you pass the "
+                           "full desired layout (merge your changes into the current one).",
+            "input_schema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "get_scorecard_config",
+            "description": "Active Group HR Scorecard rules: version, pillar weights, thresholds, "
+                           "and compact KPI list (key, label, pillar, weight, target, direction, "
+                           "added). Use before changing weights/targets or adding a scored KPI.",
+            "input_schema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "draft_scorecard_config",
+            "description": "Create a draft scorecard rules version (group-wide admin only). Pass a "
+                           "partial rules object merged onto the active rules — e.g. kpi_overrides, "
+                           "added_kpis, pillar_weights. Pillar KPI weights must still sum to 100% "
+                           "(rebalance siblings when adding a KPI). Returns version + diff. Does NOT "
+                           "activate; then propose_action activate_scorecard_config with that version.",
+            "input_schema": {"type": "object", "properties": {
+                "rules": {"type": "object",
+                          "description": "Partial ScorecardRules fields to merge onto active rules."},
+                "note": {"type": "string", "maxLength": 300,
+                         "description": "Short note for approvers."}},
+                "required": ["rules"]},
+        },
+        {
+            "name": "draft_workflow",
+            "description": "Plan a workflow from a natural-language description. Returns a draft "
+                           "spec (title, steps, problems, suggested_key) but does NOT save it. "
+                           "Group-wide editor/admin only. After review, call save_workflow; to run, "
+                           "publish via propose_action publish_asset then propose_action run_workflow.",
+            "input_schema": {"type": "object", "properties": {
+                "description": {"type": "string", "minLength": 10, "maxLength": 4000,
+                                "description": "What the workflow should do."},
+                "period": PERIOD_PROP},
+                "required": ["description"]},
+        },
+        {
+            "name": "save_workflow",
+            "description": "Save a workflow definition as a draft asset (same as Workflows → save). "
+                           "Does not publish or run. Group-wide editor/admin only. "
+                           "Pass the definition object from draft_workflow.spec.",
+            "input_schema": {"type": "object", "properties": {
+                "key": {"type": "string",
+                        "description": "Stable lowercase key, e.g. weekly_skills_brief."},
+                "name": {"type": "string", "minLength": 1, "maxLength": 120},
+                "description": {"type": "string", "maxLength": 500},
+                "definition": {"type": "object",
+                               "description": "WorkflowSpec dict: title, steps, …"}},
+                "required": ["key", "name", "definition"]},
+        },
+        {
+            "name": "list_workflows",
+            "description": "List saved workflow definitions (key, name, lifecycle, published version, "
+                           "steps). Group-wide editor/admin only. Prose by default; set "
+                           "include_artifact=true for a table card.",
+            "input_schema": {"type": "object", "properties": {
+                "lifecycle": {"type": "string",
+                              "description": "Optional filter: draft | validated | published | deprecated."},
+                "include_artifact": INCLUDE_ARTIFACT_PROP}},
+        },
+        {
             "name": "rank_ics",
-            "description": "Rank companies by overall score (lowest or highest first), with status.",
+            "description": "Rank companies by overall score (lowest or highest first), with status. "
+                           "Prose by default; set include_artifact=true to show the comparison chart.",
             "input_schema": {"type": "object", "properties": {
                 "order": {"type": "string", "enum": ["lowest", "highest"]},
-                "limit": {"type": "integer", "minimum": 1, "maximum": 88}, "period": PERIOD_PROP}},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 88},
+                "period": PERIOD_PROP,
+                "include_artifact": INCLUDE_ARTIFACT_PROP,
+            }},
         },
         {
             "name": "get_source_status",
@@ -242,12 +339,14 @@ def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int
         if name == "get_group_score":
             card = sc.build_scorecard(db, who, period)
             group = card["group"]
-            artifact_src = {**group, "no_source_kpis": card.get("no_source_kpis") or []}
-            return {"period": period, "scope": card["scope"],
-                    "no_source_kpis": card["no_source_kpis"], **group,
-                    "source_freshness": card.get("freshness"),
-                    "as_of_month": period,
-                    "artifact": _scorecard_summary_artifact(period, artifact_src)}
+            out = {"period": period, "scope": card["scope"],
+                   "no_source_kpis": card["no_source_kpis"], **group,
+                   "source_freshness": card.get("freshness"),
+                   "as_of_month": period}
+            if want_artifact(args):
+                artifact_src = {**group, "no_source_kpis": card.get("no_source_kpis") or []}
+                out["artifact"] = _scorecard_summary_artifact(period, artifact_src)
+            return out
         if name == "get_source_status":
             envelope = src_status.build_sources_status(db)
             wanted = (args.get("source") or "").strip().lower() or None
@@ -277,24 +376,25 @@ def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int
             out = sc.build_company_scorecard(db, who, match.id, period)
             out["as_of_month"] = period
             out["source_freshness"] = out.get("freshness")
-            out["artifact"] = {
-                "kind": "scorecard_summary",
-                "title": f"{code} scorecard · {period}",
-                "source": "scorecard.ic",
-                "export_key": "scorecard",
-                "schedule_key": "scorecard_snapshot",
-                "overall": _round_score(out.get("score")),
-                "status": out.get("status"),
-                "pillars": [
-                    {
-                        "key": p.get("pillar"),
-                        "label": p.get("label") or p.get("pillar"),
-                        "score": _round_score(p.get("score")),
-                        "status": p.get("status"),
-                    }
-                    for p in (out.get("pillars") or [])
-                ],
-            }
+            if want_artifact(args):
+                out["artifact"] = {
+                    "kind": "scorecard_summary",
+                    "title": f"{code} scorecard · {period}",
+                    "source": "scorecard.ic",
+                    "export_key": "scorecard",
+                    "schedule_key": "scorecard_snapshot",
+                    "overall": _round_score(out.get("score")),
+                    "status": out.get("status"),
+                    "pillars": [
+                        {
+                            "key": p.get("pillar"),
+                            "label": p.get("label") or p.get("pillar"),
+                            "score": _round_score(p.get("score")),
+                            "status": p.get("status"),
+                        }
+                        for p in (out.get("pillars") or [])
+                    ],
+                }
             return out
         if name == "explain_pillar":
             out = sc.build_pillar_drilldown(db, who, args["pillar"], period)
@@ -308,45 +408,46 @@ def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int
                     return "amber"
                 return "red"
 
-            items = []
-            for k in out.get("kpis") or []:
-                sc_val = _round_score(k.get("group_score"))
-                if sc_val is None:
-                    continue
-                items.append(
-                    {
-                        "label": _pillar_label(k.get("key")),
-                        "value": sc_val,
-                        "unit": "",
-                        "target": k.get("target"),
-                        "actual": _round_score(k.get("group_achievement")),
-                        "weight": _round_score((k.get("weight") or 0) * 100),
-                        "status": _kpi_status(sc_val),
-                        "note": (
-                            "No source connected"
-                            if k.get("no_source")
-                            else None
-                        ),
-                        "tags": [
-                            t
-                            for t in [
-                                "SuccessFactors",
-                                "Due: Continuous",
-                                "No source" if k.get("no_source") else None,
-                            ]
-                            if t
-                        ],
-                    }
-                )
-            out["artifact"] = {
-                "kind": "kpi_bars",
-                "title": f"{_pillar_label(args['pillar'])} sub-KPIs · {period}",
-                "subtitle": "Target · actual · score · weight for scored sub-KPIs.",
-                "source": "scorecard.pillar",
-                "export_key": "scorecard",
-                "schedule_key": "monthly_review",
-                "items": items,
-            }
+            if want_artifact(args):
+                items = []
+                for k in out.get("kpis") or []:
+                    sc_val = _round_score(k.get("group_score"))
+                    if sc_val is None:
+                        continue
+                    items.append(
+                        {
+                            "label": _pillar_label(k.get("key")),
+                            "value": sc_val,
+                            "unit": "",
+                            "target": k.get("target"),
+                            "actual": _round_score(k.get("group_achievement")),
+                            "weight": _round_score((k.get("weight") or 0) * 100),
+                            "status": _kpi_status(sc_val),
+                            "note": (
+                                "No source connected"
+                                if k.get("no_source")
+                                else None
+                            ),
+                            "tags": [
+                                t
+                                for t in [
+                                    "SuccessFactors",
+                                    "Due: Continuous",
+                                    "No source" if k.get("no_source") else None,
+                                ]
+                                if t
+                            ],
+                        }
+                    )
+                out["artifact"] = {
+                    "kind": "kpi_bars",
+                    "title": f"{_pillar_label(args['pillar'])} sub-KPIs · {period}",
+                    "subtitle": "Target · actual · score · weight for scored sub-KPIs.",
+                    "source": "scorecard.pillar",
+                    "export_key": "scorecard",
+                    "schedule_key": "monthly_review",
+                    "items": items,
+                }
             return out
         if name == "list_missing_submissions":
             card = sc.build_scorecard(db, who, period)
@@ -379,6 +480,82 @@ def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int
             return {"run_id": run.id, "period": period, "published_snapshot_id": published,
                     "headline": r["headline"], "attention": r["attention"], "exceptions": r["exceptions"],
                     "commentary": r["commentary"], "caveats": r["caveats"], "meta": r["meta"]}
+        if name == "get_dashboard_layout":
+            from app.dashboard import layout as layout_service
+
+            return layout_service.get_layout(db, who.user_id)
+        if name == "get_scorecard_config":
+            from app.db.models import ScorecardConfigVersion
+            from app.kpi_registry.seed import PILLAR_LABELS
+            from app.scorecard_config import service as config_service
+            from app.scorecard_config.rules import effective_kpis
+
+            rules, version = config_service.active(db)
+            has_active_row = db.scalar(
+                select(ScorecardConfigVersion.id).where(
+                    ScorecardConfigVersion.status == "active"
+                ).limit(1)
+            )
+            kpis = effective_kpis(rules.kpi_overrides, rules.added_kpis)
+            added_keys = {a.key for a in rules.added_kpis}
+            labels = {a.key: a.label for a in rules.added_kpis}
+            return {
+                "version": version,
+                "built_in": has_active_row is None,
+                "pillar_weights": rules.pillar_weights,
+                "green_min": rules.green_min,
+                "amber_min": rules.amber_min,
+                "kpis": [
+                    {
+                        "key": k.key,
+                        "label": labels.get(k.key) or k.key.replace("_", " ").title(),
+                        "pillar": k.pillar,
+                        "pillar_label": PILLAR_LABELS.get(k.pillar, k.pillar),
+                        "weight": k.weight,
+                        "target": k.target,
+                        "direction": k.direction.value,
+                        "added": k.key in added_keys,
+                    }
+                    for k in kpis
+                ],
+                "note": "To change weights/targets or add a scored KPI, call draft_scorecard_config "
+                        "then propose_action activate_scorecard_config. Home pulse tiles use "
+                        "update_dashboard_layout instead.",
+            }
+        if name == "draft_scorecard_config":
+            from pydantic import ValidationError
+
+            from app.scorecard_config import service as config_service
+            from app.scorecard_config.rules import ScorecardRules
+
+            if who.role.value != "admin" or who.company_ids is not None:
+                return {"error": "group-wide admin access is required to draft scorecard rules"}
+            partial = args.get("rules")
+            if not isinstance(partial, dict):
+                return {"error": "rules must be an object"}
+            active_rules, active_version = config_service.active(db)
+            try:
+                merged = ScorecardRules(**{**active_rules.model_dump(), **partial})
+            except ValidationError as e:
+                msg = "; ".join(
+                    err["msg"].removeprefix("Value error, ") for err in e.errors()
+                )
+                return {"error": msg}
+            changes = config_service.diff(active_rules, merged)
+            if not changes:
+                return {"error": "That draft changes nothing compared with the active rules"}
+            row = config_service.create_draft(
+                db, who, merged, str(args.get("note") or "")[:300]
+            )
+            return {
+                "version": row.version,
+                "status": row.status,
+                "replacing_version": active_version,
+                "diff": changes,
+                "note": row.note,
+                "next": "propose_action activate_scorecard_config with args.version = "
+                        f"{row.version}. Scores do not change until a human approves.",
+            }
         if name == "propose_action":
             # The model can only ask. Policy, approval and execution all live in app.approvals.
             try:
@@ -387,9 +564,42 @@ def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int
                                        context={"reason": str(args.get("reason", ""))[:500]})
             except approvals.ApprovalError as e:
                 return {"error": e.message}
-            return {"verdict": res.verdict, "reason": res.reason, "approval_id": res.approval.id,
+            action_def = ACTIONS.get(args["action"])
+            out: dict[str, Any] = {
+                "verdict": res.verdict,
+                "reason": res.reason,
+                "approval_id": res.approval.id,
+                "status": res.approval.status,
+                "action": args["action"],
+                "summary": res.approval.summary,
+                "allow_self_approval": bool(action_def.allow_self_approval) if action_def else False,
+                "note": (
+                    None
+                    if res.verdict == "deny"
+                    else (
+                        "Executed immediately."
+                        if res.approval.status == "executed"
+                        else "Not executed. A human must approve it first."
+                        + (
+                            " You may approve this personal layout change yourself."
+                            if action_def and action_def.allow_self_approval
+                            else ""
+                        )
+                    )
+                ),
+            }
+            if res.verdict != "deny" and res.approval.status == "pending":
+                out["artifact"] = {
+                    "kind": "approval_request",
+                    "title": res.approval.summary or args["action"],
+                    "approval_id": res.approval.id,
+                    "action": args["action"],
                     "status": res.approval.status,
-                    "note": "Not executed. A human must approve it first." if res.verdict != "deny" else None}
+                    "allow_self_approval": bool(action_def.allow_self_approval) if action_def else False,
+                    "summary": res.approval.summary,
+                    "changes": (res.approval.context or {}).get("changes"),
+                }
+            return out
         if name == "delegate":
             from app.copilot import delegate as delegate_mod
 
@@ -401,8 +611,82 @@ def run_tool(db: Session, who: Principal, name: str, args: dict, session_id: int
             n = min(int(args.get("limit", 10)), 88)
             ranking = [{"code": c["code"], "score": c["score"], "status": c["status"],
                         "pillar_coverage": c["pillar_coverage"]} for c in scored[:n]]
-            return {"period": period, "unscored": len(card["companies"]) - len(scored),
-                    "ranking": ranking, "artifact": _ic_compare_artifact(period, ranking)}
+            result = {"period": period, "unscored": len(card["companies"]) - len(scored),
+                      "ranking": ranking}
+            if want_artifact(args):
+                result["artifact"] = _ic_compare_artifact(period, ranking)
+            return result
+        if name == "list_workflows":
+            from app.workflows import ops as wf_ops
+
+            err = wf_ops.require_author(who)
+            if err:
+                return {"error": err}
+            rows = wf_ops.list_defs(db, args.get("lifecycle"))
+            compact = [
+                {
+                    "key": r["key"],
+                    "name": r["name"],
+                    "lifecycle": r["lifecycle"],
+                    "published_version": r["published_version"],
+                    "version": r["version"],
+                    "steps": len(r.get("steps") or []),
+                    "title": r.get("title"),
+                }
+                for r in rows
+            ]
+            out: dict[str, Any] = {"count": len(compact), "workflows": compact}
+            if want_artifact(args):
+                out["artifact"] = {
+                    "kind": "table",
+                    "title": "Workflows",
+                    "columns": ["key", "name", "lifecycle", "published", "steps"],
+                    "rows": [
+                        [
+                            w["key"],
+                            w["name"],
+                            w["lifecycle"],
+                            w["published_version"] if w["published_version"] is not None else "—",
+                            w["steps"],
+                        ]
+                        for w in compact
+                    ],
+                }
+            return out
+        if name == "save_workflow":
+            from app.workflows import ops as wf_ops
+
+            err = wf_ops.require_author(who)
+            if err:
+                return {"error": err}
+            key = str(args.get("key") or "").strip()
+            name_ = str(args.get("name") or "").strip()
+            definition = args.get("definition")
+            if not key or not name_ or not isinstance(definition, dict):
+                return {"error": "key, name and definition (object) are required"}
+            try:
+                saved = wf_ops.save_def(
+                    db,
+                    who,
+                    key,
+                    name_,
+                    str(args.get("description") or "")[:500],
+                    definition,
+                )
+            except wf_ops.WorkflowOpsError as e:
+                return {"error": e.message}
+            return {
+                "id": saved["id"],
+                "key": saved["key"],
+                "name": saved["name"],
+                "lifecycle": saved["lifecycle"],
+                "version": saved["version"],
+                "note": "Saved as draft. Propose publish_asset to publish, then run_workflow to run.",
+            }
+        if name == "draft_workflow":
+            return {
+                "error": "draft_workflow requires the async chat planner; use Copilot chat.",
+            }
     except (KeyError, ValueError) as e:
         return {"error": f"bad arguments: {type(e).__name__}"}
     return {"error": f"unknown tool {name}"}

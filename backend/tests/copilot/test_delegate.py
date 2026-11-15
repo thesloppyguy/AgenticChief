@@ -3,6 +3,12 @@
 Everything runs against ScriptedClient, so no test here calls a real model.
 """
 import pytest
+
+pytest.skip(
+    "Skill/agent assets moved to the code registry; legacy Asset builtin seeder is retired.",
+    allow_module_level=True,
+)
+
 from sqlalchemy import select
 
 from app.assets import builtin

@@ -18,6 +18,22 @@ from app.services.scorecard import current_period
 
 SYSTEM = Principal("scheduler", Role.VIEWER, None)
 
+# Machine action keys → short CHRO-facing labels (briefs, digests).
+_ACTION_LABELS = {
+    "launch_capability_program": "Launch talent programme",
+    "launch_retention_corrective": "Launch retention plan",
+    "send_directive": "Send directive",
+    "publish_asset": "Publish workflow",
+    "activate_scorecard_config": "Activate scorecard rules",
+}
+
+
+def _action_label(key: str) -> str:
+    k = (key or "").strip()
+    if k in _ACTION_LABELS:
+        return _ACTION_LABELS[k]
+    return k.replace("_", " ").strip().title() or k
+
 
 def _local_today() -> str:
     try:
@@ -98,9 +114,10 @@ def _render_morning(ctx: dict[str, Any], due_notes: list[str]) -> str:
     ]
     lines += [f"- {r}" for r in ctx["reds"]] or ["- Nothing red right now."]
     lines += ["", "## Open approvals"]
-    lines += [f"- #{a['id']} {a['action']}: {a['summary']}" for a in ctx["approvals"]] or [
-        "- None pending."
-    ]
+    lines += [
+        f"- #{a['id']} {_action_label(a['action'])}: {a['summary']}"
+        for a in ctx["approvals"]
+    ] or ["- None pending."]
     lines += ["", "## Recent alerts"]
     lines += [f"- [{a['severity']}] {a['title']}" for a in ctx["alerts"][:5]] or ["- Quiet."]
     lines += ["", "## Open loops"]
@@ -121,7 +138,10 @@ def _render_eod(ctx: dict[str, Any], noted_today: list[str]) -> str:
     ]
     lines += [f"- {r}" for r in ctx["reds"]] or ["- Clear."]
     lines += ["", "## Approvals waiting"]
-    lines += [f"- #{a['id']} {a['action']}" for a in ctx["approvals"]] or ["- None."]
+    lines += [
+        f"- #{a['id']} {a['summary'] or _action_label(a['action'])}"
+        for a in ctx["approvals"]
+    ] or ["- None."]
     lines += ["", "## Open loops"]
     lines += [f"- {L['description']}" for L in ctx["open_loops"][:8]] or ["- None."]
     if noted_today:

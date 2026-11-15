@@ -2,7 +2,7 @@
 
 import { Terminal, Users } from "lucide-react";
 import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
-import { label } from "@/lib/format";
+import { friendlyRef } from "@/lib/format";
 
 /** Specialist consults read differently from ordinary tools. */
 export function ToolTrace({ tools, live }: { tools: string[]; live: boolean }) {
@@ -23,7 +23,7 @@ export function ToolTrace({ tools, live }: { tools: string[]; live: boolean }) {
             <TraceTitle>
               {delegated
                 ? "Asked a specialist"
-                : `Used ${label(t.replace(/^cap_/, ""))}`}
+                : `Used ${friendlyRef(t)}`}
             </TraceTitle>
           </TraceLine>
         );

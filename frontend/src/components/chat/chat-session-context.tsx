@@ -9,13 +9,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { usePeriod } from "@/components/AppShell";
 import { API_URL, getToken } from "@/lib/api";
 import { streamChat } from "@/lib/chat";
 import { useApi } from "@/lib/hooks";
 import { SESSIONS_CHANGED, type SessionDetail } from "@/lib/types";
 import type { AgentOption, ChatArtifact, ChatMsg } from "./types";
+import { useUiSelectionOptional } from "./ui-selection";
 
 const DEFAULT_MODE = "__default__";
 
@@ -65,7 +66,9 @@ async function uploadAttachments(files: File[]): Promise<string[]> {
 
 export function ChatSessionProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [period] = usePeriod();
+  const uiSelection = useUiSelectionOptional();
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [text, setText] = useState("");
@@ -76,6 +79,8 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
   const loadedRef = useRef<number | null>(null);
   const liveRef = useRef({ busy: false, sessionId: null as number | null, messages: [] as ChatMsg[] });
   liveRef.current = { busy, sessionId, messages };
+  const pathRef = useRef(pathname);
+  pathRef.current = pathname;
 
   const agents = useApi<{ name: string; role: string }[]>("/agents");
 
@@ -165,14 +170,20 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
       const pendingFiles = files;
       const attachmentNames = pendingFiles.map((f) => f.name);
       const currentSession = sessionId;
+      const attached = uiSelection?.selection ?? null;
+      const displayContent = attached
+        ? `[Selected: ${attached.label}]\n${body || "See attached files."}`
+        : body || "See attached files.";
+
       setText("");
       setFiles([]);
+      uiSelection?.clearSelection();
       setBusy(true);
       setMessages((all) => [
         ...all,
         {
           role: "user",
-          content: body || "See attached files.",
+          content: displayContent,
           tools: [],
           done: true,
           attachments: attachmentNames.length ? attachmentNames : undefined,
@@ -196,6 +207,19 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
           session_id: currentSession,
           period,
           ...(agentKey ? { agent_key: agentKey } : {}),
+          ...(attached
+            ? {
+                ui_context: {
+                  type: attached.type,
+                  id: attached.id,
+                  label: attached.label,
+                  route: attached.route,
+                  period: attached.period,
+                  refs: attached.refs,
+                  dataSnapshot: attached.dataSnapshot,
+                },
+              }
+            : {}),
         },
         {
           onSession: (id) => {
@@ -203,9 +227,12 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
             setSessionId(id);
             loadedRef.current = id;
             if (!routed && currentSession == null) {
-              routed = true;
-              router.replace(`/chat/${id}`);
               window.dispatchEvent(new Event(SESSIONS_CHANGED));
+              // Only navigate when already on the full-page chat experience.
+              if (pathRef.current.startsWith("/chat")) {
+                routed = true;
+                router.replace(`/chat/${id}`);
+              }
             }
           },
           onChunk: (c) => {
@@ -233,7 +260,11 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
             loadedRef.current = id;
             patchLast((m) => ({ ...m, done: true }));
             window.dispatchEvent(new Event(SESSIONS_CHANGED));
-            if (!routed && currentSession == null) {
+            if (
+              !routed &&
+              currentSession == null &&
+              pathRef.current.startsWith("/chat")
+            ) {
               routed = true;
               router.replace(`/chat/${id}`);
             }
@@ -243,7 +274,7 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
 
       if (gen === genRef.current) setBusy(false);
     },
-    [agent, busy, files, patchLast, period, router, sessionId, text],
+    [agent, busy, files, patchLast, period, router, sessionId, text, uiSelection],
   );
 
   const value = useMemo(

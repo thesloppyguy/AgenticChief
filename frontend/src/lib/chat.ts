@@ -1,9 +1,20 @@
 import { API_URL, getToken } from "./api";
 
+export interface UiContextBody {
+  type?: string;
+  id?: string;
+  label?: string;
+  route?: string;
+  period?: string;
+  refs?: Record<string, unknown>;
+  dataSnapshot?: Record<string, unknown>;
+}
+
 export interface ChatBody {
   message?: string; session_id?: number | null; period?: string;
   skill_name?: string; skill_key?: string; skill_inputs?: Record<string, unknown>;
   agent_key?: string; allow_draft?: boolean;
+  ui_context?: UiContextBody | null;
 }
 export interface ChatHandlers {
   onChunk: (text: string) => void;

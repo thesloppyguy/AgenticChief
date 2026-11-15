@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.alerts import engine as alerts_engine
 from app.assets import service as asset_service
 from app.assets.service import AssetError
 from app.core.config import settings
@@ -17,7 +16,7 @@ from app.reports import monthly_review
 from app.reports.markdown import render_markdown
 from app.reports.pdf import render_pdf
 from app.services.scorecard import current_period
-from app.workflows import engine, planner
+from app.workflows import engine, ops, planner
 from app.workflows.compiler import compile_spec
 from app.workflows.spec import WorkflowSpec
 
@@ -62,22 +61,13 @@ def _group_wide(who: Principal) -> None:
         raise HTTPException(403, "Group-wide scope required")
 
 
-def _on_failure(db: Session, run: WorkflowRun) -> None:
-    """A failed report should not be silent."""
-    alerts_engine._raise(db, kind="workflow_failed", severity="medium", company_id=None, entity="monthly_review",
-                         period=run.period, title=f"Monthly review for {run.period} failed ({run.error})",
-                         detail={"run_id": run.id, "error": run.error}, dedupe_key=f"workflow:{run.id}:{run.error}")
-    db.commit()
-
-
 def _launch(bg: BackgroundTasks, factory: sessionmaker, llm, run_id: int, wf=None, allm=None) -> None:
     bg.add_task(engine.execute, factory, wf or monthly_review.WORKFLOW, run_id,
-                {"llm": llm, "allm": allm}, _on_failure)
+                {"llm": llm, "allm": allm}, ops.on_run_failure)
 
 
 def _summary(r: WorkflowRun) -> dict:
-    return {"id": r.id, "workflow": r.workflow, "period": r.period, "status": r.status, "error": r.error,
-            "requested_by": r.requested_by, "created_at": r.created_at, "finished_at": r.finished_at}
+    return ops.run_summary(r)
 
 
 def _workflow_for(db: Session, run: WorkflowRun):
@@ -205,18 +195,7 @@ class DefVersionIn(BaseModel):
 
 
 def _def_out(db: Session, a: Asset, detail: bool = False) -> dict:
-    shown = a.published_version or a.version
-    row = asset_service.version_row(db, a, shown)
-    spec = WorkflowSpec(**row.definition) if row else None
-    out = {"id": a.id, "key": a.key, "name": a.name, "description": a.description,
-           "lifecycle": a.lifecycle, "version": a.version, "published_version": a.published_version,
-           "title": spec.title if spec else None,
-           "steps": [s.model_dump() for s in spec.steps] if spec else [],
-           "uses": spec.tools if spec else [], "permissions": spec.permissions if spec else []}
-    if detail:
-        out["definition"] = asset_service.latest(db, a).definition
-        out["validation"] = a.validation
-    return out
+    return ops.def_out(db, a, detail=detail)
 
 
 @router.post("/drafts")
@@ -228,14 +207,13 @@ async def draft_workflow(req: DraftRequest, db: Session = Depends(get_db),
 
 @router.get("/defs")
 def list_defs(db: Session = Depends(get_db), who: Principal = Depends(_author)):
-    rows = db.scalars(select(Asset).where(Asset.kind == "workflow").order_by(Asset.name))
-    return [_def_out(db, a) for a in rows]
+    return ops.list_defs(db)
 
 
 @router.get("/defs/{key}")
 def get_def(key: str, db: Session = Depends(get_db), who: Principal = Depends(_author)):
     try:
-        return _def_out(db, asset_service.get(db, "workflow", key), detail=True)
+        return ops.def_out(db, asset_service.get(db, "workflow", key), detail=True)
     except AssetError as e:
         raise HTTPException(e.status, e.message) from e
 
@@ -243,10 +221,9 @@ def get_def(key: str, db: Session = Depends(get_db), who: Principal = Depends(_a
 @router.post("/defs", status_code=201)
 def create_def(body: DefIn, db: Session = Depends(get_db), who: Principal = Depends(_author)):
     try:
-        a = asset_service.create(db, who, "workflow", body.key, body.name, body.description, body.definition)
-    except AssetError as e:
+        return ops.save_def(db, who, body.key, body.name, body.description, body.definition)
+    except ops.WorkflowOpsError as e:
         raise HTTPException(e.status, e.message) from e
-    return _def_out(db, a, detail=True)
 
 
 @router.post("/defs/{key}/versions", status_code=201)
@@ -256,7 +233,7 @@ def add_def_version(key: str, body: DefVersionIn, db: Session = Depends(get_db),
         a = asset_service.new_version(db, who, asset_service.get(db, "workflow", key), body.definition)
     except AssetError as e:
         raise HTTPException(e.status, e.message) from e
-    return _def_out(db, a, detail=True)
+    return ops.def_out(db, a, detail=True)
 
 
 @router.post("/defs/{key}/validate")
@@ -276,7 +253,7 @@ def deprecate_def(key: str, db: Session = Depends(get_db), who: Principal = Depe
         a = asset_service.deprecate(db, who, asset_service.get(db, "workflow", key))
     except AssetError as e:
         raise HTTPException(e.status, e.message) from e
-    return _def_out(db, a)
+    return ops.def_out(db, a)
 
 
 class DefRunRequest(BaseModel):
@@ -289,17 +266,8 @@ def run_def(key: str, body: DefRunRequest, bg: BackgroundTasks, db: Session = De
             who: Principal = Depends(_author), factory: sessionmaker = Depends(get_session_factory),
             llm=Depends(get_llm), allm=Depends(get_async_llm)):
     try:
-        a = asset_service.get(db, "workflow", key)
-    except AssetError as e:
+        run, wf = ops.start_run(db, who, key, body.period, allow_draft=body.allow_draft)
+    except ops.WorkflowOpsError as e:
         raise HTTPException(e.status, e.message) from e
-    if a.deprecated:
-        raise HTTPException(409, "this workflow has been deprecated")
-    version = a.version if (body.allow_draft and who.role.value == "admin") else a.published_version
-    if version is None:
-        raise HTTPException(409, "this workflow is not published yet")
-    row = asset_service.version_row(db, a, version)
-    wf = compile_spec(key, WorkflowSpec(**row.definition))
-    # Pin the version: a republish mid-run must not swap the steps under a run that resumes.
-    run = engine.create_run(db, who, wf, body.period, {"asset_id": a.id, "asset_version": version})
     _launch(bg, factory, llm, run.id, wf, allm)
     return _summary(run)

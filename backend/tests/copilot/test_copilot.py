@@ -57,7 +57,14 @@ def test_chat_runs_tool_and_persists(client):
     h = auth(Role.VIEWER, [1])
     r = client.post("/copilot/chat", json={"message": "group score?", "period": "2026-10"}, headers=h)
     events = [json.loads(l[5:]) for l in r.text.splitlines() if l.startswith("data:")]
-    assert [e["type"] for e in events] == ["tool", "chunk", "done"]
+    types = [e["type"] for e in events]
+    # Session id is emitted first so the client can route before the model streams.
+    assert types[0] == "session"
+    assert types[-1] == "done"
+    assert "tool" in types and "chunk" in types
+    # Ignore optional artifact cards interleaved with the tool event.
+    core = [t for t in types if t not in ("session", "artifact")]
+    assert core == ["tool", "chunk", "done"]
     # tool result fed back to the model came from the scoring service, scoped to company 1
     tool_result = json.loads(fake.calls[1]["messages"][-1]["content"][0]["content"])
     assert tool_result["scope"] == "restricted" and tool_result["companies_in_scope"] == 1
@@ -69,6 +76,47 @@ def test_chat_runs_tool_and_persists(client):
     from app.core.security import make_token
     assert client.get(f"/copilot/sessions/{sid}",
                       headers={"Authorization": f"Bearer {make_token('u2', Role.VIEWER)}"}).status_code == 404
+
+
+def test_chat_injects_ui_context(client):
+    """Selected UI surfaces are persisted as a short prefix and sent to the model as XML."""
+    fake = FakeClient()
+    app.dependency_overrides[get_anthropic] = lambda: fake
+    h = auth(Role.VIEWER, [1])
+    r = client.post(
+        "/copilot/chat",
+        json={
+            "message": "why is this red?",
+            "period": "2026-10",
+            "ui_context": {
+                "type": "pillar_tile",
+                "id": "pillar.talent_management",
+                "label": "Talent Management",
+                "route": "/home",
+                "period": "2026-10",
+                "refs": {"pillar": "talent_management"},
+                "dataSnapshot": {"score": 61.6, "status": "red"},
+            },
+        },
+        headers=h,
+    )
+    events = [json.loads(l[5:]) for l in r.text.splitlines() if l.startswith("data:")]
+    assert events[-1]["type"] == "done"
+    sid = events[-1]["session_id"]
+    msgs = client.get(f"/copilot/sessions/{sid}", headers=h).json()["messages"]
+    user = next(m for m in msgs if m["role"] == "user")
+    assert user["content"].startswith("[Selected: Talent Management]")
+    assert "why is this red?" in user["content"]
+    assert "<ui_context" not in user["content"]
+    # Model turn (first Anthropic call) must include the structured block.
+    first_users = [
+        m["content"]
+        for m in fake.calls[0]["messages"]
+        if m.get("role") == "user" and isinstance(m.get("content"), str)
+    ]
+    assert first_users, "expected a string user message on the first model call"
+    assert any("<ui_context" in c and "pillar_tile" in c for c in first_users)
+    assert any("why is this red?" in c for c in first_users)
 
 
 def test_tools_run_off_the_event_loop(client, monkeypatch):

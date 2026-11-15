@@ -19,6 +19,14 @@ import {
 import { AppSidebar } from "@/components/shared/app-sidebar";
 import { SettingsDialog } from "@/components/shared/settings-dialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ChatSessionProvider } from "@/components/chat/chat-session-context";
+import {
+  CopilotPanelRail,
+  CopilotPanelSheet,
+} from "@/components/chat/copilot-panel";
+import { CopilotPanelProvider } from "@/components/chat/copilot-panel-context";
+import { CopilotToggle } from "@/components/chat/copilot-toggle";
+import { UiSelectionProvider } from "@/components/chat/ui-selection";
 
 const PERIOD_KEY = "chro_period";
 const PERIOD_EVENT = "chro:period";
@@ -148,20 +156,37 @@ export default function AppShell({ children }: { children: ReactNode }) {
   if (onLogin || !ready) return <>{children}</>;
 
   return (
-    <>
-      <SidebarProvider className="bg-shell! min-h-svh">
-        <AppSidebar open={open} onOpenChange={setOpen} />
-        <SidebarInset className="overflow-hidden bg-background md:peer-data-[variant=inset]:m-4 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-2xl md:peer-data-[variant=inset]:shadow-md md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-4">
-          <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border/70 px-5">
-            <SidebarTrigger className="-ml-1" />
-            <ThemeToggle />
-          </header>
-          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 md:px-7 md:py-6">
-            {children}
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-      <SettingsDialog open={open} onOpenChange={setOpen} />
-    </>
+    <CopilotPanelProvider>
+      <UiSelectionProvider>
+        <ChatSessionProvider>
+          <SidebarProvider className="bg-shell! h-svh max-h-svh min-h-0 overflow-hidden">
+            <AppSidebar open={open} onOpenChange={setOpen} />
+            <SidebarInset className="min-h-0 overflow-hidden bg-background md:peer-data-[variant=inset]:m-4 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:max-h-[calc(100svh-2rem)] md:peer-data-[variant=inset]:rounded-2xl md:peer-data-[variant=inset]:shadow-md md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-4">
+              <header
+                data-copilot-chrome
+                className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border/70 px-5"
+              >
+                <SidebarTrigger className="-ml-1" />
+                <div className="flex items-center gap-1">
+                  <CopilotToggle />
+                  <ThemeToggle />
+                </div>
+              </header>
+              <div className="flex min-h-0 flex-1 overflow-hidden">
+                <div
+                  data-copilot-main
+                  className="flex min-h-0 min-w-0 flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 md:px-7 md:py-6"
+                >
+                  {children}
+                </div>
+                <CopilotPanelRail />
+              </div>
+            </SidebarInset>
+          </SidebarProvider>
+          <CopilotPanelSheet />
+          <SettingsDialog open={open} onOpenChange={setOpen} />
+        </ChatSessionProvider>
+      </UiSelectionProvider>
+    </CopilotPanelProvider>
   );
 }

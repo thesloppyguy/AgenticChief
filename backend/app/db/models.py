@@ -69,7 +69,9 @@ class Goal(Base):
     key_result: Mapped[str] = mapped_column(String(400))
     target: Mapped[str] = mapped_column(String(120), default="")
     current: Mapped[str] = mapped_column(String(120), default="")
-    status: Mapped[str] = mapped_column(String(16), default="on_track")  # on_track | at_risk | off_track
+    status: Mapped[str] = mapped_column(
+        String(16), default="on_track"
+    )  # on_track | at_risk | off_track
     pillar_key: Mapped[str | None] = mapped_column(String(48))
 
 
@@ -125,7 +127,9 @@ class ReportSnapshot(Base):
     calc_version: Mapped[str] = mapped_column(String(16))
     payload: Mapped[dict] = mapped_column(JSON)
     content_hash: Mapped[str | None] = mapped_column(String(64))
-    run_id: Mapped[int | None] = mapped_column(ForeignKey("workflow_run.id", name="fk_report_snapshot_run_id"))
+    run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("workflow_run.id", name="fk_report_snapshot_run_id")
+    )
     created_by: Mapped[str] = mapped_column(String(128))
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
 
@@ -148,7 +152,9 @@ class WorkflowRun(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     workflow: Mapped[str] = mapped_column(String(48), index=True)
     period: Mapped[str] = mapped_column(String(7))
-    status: Mapped[str] = mapped_column(String(16), index=True)  # queued|running|succeeded|failed|interrupted
+    status: Mapped[str] = mapped_column(
+        String(16), index=True
+    )  # queued|running|succeeded|failed|interrupted
     params: Mapped[dict | None] = mapped_column(JSON)
     requested_by: Mapped[str] = mapped_column(String(128))
     role: Mapped[str] = mapped_column(String(16))
@@ -203,7 +209,9 @@ class IngestionRun(Base):
     companies_ok: Mapped[int] = mapped_column(Integer, default=0)
     companies_failed: Mapped[int] = mapped_column(Integer, default=0)
     records_written: Mapped[int] = mapped_column(Integer, default=0)
-    errors: Mapped[list | None] = mapped_column(JSON)  # exception type names only, never raw payloads
+    errors: Mapped[list | None] = mapped_column(
+        JSON
+    )  # exception type names only, never raw payloads
     started_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
     finished_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
 
@@ -218,7 +226,9 @@ class ApprovalRequest(Base):
     risk: Mapped[str] = mapped_column(String(24))
     summary: Mapped[str] = mapped_column(String(300))
     args: Mapped[dict] = mapped_column(JSON)
-    context: Mapped[dict | None] = mapped_column(JSON)  # supporting context, e.g. the model's reason
+    context: Mapped[dict | None] = mapped_column(
+        JSON
+    )  # supporting context, e.g. the model's reason
     requested_by: Mapped[str] = mapped_column(String(128), index=True)
     via: Mapped[str] = mapped_column(String(16))  # api | copilot
     session_id: Mapped[int | None] = mapped_column(ForeignKey("chat_session.id"))
@@ -262,9 +272,13 @@ class OutboundMessage(Base):
 class Alert(Base):
     __tablename__ = "alert"
     id: Mapped[int] = mapped_column(primary_key=True)
-    kind: Mapped[str] = mapped_column(String(32), index=True)  # status_red | ingestion_failed | watch_fired
+    kind: Mapped[str] = mapped_column(
+        String(32), index=True
+    )  # status_red | ingestion_failed | watch_fired
     severity: Mapped[str] = mapped_column(String(12))  # low | medium | high | urgent
-    company_id: Mapped[int | None] = mapped_column(ForeignKey("company.id"), index=True)  # None = group-wide
+    company_id: Mapped[int | None] = mapped_column(
+        ForeignKey("company.id"), index=True
+    )  # None = group-wide
     entity: Mapped[str] = mapped_column(String(64))  # company code, "group", or a source name
     period: Mapped[str] = mapped_column(String(7))
     title: Mapped[str] = mapped_column(String(200))
@@ -382,13 +396,17 @@ class JobSchedule(Base):
     job: Mapped[str] = mapped_column(String(32))  # ingest | monthly_review
     name: Mapped[str] = mapped_column(String(120))
     cadence: Mapped[dict] = mapped_column(JSON)
-    params: Mapped[dict | None] = mapped_column(JSON)  # e.g. {"period": "previous", "sources": ["successfactors"]}
+    params: Mapped[dict | None] = mapped_column(
+        JSON
+    )  # e.g. {"period": "previous", "sources": ["successfactors"]}
     enabled: Mapped[bool] = mapped_column(default=True)
     next_run_at: Mapped[datetime] = mapped_column(UtcDateTime(), index=True)
     last_run_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
     last_status: Mapped[str | None] = mapped_column(String(16))  # success | failed
     last_detail: Mapped[str | None] = mapped_column(String(200))
-    claimed_at: Mapped[datetime | None] = mapped_column(UtcDateTime())  # set while a run is in flight
+    claimed_at: Mapped[datetime | None] = mapped_column(
+        UtcDateTime()
+    )  # set while a run is in flight
     created_by: Mapped[str] = mapped_column(String(128))
 
 
@@ -399,9 +417,13 @@ class Watch(Base):
 
     __tablename__ = "watch"
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[str] = mapped_column(String(128), index=True)  # the owner; alerts go only to them
+    user_id: Mapped[str] = mapped_column(
+        String(128), index=True
+    )  # the owner; alerts go only to them
     name: Mapped[str] = mapped_column(String(120))
-    company_id: Mapped[int | None] = mapped_column(ForeignKey("company.id"), index=True)  # None = group
+    company_id: Mapped[int | None] = mapped_column(
+        ForeignKey("company.id"), index=True
+    )  # None = group
     condition: Mapped[dict] = mapped_column(JSON)
     enabled: Mapped[bool] = mapped_column(default=True)
     schedule_id: Mapped[int | None] = mapped_column(ForeignKey("job_schedule.id"), index=True)
@@ -519,3 +541,15 @@ class BriefArtifact(Base):
     title: Mapped[str] = mapped_column(String(200))
     body: Mapped[str] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
+
+
+class DashboardLayout(Base):
+    """Per-user Home layout: ordered built-in sections, pinned chat widgets, pulse KPIs."""
+
+    __tablename__ = "dashboard_layout"
+    user_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    sections: Mapped[list] = mapped_column(JSON, default=list)
+    widgets: Mapped[list] = mapped_column(JSON, default=list)
+    pulse_cells: Mapped[list] = mapped_column(JSON, default=list)
+    pulse_hidden: Mapped[list] = mapped_column(JSON, default=list)
+    updated_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())

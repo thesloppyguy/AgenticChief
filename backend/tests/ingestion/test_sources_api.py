@@ -114,16 +114,23 @@ def test_check_source_freshness_raises_alerts(db, monkeypatch):
 
 
 def test_live_extractor_against_mock_sources_asgi(client, db, tmp_path, monkeypatch):
-    """RestExtractor → /mock-sources with pre-seeded MockCompanyData (no Anthropic)."""
+    """RestExtractor → /api/mock-sources with pre-seeded MockCompanyData (no Anthropic)."""
+    from app.db.models import Company
     from app.mock_sources.router import router as mock_router
 
-    already = any(getattr(r, "path", "").startswith("/mock-sources") for r in app.router.routes)
-    if not already:
-        app.include_router(mock_router)
+    # Production mounts mock sources under /api; older tests may also attach the
+    # router at the root. Prefer the /api prefix when that mount is present.
+    route_paths = [getattr(r, "path", "") or "" for r in app.router.routes]
+    under_api = any("/api/mock-sources" in p or p.startswith("/mock-sources") for p in route_paths)
+    if not under_api:
+        app.include_router(mock_router, prefix="/api")
+    mock_path = "/api/mock-sources/myhealth/v2/ahc/summary"
 
     token = "test-mock-token"
     monkeypatch.setattr(app_settings, "mock_source_token", SecretStr(token))
 
+    if not db.scalar(select(Company.id).where(Company.code == "IC1")):
+        db.add(Company(code="IC1", name="IC One"))
     raw = synthetic_company("IC1", "steady")
     db.add(MockCompanyData(
         company_code="IC1", archetype="steady", origin="ai", model="test", raw=raw.model_dump(),
@@ -132,7 +139,7 @@ def test_live_extractor_against_mock_sources_asgi(client, db, tmp_path, monkeypa
 
     mapping = {
         "ahc_completion": {
-            "path": "/mock-sources/myhealth/v2/ahc/summary",
+            "path": mock_path,
             "params": {"orgCode": "{company_code}", "month": "{period}"},
             "result_path": "",
             "fields": {"completed": "completed", "eligible": "eligible"},

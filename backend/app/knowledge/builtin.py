@@ -56,7 +56,13 @@ def kpi_definitions(kpis=None) -> str:
     for pillar in PILLAR_WEIGHTS:
         out += [f"## {PILLAR_LABELS[pillar]}", ""]
         for k in (k for k in (kpis or KPIS) if k.pillar == pillar):
-            src = "entered manually by editors" if k.key in MANUAL_KPIS else f"data from {source_of.get(k.key, 'a source system')}"
+            # Added KPIs (not in the seed registry) are always manual.
+            is_manual = k.key in MANUAL_KPIS or k.key not in {x.key for x in KPIS}
+            src = (
+                "entered manually by editors"
+                if is_manual
+                else f"data from {source_of.get(k.key, 'a source system')}"
+            )
             direction = "lower is better" if k.direction.value == "lower" else "higher is better"
             title = k.key.replace("_", " ").title()
             out += [f"### {title}", f"Weight in pillar: {round(k.weight * 100)}%. Target: {k.target:g}. {direction.capitalize()}. Source: {src}.",

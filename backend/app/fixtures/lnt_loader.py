@@ -309,6 +309,7 @@ def _seed_approvals(db: Session, who: Principal, period: str) -> int:
         title = (draft.get("title") or draft.get("key") or "").strip()
         blurb = " ".join(str(draft.get("summary") or "").split())
         detail = " ".join(str(draft.get("detail") or "").split())
+        draft_key = draft.get("key")
         if not action or not args or not title:
             continue
         ctx = {
@@ -318,24 +319,45 @@ def _seed_approvals(db: Session, who: Principal, period: str) -> int:
             "detail": detail or None,
             "sla": draft.get("sla"),
             "sla_style": draft.get("sla_style") or "pill",
-            "draft_key": draft.get("key"),
+            "draft_key": draft_key,
             "severity": draft.get("severity"),
             "routes_to": draft.get("routes_to") or [],
             "insights": draft.get("insights") or [],
             "roi": draft.get("roi"),
             "drivers": draft.get("drivers") or [],
         }
+        # Refresh copy on an existing pending draft rather than stacking duplicates.
+        if draft_key:
+            existing = db.scalars(
+                select(ApprovalRequest).where(ApprovalRequest.status == "pending")
+            ).all()
+            match = next(
+                (
+                    row
+                    for row in existing
+                    if isinstance(row.context, dict) and row.context.get("draft_key") == draft_key
+                ),
+                None,
+            )
+            if match is not None:
+                match.summary = title[:300]
+                match.context = {**(match.context or {}), **ctx}
+                match.args = {**(match.args or {}), **args}
+                db.commit()
+                n += 1
+                continue
         try:
-            with db.begin_nested():
-                res = approvals.submit(db, requester, action, args, via="api", context=ctx)
-                # Prefer the human title over the technical action.summarize() line.
-                row = db.get(ApprovalRequest, res.approval.id)
-                if row is not None:
-                    row.summary = title[:300]
+            # submit() commits itself — do not wrap in begin_nested (closes the txn).
+            res = approvals.submit(db, requester, action, args, via="api", context=ctx)
+            # Prefer the human title over the technical action.summarize() line.
+            row = db.get(ApprovalRequest, res.approval.id)
+            if row is not None and row.summary != title[:300]:
+                row.summary = title[:300]
+                db.commit()
             n += 1
         except Exception:
+            db.rollback()
             continue
-    db.commit()
     return n
 
 
@@ -541,6 +563,9 @@ def load_lnt(*, db: Session, reset: bool = True, ingest: bool = True,
     """Full L&T demo load. Returns a summary dict."""
     if not SEED_ROOT.exists():
         raise FileNotFoundError(f"seed root missing: {SEED_ROOT}")
+    from app.workforce import loader as wf_loader
+
+    wf_loader.clear_cache()  # pick up rewritten pulse / action copy
     through = through or current_period()
     who = Principal(user_id, Role.ADMIN, None)
     summary: dict[str, Any] = {"seed_root": str(SEED_ROOT)}

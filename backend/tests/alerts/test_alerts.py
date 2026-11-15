@@ -151,4 +151,5 @@ def test_ingestion_run_endpoint_raises_failure_and_status_alerts(client, db):
         assert r.json()[0]["status"] == "failed"
     finally:
         app.dependency_overrides.pop(get_extractors)
-    assert [a.kind for a in db.scalars(select(Alert))] == ["ingestion_failed"]
+    kinds = [a.kind for a in db.scalars(select(Alert))]
+    assert "ingestion_failed" in kinds

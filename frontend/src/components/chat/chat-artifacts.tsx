@@ -5,6 +5,7 @@ import {
   BarChart3,
   Download,
   CalendarClock,
+  LayoutDashboard,
   Table2,
   Layers3,
   Crosshair,
@@ -55,8 +56,107 @@ const KIND_META: Record<string, { label: string; icon: typeof BarChart3 }> = {
   succession_stack: { label: "Succession", icon: Layers3 },
   workforce_pulse: { label: "Pulse", icon: Activity },
   action_drafts: { label: "Decisions", icon: ListChecks },
+  approval_request: { label: "Approval", icon: ListChecks },
   table: { label: "Table", icon: Table2 },
 };
+
+const LAYOUT_CHANGED = "dashboard-layout:changed";
+
+function ApprovalRequestCard({ artifact }: { artifact: ChatArtifact }) {
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState(artifact.status || "pending");
+  const id = artifact.approval_id;
+  const changes = Array.isArray(artifact.changes)
+    ? artifact.changes.map(String)
+    : [];
+
+  async function decide(decision: "approve" | "reject") {
+    if (!id || busy) return;
+    setBusy(true);
+    try {
+      const out = await api<{ status: string; action?: string }>(
+        `/approvals/${id}/decision`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            decision,
+            comment: decision === "reject" ? "Rejected from Copilot" : null,
+          }),
+        },
+      );
+      setStatus(out.status);
+      if (out.status === "executed" && out.action === "update_dashboard_layout") {
+        window.dispatchEvent(new Event(LAYOUT_CHANGED));
+      }
+      toast.success(
+        out.status === "executed"
+          ? `Applied (#${id})`
+          : decision === "approve"
+            ? `Approved (#${id})`
+            : `Rejected (#${id})`,
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not decide");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const pending = status === "pending";
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-foreground">
+        {artifact.summary || artifact.title || "Proposed change"}
+        {id ? (
+          <span className="text-muted-foreground"> · approval #{id}</span>
+        ) : null}
+      </p>
+      {changes.length > 0 ? (
+        <ul className="list-inside list-disc space-y-1 text-xs text-muted-foreground">
+          {changes.slice(0, 8).map((c) => (
+            <li key={c}>{c}</li>
+          ))}
+        </ul>
+      ) : null}
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge
+          variant="outline"
+          className="rounded-full text-[10px] font-medium capitalize"
+        >
+          {status.replace(/_/g, " ")}
+        </Badge>
+        {pending && id ? (
+          <>
+            <Button
+              type="button"
+              size="sm"
+              className="h-8 rounded-full"
+              disabled={busy}
+              onClick={() => void decide("approve")}
+            >
+              {busy ? "Approving…" : "Approve & apply"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-8 rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+              disabled={busy}
+              onClick={() => void decide("reject")}
+            >
+              Reject
+            </Button>
+          </>
+        ) : null}
+      </div>
+      {pending && artifact.allow_self_approval ? (
+        <p className="text-[11px] text-muted-foreground">
+          Personal Home change — you can approve this yourself.
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 function asStatus(v: string | undefined): Status {
   return v === "green" || v === "amber" || v === "red" ? v : null;
@@ -1192,7 +1292,10 @@ function ApprovalsList({ drafts }: { drafts: ArtifactDraft[] }) {
   );
 }
 
-function ArtifactBody({ artifact }: { artifact: ChatArtifact }) {
+export function ArtifactBody({ artifact }: { artifact: ChatArtifact }) {
+  if (artifact.kind === "approval_request") {
+    return <ApprovalRequestCard artifact={artifact} />;
+  }
   if (artifact.kind === "scorecard_summary") {
     return <ScorecardBody artifact={artifact} />;
   }
@@ -1298,6 +1401,82 @@ export function ChatArtifacts({
     }
   }
 
+  async function onAddToDashboard(a: ChatArtifact) {
+    const pinKey = `${a.kind}:${a.title || "widget"}`;
+    setBusy(`pin:${pinKey}`);
+    try {
+      const current = await api<{
+        sections: { key: string; visible: boolean }[];
+        widgets: {
+          id: string;
+          title: string;
+          kind: string;
+          artifact: Record<string, unknown>;
+          source?: Record<string, unknown> | null;
+        }[];
+        pulse_cells?: Record<string, unknown>[];
+        pulse_hidden?: string[];
+      }>("/dashboard/layout");
+      const widgetId = `w_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+      const sections = (current.sections?.length
+        ? current.sections
+        : [
+            { key: "brief", visible: true },
+            { key: "pulse", visible: true },
+            { key: "scorecard", visible: true },
+            { key: "exception", visible: true },
+            { key: "issues", visible: true },
+            { key: "pinned_widgets", visible: true },
+          ]
+      ).map((s) =>
+        s.key === "pinned_widgets" ? { ...s, visible: true } : s,
+      );
+      const widgets = [
+        ...(current.widgets || []),
+        {
+          id: widgetId,
+          title: a.title || KIND_META[a.kind]?.label || a.kind,
+          kind: a.kind,
+          artifact: { ...a },
+          source: a.source ? { label: a.source } : null,
+        },
+      ];
+      const out = await api<{
+        verdict: string;
+        reason?: string;
+        approval?: { id: number };
+      }>("/approvals", {
+        method: "POST",
+        body: JSON.stringify({
+          action: "update_dashboard_layout",
+          args: {
+            sections,
+            widgets,
+            pulse_cells: current.pulse_cells || [],
+            pulse_hidden: current.pulse_hidden || [],
+          },
+          context: {
+            reason: `Pin chat card to Home: ${a.title || a.kind}`,
+            title: `Pin “${a.title || a.kind}” to Home`,
+          },
+        }),
+      });
+      if (out.verdict === "deny") {
+        toast.error(out.reason || "Pin denied by policy");
+      } else {
+        toast.success(
+          out.approval?.id
+            ? `Dashboard update proposed (#${out.approval.id}) — approve on Actions`
+            : "Dashboard update proposed",
+        );
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not propose pin");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function onSchedule(a: ChatArtifact) {
     const reportKey = a.schedule_key;
     if (!reportKey) return;
@@ -1383,8 +1562,19 @@ export function ChatArtifacts({
             <div className="bg-background/90 px-4 py-4">
               <ArtifactBody artifact={a} />
             </div>
-            {(a.export_key || a.schedule_key) && (
+            {a.kind !== "approval_request" ? (
               <footer className="flex flex-wrap gap-2 border-t border-border/70 bg-background/70 px-4 py-2.5">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 rounded-full"
+                  disabled={busy !== null}
+                  onClick={() => void onAddToDashboard(a)}
+                >
+                  <LayoutDashboard className="size-3.5" />
+                  Add to dashboard
+                </Button>
                 {a.export_key ? (
                   <Button
                     type="button"
@@ -1412,7 +1602,7 @@ export function ChatArtifacts({
                   </Button>
                 ) : null}
               </footer>
-            )}
+            ) : null}
           </article>
         );
       })}

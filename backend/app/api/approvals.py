@@ -20,16 +20,32 @@ def _http(e: ApprovalError) -> HTTPException:
 
 
 def _out(r: ApprovalRequest) -> dict:
-    return {"id": r.id, "action": r.action, "risk": r.risk, "summary": r.summary, "status": r.status,
-            "requested_by": r.requested_by, "via": r.via, "session_id": r.session_id, "args": r.args,
-            "context": r.context, "created_at": r.created_at, "decided_by": r.decided_by,
-            "decided_at": r.decided_at, "decision_comment": r.decision_comment, "result": r.result}
+    action = ACTIONS.get(r.action)
+    return {
+        "id": r.id,
+        "action": r.action,
+        "risk": r.risk,
+        "summary": r.summary,
+        "status": r.status,
+        "requested_by": r.requested_by,
+        "via": r.via,
+        "session_id": r.session_id,
+        "args": r.args,
+        "context": r.context,
+        "created_at": r.created_at,
+        "decided_by": r.decided_by,
+        "decided_at": r.decided_at,
+        "decision_comment": r.decision_comment,
+        "result": r.result,
+        "allow_self_approval": bool(action.allow_self_approval) if action else False,
+    }
 
 
 @router.get("/actions")
 def actions(_: Principal = Depends(get_principal)):
     return [{"key": a.key, "risk": a.risk.value, "description": a.description,
-             "args_schema": a.args_model.model_json_schema(), "group_wide_only": a.group_wide_only}
+             "args_schema": a.args_model.model_json_schema(), "group_wide_only": a.group_wide_only,
+             "allow_self_approval": a.allow_self_approval}
             for a in ACTIONS.values()]
 
 

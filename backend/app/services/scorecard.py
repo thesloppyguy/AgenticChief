@@ -25,9 +25,9 @@ def active_config(db: Session) -> ScoringConfig:
 
 
 def active_kpis(db: Session) -> list[KpiDef]:
-    """The KPI definitions in force: the defaults with any approved weight/target overrides applied."""
+    """The KPI definitions in force: defaults + overrides + any approved added KPIs."""
     rules, _ = config_service.active(db)
-    return effective_kpis(rules.kpi_overrides)
+    return effective_kpis(rules.kpi_overrides, rules.added_kpis)
 
 
 def _thresholds(cfg: ScoringConfig) -> dict:

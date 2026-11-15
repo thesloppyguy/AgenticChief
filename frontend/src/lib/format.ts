@@ -6,8 +6,50 @@ const NAMES: Record<string, string> = {
   engagement_wellness: "Engagement / Wellness",
 };
 
-export const label = (key: string) =>
-  NAMES[key] ?? key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+/** Draft-action / programme keys — keep machine ids, show executive titles. */
+const ACTION_NAMES: Record<string, string> = {
+  capability_green_h2: "Green energy talent programme",
+  retention_semi: "Semiconductor retention plan",
+  atmp_leadership: "ATMP leadership — hire and develop",
+  manager_effectiveness_bq: "Manager coaching for bottom quartile",
+};
+
+/** Workflow tool / agent refs shown on the Workflows page. */
+const REF_NAMES: Record<string, string> = {
+  "agent:chro": "HR Copilot",
+  "agent:cfo": "Finance Copilot",
+  "agent:ceo": "CEO Copilot",
+  "agent:coo": "Operations Copilot",
+  get_workforce_pulse: "Workforce pulse",
+  list_draft_actions: "Pending actions",
+  get_skills_gap: "Skills gap",
+  get_succession_bench: "Succession bench",
+  get_succession_coverage: "Succession coverage",
+  get_dashboard_layout: "Home layout",
+  get_scorecard_config: "Scorecard rules",
+  draft_scorecard_config: "Draft scorecard rules",
+  update_dashboard_layout: "Update Home layout",
+  activate_scorecard_config: "Activate scorecard rules",
+  launch_capability_program: "Launch talent programme",
+  launch_retention_corrective: "Launch retention plan",
+  send_directive: "Send directive",
+};
+
+export const label = (key: string) => {
+  const k = key.trim();
+  return (
+    NAMES[k] ??
+    ACTION_NAMES[k] ??
+    REF_NAMES[k] ??
+    k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  );
+};
+
+/** Prefer a short executive name for tools, agents, and draft keys. */
+export const friendlyRef = (ref: string) => {
+  const k = ref.trim();
+  return REF_NAMES[k] ?? ACTION_NAMES[k] ?? label(k.replace(/^cap_/, ""));
+};
 
 // Short, distinct table headings (two pillars both start with "Talent").
 export const PILLAR_SHORT: Record<string, string> = {

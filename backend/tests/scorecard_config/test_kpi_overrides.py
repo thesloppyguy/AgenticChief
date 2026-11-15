@@ -149,3 +149,74 @@ def test_resetting_an_override_back_to_the_default_counts_as_no_change(client, d
     assert r.status_code == 201
     prop = client.post("/approvals", json={"action": "activate_scorecard_config", "args": {"version": 3}}, headers=ALICE).json()
     assert prop["approval"]["context"]["changes"] == {"kpi.kra_submission.target": {"from": 90.0, "to": 100.0}}
+
+
+def test_added_kpi_requires_rebalance_then_activates(client, data):
+    # engagement_wellness: ahc 0.25 + platform 0.25 + gptw 0.50 — shrink gptw to make room.
+    bad = client.post(
+        "/scorecard-config/drafts",
+        json={
+            "rules": {
+                "added_kpis": [
+                    {
+                        "key": "pending_action_sla",
+                        "label": "Pending action SLA",
+                        "pillar": "engagement_wellness",
+                        "weight": 0.10,
+                        "target": 90,
+                        "direction": "higher",
+                    }
+                ]
+            }
+        },
+        headers=ALICE,
+    )
+    assert bad.status_code == 422 and "Engagement" in bad.json()["detail"]
+
+    d = client.post(
+        "/scorecard-config/drafts",
+        json={
+            "rules": {
+                "kpi_overrides": {"gptw_score": {"weight": 0.40}},
+                "added_kpis": [
+                    {
+                        "key": "pending_action_sla",
+                        "label": "Pending action SLA",
+                        "pillar": "engagement_wellness",
+                        "weight": 0.10,
+                        "target": 90,
+                        "direction": "higher",
+                    }
+                ],
+            },
+            "note": "Track pending-action SLA as a scored KPI",
+        },
+        headers=ALICE,
+    )
+    assert d.status_code == 201
+    version = d.json()["version"]
+    prop = client.post(
+        "/approvals",
+        json={"action": "activate_scorecard_config", "args": {"version": version}},
+        headers=ALICE,
+    ).json()
+    changes = prop["approval"]["context"]["changes"]
+    assert "kpi.pending_action_sla.added" in changes
+    assert changes["kpi.gptw_score.weight"] == {"from": 0.5, "to": 0.4}
+
+    assert activate(client, version).json()["status"] == "executed"
+    cat = {k["key"]: k for k in client.get("/kpis", headers=ALICE).json()["kpis"]}
+    assert cat["pending_action_sla"]["added"] is True
+    assert cat["pending_action_sla"]["manual"] is True
+    assert cat["pending_action_sla"]["weight"] == pytest.approx(0.10)
+    assert cat["gptw_score"]["weight"] == pytest.approx(0.40)
+
+    pillar = client.get(
+        "/scorecard/pillars/engagement_wellness", params={"period": P}, headers=ALICE
+    ).json()
+    keys = {k["key"] for k in pillar["kpis"]}
+    assert "pending_action_sla" in keys
+    # No values yet → excluded, not zero
+    added_row = next(k for k in pillar["kpis"] if k["key"] == "pending_action_sla")
+    assert added_row.get("group_score") is None
+    assert added_row.get("group_excluded_reason") == "missing"

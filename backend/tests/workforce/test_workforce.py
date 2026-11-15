@@ -71,23 +71,34 @@ def test_workforce_http_endpoints(client):
 def test_workforce_tools_dispatch(client):
     db = next(app.dependency_overrides[get_db]())
     who = Principal("admin", Role.ADMIN, None)
-    out = workforce_tools.dispatch("get_workforce_pulse", {}, db, who)
+    # Chat default: prose only — no artifact unless opted in.
+    bare = workforce_tools.dispatch("get_workforce_pulse", {}, db, who)
+    assert "artifact" not in bare
+    out = workforce_tools.dispatch(
+        "get_workforce_pulse", {"include_artifact": True}, db, who
+    )
     assert out["artifact"]["kind"] == "workforce_pulse"
     out = workforce_tools.dispatch("list_draft_actions", {"key": "capability_green_h2"}, db, who)
     assert len(out["drafts"]) == 1
     assert out["drafts"][0]["action"] == "launch_capability_program"
+    assert "artifact" not in out
 
 
 def test_workforce_pulse_scopes_to_ic(client):
     loader.clear_cache()
     db = next(app.dependency_overrides[get_db]())
     who = Principal("admin", Role.ADMIN, None)
-    group = workforce_tools.dispatch("get_workforce_pulse", {}, db, who)
+    group = workforce_tools.dispatch(
+        "get_workforce_pulse", {"include_artifact": True}, db, who
+    )
     assert len(group["cells"]) == 5
     assert group["artifact"]["scope"] == "group"
 
     ltim = workforce_tools.dispatch(
-        "get_workforce_pulse", {"company_code": "LTIM"}, db, who
+        "get_workforce_pulse",
+        {"company_code": "LTIM", "include_artifact": True},
+        db,
+        who,
     )
     assert ltim["available"] is True
     assert ltim["company_code"] == "LTIM"
@@ -107,6 +118,7 @@ def test_workforce_pulse_scopes_to_ic(client):
     assert missing["available"] is False
     assert "cells" in missing["missing"]
     assert missing["cells"] == []
+    assert "artifact" not in missing
 
 
 def test_succession_coverage_scopes_to_ic(client):
@@ -137,8 +149,18 @@ def test_succession_coverage_scopes_to_ic(client):
 def test_succession_bench_alias_matches_coverage(client):
     db = next(app.dependency_overrides[get_db]())
     who = Principal("admin", Role.ADMIN, None)
-    a = workforce_tools.dispatch("get_succession_bench", {"company_code": "LTIM"}, db, who)
-    b = workforce_tools.dispatch("get_succession_coverage", {"company_code": "LTIM"}, db, who)
+    a = workforce_tools.dispatch(
+        "get_succession_bench",
+        {"company_code": "LTIM", "include_artifact": True},
+        db,
+        who,
+    )
+    b = workforce_tools.dispatch(
+        "get_succession_coverage",
+        {"company_code": "LTIM", "include_artifact": True},
+        db,
+        who,
+    )
     assert a["headline"] == b["headline"]
     # Bench tool defaults to a role-table chart; coverage defaults to overview.
     assert a["focus"] == "bench"
@@ -154,12 +176,20 @@ def test_succession_focus_builds_distinct_charts(client):
     db = next(app.dependency_overrides[get_db]())
     who = Principal("admin", Role.ADMIN, None)
 
-    overview = workforce_tools.dispatch("get_succession_coverage", {}, db, who)
+    overview = workforce_tools.dispatch(
+        "get_succession_coverage", {"include_artifact": True}, db, who
+    )
     weak = workforce_tools.dispatch(
-        "get_succession_coverage", {"focus": "weak_gaps"}, db, who
+        "get_succession_coverage",
+        {"focus": "weak_gaps", "include_artifact": True},
+        db,
+        who,
     )
     c_suite = workforce_tools.dispatch(
-        "get_succession_coverage", {"focus": "c_suite"}, db, who
+        "get_succession_coverage",
+        {"focus": "c_suite", "include_artifact": True},
+        db,
+        who,
     )
 
     assert overview["artifact"]["title"] == "Succession coverage by function"

@@ -56,6 +56,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     cors_origins: Annotated[list[str], NoDecode] = [
         "http://localhost:3000",
+        "http://127.0.0.1:3000",
         "https://chro.lokibots.ai",
     ]
     anthropic_api_key: str | None = None
