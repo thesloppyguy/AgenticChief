@@ -36,7 +36,7 @@ const data = {
   },
   navMain: [
     {
-      title: "Home",
+      title: "Executive Overview",
       url: "/home",
       icon: Home,
     },
@@ -45,11 +45,11 @@ const data = {
       url: "/chat",
       icon: SquareTerminal,
     },
-    // {
-    //   title: "Company",
-    //   url: "/company",
-    //   icon: Building,
-    // },
+    {
+      title: "Group & IC Performance",
+      url: "/company",
+      icon: Building,
+    },
     {
       title: "Work",
       url: "#",
