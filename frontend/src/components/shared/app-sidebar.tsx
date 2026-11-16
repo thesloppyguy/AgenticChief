@@ -41,7 +41,7 @@ const data = {
       icon: Home,
     },
     {
-      title: "Chat",
+      title: "Ask Copilot",
       url: "/chat",
       icon: SquareTerminal,
     },
@@ -56,7 +56,7 @@ const data = {
       icon: ListChecks,
       items: [
         {
-          title: "Actions",
+          title: "Decisions & Actions",
           url: "/actions",
           icon: ListChecks,
         },
@@ -77,13 +77,13 @@ const data = {
       url: "/documents",
       icon: FileText,
     },
+    // {
+    //   title: "Memories",
+    //   url: "/memory",
+    //   icon: Box,
+    // },
     {
-      title: "Memory Store",
-      url: "/memory",
-      icon: Box,
-    },
-    {
-      title: "Dream",
+      title: "Activity",
       url: "/dream",
       icon: Cloud,
     },
