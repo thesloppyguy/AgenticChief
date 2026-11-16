@@ -815,6 +815,7 @@ function Dashboard() {
 
           <Card
             title="Group HR Score Trend"
+            className="h-full"
             action={
               <Select defaultValue="12">
                 <SelectTrigger
@@ -829,7 +830,7 @@ function Dashboard() {
                 </SelectContent>
               </Select>
             }
-            contentClassName="flex min-h-0 flex-1 flex-col"
+            contentClassName="flex min-h-0 flex-1 flex-col pt-1"
           >
             <ScoreTrend
               score={data.group.score}
