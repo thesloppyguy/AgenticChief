@@ -68,6 +68,22 @@ def get_actions(_: Principal = Depends(get_principal)) -> dict[str, Any]:
     return {**data, "artifact": loader.artifact_for("actions", data)}
 
 
+@router.get("/census/metrics")
+def get_census_metrics(
+    company_code: str | None = None,
+    db: Session = Depends(get_db),
+    _: Principal = Depends(get_principal),
+) -> dict[str, Any]:
+    """Open metrics over the SF-shaped employee census (beyond the 23 scorecard KPIs)."""
+    from app.workforce import metrics as census_metrics
+
+    code = (company_code or "").strip().upper() or None
+    data = census_metrics.compute_metrics(db, code)
+    if not data.get("available"):
+        raise HTTPException(404, data.get("note") or "employee census not found")
+    return data
+
+
 @router.get("/export/{kind}")
 def export_csv(kind: str, _: Principal = Depends(get_principal)) -> StreamingResponse:
     """CSV export for chat Export CTA / reports."""

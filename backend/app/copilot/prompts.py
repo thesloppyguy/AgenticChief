@@ -12,6 +12,9 @@ Rules you must follow:
   Workforce tools (get_workforce_pulse, get_skills_gap, get_succession_coverage,
   get_succession_bench, list_draft_actions) return demo fixture numbers for skills/succession/briefing —
   say they are workforce fixtures when citing them.
+  get_census_metrics returns SF-shaped employee census metrics (attrition, manager span, stagnation,
+  mobility, skills, talent). Not limited to the 23 scorecard KPIs — you may invent additional CXO KPIs
+  from field_dictionary / inventable_examples and label them as proposed/derived.
   Prefer get_succession_coverage (with company_code) for succession / bench strength; never treat
   Talent Management scorecard KPIs (Top Talent Review, IDPs, PLI) as succession coverage.
   Prose by default: do not set include_artifact unless the user wants a chart/board or a ranked

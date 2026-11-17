@@ -58,6 +58,37 @@ def test_workforce_http_endpoints(client):
         assert r.status_code == 200, path
         body = r.json()
         assert "artifact" in body
+
+
+def test_census_metrics_endpoint_after_seed(client):
+    from app.db.session import get_db
+    from app.main import app
+    from app.workforce.employee_sim.persist import seed_census
+
+    # Seed into the same in-memory DB the TestClient uses.
+    db_gen = app.dependency_overrides[get_db]()
+    db = next(db_gen)
+    try:
+        seed_census(db, [("LTIM", "strong")], per_ic=90, seed="api-v1", clear=True)
+    finally:
+        db_gen.close()
+
+    r = client.get("/workforce/census/metrics", params={"company_code": "LTIM"}, headers=h())
+    assert r.status_code == 200
+    body = r.json()
+    assert body["available"] is True
+    assert body["metrics"]["headcount_active"] > 0
+    assert "field_dictionary" in body
+
+    db_gen2 = app.dependency_overrides[get_db]()
+    db2 = next(db_gen2)
+    try:
+        out = workforce_tools.dispatch(
+            "get_census_metrics", {"company_code": "LTIM"}, db2, Principal("admin", Role.ADMIN, None)
+        )
+        assert out.get("available") is True
+    finally:
+        db_gen2.close()
     ic = client.get("/workforce/pulse", params={"company_code": "LTIM"}, headers=h())
     assert ic.status_code == 200
     assert ic.json()["company_code"] == "LTIM"

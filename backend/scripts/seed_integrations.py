@@ -41,8 +41,9 @@ def lnt_fixture(*, ai: bool) -> dict:
     codes = list(LNT_CODES)
     assignments = [(c, LNT_BY_CODE[c][1]) for c in codes]
     if not ai:
+        # synthetic_company now derives CompanyRaw from a simulated employee census.
         companies = {
-            c: {"origin": "deterministic", "raw": synthetic_company(c, arch).model_dump()}
+            c: {"origin": "census", "raw": synthetic_company(c, arch).model_dump()}
             for c, arch in assignments
         }
         return {
@@ -51,7 +52,7 @@ def lnt_fixture(*, ai: bool) -> dict:
                 "model": None,
                 "count": len(codes),
                 "ai_generated": 0,
-                "notes": ["lnt_archetypes"],
+                "notes": ["employee_census", "lnt_archetypes"],
             },
             "companies": companies,
         }

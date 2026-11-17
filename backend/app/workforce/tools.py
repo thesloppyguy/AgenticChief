@@ -128,6 +128,18 @@ WORKFORCE_TOOLS: list[dict[str, Any]] = sorted(
                 },
             },
         },
+        {
+            "name": "get_census_metrics",
+            "description": "Open SF-shaped employee census metrics for Group or one IC — attrition "
+            "by grade/tenure/reason, manager span, stagnation, mobility, skill coverage, "
+            "learning velocity, top talent / IDP / PLI / nine-box, trainee pipeline. "
+            "Not limited to the 23 scorecard KPIs; use field_dictionary + inventable_examples "
+            "to propose additional CXO KPIs. Requires seeded employee census.",
+            "input_schema": {
+                "type": "object",
+                "properties": {"company_code": _IC_CODE_PROP},
+            },
+        },
     ],
     key=lambda t: t["name"],
 )
@@ -201,4 +213,9 @@ def dispatch(name: str, args: dict, db: Session, who: Principal) -> dict:
         if want_artifact(args):
             out["artifact"] = loader.artifact_for("actions", {"drafts": drafts})
         return out
+    if name == "get_census_metrics":
+        from app.workforce import metrics as census_metrics
+
+        code = (args.get("company_code") or "").strip().upper() or None
+        return census_metrics.compute_metrics(db, code)
     return {"error": f"unknown workforce tool {name}"}

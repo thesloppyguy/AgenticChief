@@ -20,16 +20,26 @@ def main() -> None:
     ap.add_argument("--reset", action="store_true", help="wipe existing org/KPI/demo data first")
     ap.add_argument("--through", default=current_period())
     ap.add_argument("--no-ingest", action="store_true", help="skip stub KPI ingestion")
+    ap.add_argument(
+        "--census-only",
+        action="store_true",
+        help="only (re)generate employee census + MockCompanyData after org load",
+    )
     a = ap.parse_args()
 
     upgrade_head()
     with SessionLocal() as db:
-        summary = load_lnt(
-            db=db,
-            reset=a.reset,
-            ingest=not a.no_ingest,
-            through=a.through,
-        )
+        if a.census_only:
+            from app.fixtures.lnt_loader import _seed_employee_census
+
+            summary = _seed_employee_census(db)
+        else:
+            summary = load_lnt(
+                db=db,
+                reset=a.reset,
+                ingest=not a.no_ingest,
+                through=a.through,
+            )
     print(json.dumps(summary, indent=2, default=str))
 
 

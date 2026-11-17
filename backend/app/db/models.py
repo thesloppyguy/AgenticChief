@@ -6,6 +6,7 @@ from sqlalchemy import (
     JSON,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     UniqueConstraint,
@@ -553,3 +554,128 @@ class DashboardLayout(Base):
     pulse_cells: Mapped[list] = mapped_column(JSON, default=list)
     pulse_hidden: Mapped[list] = mapped_column(JSON, default=list)
     updated_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
+
+
+# --- SF-shaped workforce census (demo simulation; not the Person governance roster) -----------
+
+
+class Employee(Base):
+    """Current Employee Central-style snapshot for one simulated worker."""
+
+    __tablename__ = "employee"
+    __table_args__ = (Index("ix_employee_company_status", "company_code", "status"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    ps_number: Mapped[str] = mapped_column(String(32), unique=True, index=True)
+    company_code: Mapped[str] = mapped_column(String(32), index=True)
+    legal_entity: Mapped[str] = mapped_column(String(120), default="")
+    business_unit: Mapped[str] = mapped_column(String(120), default="")
+    department: Mapped[str] = mapped_column(String(120), default="")
+    job_code: Mapped[str] = mapped_column(String(48), default="")
+    job_title: Mapped[str] = mapped_column(String(120), default="")
+    job_function: Mapped[str] = mapped_column(String(120), default="")
+    grade_cadre: Mapped[str] = mapped_column(String(32), default="")
+    band: Mapped[str] = mapped_column(String(32), default="")
+    employment_type: Mapped[str] = mapped_column(String(48), default="Permanent")
+    appointment_type: Mapped[str] = mapped_column(String(48), default="")
+    employee_group: Mapped[str] = mapped_column(String(48), default="")
+    manager_ps_number: Mapped[str | None] = mapped_column(String(32), index=True)
+    position_id: Mapped[str] = mapped_column(String(48), default="")
+    hire_date: Mapped[str] = mapped_column(String(10))  # YYYY-MM-DD
+    joining_date: Mapped[str] = mapped_column(String(10))
+    separation_date: Mapped[str | None] = mapped_column(String(10))
+    status: Mapped[str] = mapped_column(String(16), default="active")  # active | separated
+    time_in_company_months: Mapped[int] = mapped_column(Integer, default=0)
+    time_in_position_months: Mapped[int] = mapped_column(Integer, default=0)
+    is_trainee: Mapped[bool] = mapped_column(default=False)
+    contract_training_end_date: Mapped[str | None] = mapped_column(String(10))
+    top_talent: Mapped[bool] = mapped_column(default=False)
+    cpr_band: Mapped[int] = mapped_column(Integer, default=0)  # CPR scale; 7+ = top talent band
+    willing_to_relocate: Mapped[bool] = mapped_column(default=False)
+    base_location: Mapped[str] = mapped_column(String(120), default="")
+    full_name: Mapped[str] = mapped_column(String(120), default="")
+    archetype: Mapped[str] = mapped_column(String(16), default="steady")
+
+
+class EmployeePerformance(Base):
+    """Annual performance / feedback signals for one employee."""
+
+    __tablename__ = "employee_performance"
+    __table_args__ = (
+        UniqueConstraint("employee_id", "assessment_year", name="uq_emp_perf_year"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    employee_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), index=True)
+    assessment_year: Mapped[int] = mapped_column(Integer)
+    mvg_rating: Mapped[float | None] = mapped_column(Float)
+    cp_rating: Mapped[float | None] = mapped_column(Float)
+    pdr_rating: Mapped[float | None] = mapped_column(Float)
+    feedback_entries_ytd: Mapped[int] = mapped_column(Integer, default=0)
+    kra_submitted: Mapped[bool] = mapped_column(default=False)
+    mid_term_completed: Mapped[bool] = mapped_column(default=False)
+
+
+class EmployeeLearning(Base):
+    """Learning / TNI / course completion events."""
+
+    __tablename__ = "employee_learning"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    employee_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), index=True)
+    course_name: Mapped[str] = mapped_column(String(200))
+    completed_on: Mapped[str | None] = mapped_column(String(10))
+    l1_rating_5: Mapped[float | None] = mapped_column(Float)
+    tni_identified: Mapped[bool] = mapped_column(default=False)
+    tni_fulfilled: Mapped[bool] = mapped_column(default=False)
+    source: Mapped[str] = mapped_column(String(32), default="course")  # course | leadership_program
+
+
+class EmployeeSkill(Base):
+    """Role skills, certifications, and language proficiency."""
+
+    __tablename__ = "employee_skill"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    employee_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), index=True)
+    skill_type: Mapped[str] = mapped_column(String(24))  # role_skill | certification | language
+    name: Mapped[str] = mapped_column(String(120))
+    proficiency: Mapped[str] = mapped_column(String(48), default="")
+    mapped_to_role: Mapped[bool] = mapped_column(default=False)
+    valid_until: Mapped[str | None] = mapped_column(String(10))
+
+
+class EmployeeDevelopment(Base):
+    """Development centre / PLI / IDP / nine-box talent signals."""
+
+    __tablename__ = "employee_development"
+    __table_args__ = (
+        UniqueConstraint("employee_id", "year", name="uq_emp_dev_year"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    employee_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), index=True)
+    year: Mapped[int] = mapped_column(Integer)
+    dc_type: Mapped[str | None] = mapped_column(String(48))
+    dc_score: Mapped[float | None] = mapped_column(Float)
+    pli_completed: Mapped[bool] = mapped_column(default=False)
+    has_idp: Mapped[bool] = mapped_column(default=False)
+    nine_box: Mapped[str | None] = mapped_column(String(24))
+
+
+class EmployeeEvent(Base):
+    """Mobility and exit timeline (hire / promote / transfer / deputation / resign / separate)."""
+
+    __tablename__ = "employee_event"
+    __table_args__ = (Index("ix_employee_event_emp_date", "employee_id", "effective_date"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    employee_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), index=True)
+    event_type: Mapped[str] = mapped_column(String(24))
+    effective_date: Mapped[str] = mapped_column(String(10))
+    reason_code: Mapped[str] = mapped_column(String(64), default="")
+    from_ic: Mapped[str | None] = mapped_column(String(32))
+    to_ic: Mapped[str | None] = mapped_column(String(32))
+    from_grade: Mapped[str | None] = mapped_column(String(32))
+    to_grade: Mapped[str | None] = mapped_column(String(32))
+    regrettable: Mapped[bool] = mapped_column(default=False)

@@ -368,16 +368,47 @@ def _write_group_profile() -> None:
     save_profile(profile)
 
 
+def _seed_employee_census(db: Session) -> dict[str, Any]:
+    """Generate SF-shaped employee census and derive MockCompanyData from it."""
+    from datetime import UTC, datetime
+
+    from app.ingestion.ai_generator import write_fixture
+    from app.org.companies import LNT_BY_CODE, LNT_CODES
+    from app.workforce.employee_sim.persist import seed_census
+
+    assignments = [(c, LNT_BY_CODE[c][1]) for c in LNT_CODES]
+    summary = seed_census(db, assignments, seed="lnt-v1", clear=True)
+    # Stub fixture for ingest extractors — raw only, sourced from the same census.
+    fixture = {
+        "meta": {
+            "generated_at": datetime.now(UTC).isoformat(),
+            "model": None,
+            "count": len(assignments),
+            "ai_generated": 0,
+            "notes": ["employee_census", "lnt_archetypes"],
+            "seed": "lnt-v1",
+        },
+        "companies": {
+            code: {"origin": "census", "raw": summary["raw"][code]}
+            for code in summary["companies"]
+        },
+    }
+    write_fixture(settings.stub_data_path, fixture)
+    summary["fixture"] = settings.stub_data_path
+    return summary
+
+
 def _ingest_kpis(db: Session, through: str) -> dict[str, Any]:
-    from scripts.seed_integrations import fiscal_periods, lnt_fixture
-    from app.ingestion.ai_generator import load_fixture, write_fixture
+    from scripts.seed_integrations import fiscal_periods
+    from app.ingestion.ai_generator import load_fixture
     from app.ingestion import registry
     from app.ingestion.manual_seed import seed_manual
     from app.ingestion.runner import ingest
     from app.alerts import engine as alerts_engine
 
-    fixture = lnt_fixture(ai=False)
-    write_fixture(settings.stub_data_path, fixture)
+    census = _seed_employee_census(db)
+    # Clear fixture cache so the new stub file mtime is picked up.
+    registry._fixture.cache_clear()
     extractors = registry.build_extractors(db=db)
     periods = fiscal_periods(through)
     records = 0
@@ -388,7 +419,12 @@ def _ingest_kpis(db: Session, through: str) -> dict[str, Any]:
 
         seed_manual(db, period, profiles(db) or load_fixture(settings.stub_data_path))
         alerts_engine.evaluate_period(db, period)
-    return {"periods": periods, "records": records, "fixture": settings.stub_data_path}
+    return {
+        "periods": periods,
+        "records": records,
+        "fixture": settings.stub_data_path,
+        "census": {"employees": census.get("employees"), "companies": census.get("companies")},
+    }
 
 
 def _demo_morning_brief_result(db: Session, who: Principal, period: str) -> dict[str, Any]:

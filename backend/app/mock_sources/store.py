@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.config import settings
 from app.db.models import Company, MockCompanyData
 from app.ingestion.ai_generator import generate_batch
-from app.ingestion.stubgen import CompanyRaw, assign_archetype, synthetic_company
+from app.ingestion.stubgen import CompanyRaw, assign_archetype
 
 BATCH = 8
 WORKERS = 4
@@ -77,7 +77,29 @@ def ensure_one(db: Session, client: Any | None, code: str) -> MockCompanyData:
         if code in good:
             _save(db, code, good[code], "ai")
         elif settings.mock_sources_allow_fallback:
-            _save(db, code, synthetic_company(code, arch), "fallback")  # type: ignore[arg-type]
+            # Prefer census → aggregate so MockCompanyData stays aligned with employees.
+            # Origin stays "fallback" so API headers still mean "AI unavailable".
+            from app.workforce.employee_sim.generate import simulate_ic
+            from app.workforce.employee_sim.persist import (
+                load_census_from_db,
+                persist_batch,
+                save_mock_from_batch,
+            )
+
+            if load_census_from_db(db, code) is None:
+                batch = simulate_ic(code, arch)  # type: ignore[arg-type]
+                persist_batch(db, batch)
+                save_mock_from_batch(db, batch, origin="fallback")
+                db.commit()
+            existing = get_profile(db, code)
+            if existing is None:
+                from app.workforce.employee_sim.aggregate import to_company_raw
+
+                _save(db, code, to_company_raw(load_census_from_db(db, code)), "fallback")  # type: ignore[arg-type]
+            elif existing.origin != "fallback":
+                existing.origin = "fallback"
+                db.commit()
+            return get_profile(db, code)  # type: ignore[return-value]
         else:
             raise GenerationUnavailable("the data generator is unavailable")
         return get_profile(db, code)  # type: ignore[return-value]
@@ -126,7 +148,23 @@ def generate_missing(factory: sessionmaker, client: Any, on_progress=None) -> Ge
     for code in left:
         if settings.mock_sources_allow_fallback:
             with factory() as db:
-                _save(db, code, synthetic_company(code, assign[code]), "fallback")  # type: ignore[arg-type]
+                from app.workforce.employee_sim.generate import simulate_ic
+                from app.workforce.employee_sim.persist import (
+                    load_census_from_db,
+                    persist_batch,
+                    save_mock_from_batch,
+                )
+
+                if load_census_from_db(db, code) is None:
+                    batch = simulate_ic(code, assign[code])  # type: ignore[arg-type]
+                    persist_batch(db, batch)
+                    save_mock_from_batch(db, batch, origin="fallback")
+                    db.commit()
+                elif get_profile(db, code) is None:
+                    from app.workforce.employee_sim.aggregate import to_company_raw
+
+                    batch = load_census_from_db(db, code)
+                    _save(db, code, to_company_raw(batch), "fallback")  # type: ignore[arg-type]
             res.fallback += 1
         else:
             res.failed.append(code)
