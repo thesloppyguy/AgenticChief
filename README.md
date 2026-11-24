@@ -91,3 +91,13 @@ Deterministic HR scoring (7 pillars, 23 KPIs) per [CHRO.md](CHRO.md). Five L&T I
 ## Governance
 
 Approvals gate consequential actions: KPI reminders and company-wide directives (queued `OutboundMessage` to People), capability / retention launches (arm 90-day watches), schedule_report, snapshots, monthly report publish, workflow publish, scorecard rule activation. Skills and agents are not DB-published assets. CHRO workflow defs (`weekly_workforce_brief`, `performance_review`, `comp_refresh`, …) ship as seeded workflow assets.
+
+
+
+---
+
+cd backend
+uv run alembic upgrade head
+uv run python -m scripts.seed_lnt --reset
+# or census only:
+uv run python -m scripts.generate_employee_census --persist --per-ic 100

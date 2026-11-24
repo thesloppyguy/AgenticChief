@@ -51,6 +51,29 @@ export interface SourcesStatusEnvelope {
   sources: SourceStatus[];
 }
 
+export interface AttritionSyncRunSummary {
+  id: number;
+  status: string;
+  started_at: string;
+  finished_at: string | null;
+  ics_requested: string[];
+  ics_ok: string[];
+  ics_failed: string[];
+  rows_upserted: number;
+  errors: { ic?: string; error?: string }[];
+  triggered_by: string;
+}
+
+export interface AttritionStatusEnvelope {
+  enabled: boolean;
+  base_url_configured: boolean;
+  auth: string;
+  total_rows: number;
+  rows_by_ic: Record<string, number>;
+  ic_roster: string[];
+  last_sync: AttritionSyncRunSummary | null;
+}
+
 export interface AlertItem {
   id: number; kind: string; severity: "low" | "medium" | "high" | "urgent"; entity: string; company_id: number | null; period: string;
   title: string; detail: { weakest_pillars?: { pillar: string; score: number }[]; previous_status?: string | null; synthetic?: boolean } | null;

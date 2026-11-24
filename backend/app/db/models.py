@@ -679,3 +679,89 @@ class EmployeeEvent(Base):
     from_grade: Mapped[str | None] = mapped_column(String(32))
     to_grade: Mapped[str | None] = mapped_column(String(32))
     regrettable: Mapped[bool] = mapped_column(default=False)
+
+
+class AttritionEmployee(Base):
+    """Employee row from ICHRATTRITION CPI, mapped to Attrition_Fields roles."""
+
+    __tablename__ = "attrition_employee"
+    __table_args__ = (
+        Index("ix_attrition_employee_company_status", "company_code", "status"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    employee_id: Mapped[str] = mapped_column(String(32), unique=True, index=True)  # P.S. Number
+    company_code: Mapped[str] = mapped_column(String(32), index=True)
+    ic_description: Mapped[str] = mapped_column(String(200), default="")
+    legal_entity: Mapped[str] = mapped_column(String(200), default="")
+    country: Mapped[str] = mapped_column(String(64), default="")
+    sbg: Mapped[str] = mapped_column(String(120), default="")
+    business_unit: Mapped[str] = mapped_column(String(200), default="")
+    department: Mapped[str] = mapped_column(String(300), default="")
+    department_code: Mapped[str] = mapped_column(String(64), default="")
+    base_location: Mapped[str] = mapped_column(String(120), default="")
+    pay_grade: Mapped[str] = mapped_column(String(32), default="")
+    grade: Mapped[str] = mapped_column(String(32), default="")
+    band: Mapped[str] = mapped_column(String(32), default="")
+    appointment_type: Mapped[str] = mapped_column(String(48), default="")
+    employee_group: Mapped[str] = mapped_column(String(64), default="")
+    employment_type: Mapped[str | None] = mapped_column(String(48))
+    hire_date: Mapped[str | None] = mapped_column(String(10))
+    joining_date: Mapped[str | None] = mapped_column(String(10))
+    trainee_experience: Mapped[str | None] = mapped_column(String(32))
+    contract_training_end_date: Mapped[str | None] = mapped_column(String(10))
+    separation_date: Mapped[str | None] = mapped_column(String(10))
+    payroll_end_date: Mapped[str | None] = mapped_column(String(10))
+    notice_period: Mapped[str | None] = mapped_column(String(32))
+    notice_period_policy: Mapped[str | None] = mapped_column(String(64))
+    resignation_date: Mapped[str | None] = mapped_column(String(10))
+    last_working_date: Mapped[str | None] = mapped_column(String(10))
+    request_relieving_date: Mapped[str | None] = mapped_column(String(10))
+    doj_resignation_port: Mapped[str | None] = mapped_column(String(10))
+    resignation_reason: Mapped[str | None] = mapped_column(String(200))
+    manager_user_id: Mapped[str | None] = mapped_column(String(32), index=True)
+    manager_name: Mapped[str | None] = mapped_column(String(120))
+    job_family: Mapped[str | None] = mapped_column(String(120))
+    job_subfamily: Mapped[str | None] = mapped_column(String(64))
+    job_subfamily_desc: Mapped[str | None] = mapped_column(String(200))
+    job_function: Mapped[str | None] = mapped_column(String(200))
+    ok_to_rehire: Mapped[bool | None] = mapped_column()
+    exit_interview_required: Mapped[bool | None] = mapped_column()
+    date_of_joining_exit_port: Mapped[str | None] = mapped_column(String(10))
+    date_of_separation_exit_port: Mapped[str | None] = mapped_column(String(10))
+    exit_designation: Mapped[str | None] = mapped_column(String(120))
+    exit_tenure: Mapped[str | None] = mapped_column(String(64))
+    exit_trigger_hr: Mapped[str | None] = mapped_column(String(500))
+    exit_trigger_employee: Mapped[str | None] = mapped_column(String(500))
+    exit_flag_compensation: Mapped[bool | None] = mapped_column()
+    exit_flag_brand: Mapped[bool | None] = mapped_column()
+    exit_flag_role: Mapped[bool | None] = mapped_column()
+    exit_flag_culture: Mapped[bool | None] = mapped_column()
+    exit_recommend_friends: Mapped[str | None] = mapped_column(String(64))
+    exit_would_rejoin: Mapped[str | None] = mapped_column(String(64))
+    current_cadre: Mapped[str | None] = mapped_column(String(32))
+    mvg_rating: Mapped[float | None] = mapped_column(Float)
+    cp_rating: Mapped[float | None] = mapped_column(Float)
+    pdr_rating: Mapped[float | None] = mapped_column(Float)
+    status: Mapped[str] = mapped_column(String(16), default="active")  # active | separated
+    is_trainee: Mapped[bool] = mapped_column(default=False)
+    time_in_company_months: Mapped[int] = mapped_column(Integer, default=0)
+    synced_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
+    raw: Mapped[dict | None] = mapped_column(JSON)
+
+
+class AttritionSyncRun(Base):
+    """One ICHRATTRITION sync pass (all ICs or a subset)."""
+
+    __tablename__ = "attrition_sync_run"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    started_at: Mapped[datetime] = mapped_column(UtcDateTime(), server_default=func.now())
+    finished_at: Mapped[datetime | None] = mapped_column(UtcDateTime())
+    status: Mapped[str] = mapped_column(String(24), default="running")  # running | ok | partial | error
+    ics_requested: Mapped[list | None] = mapped_column(JSON)
+    ics_ok: Mapped[list | None] = mapped_column(JSON)
+    ics_failed: Mapped[list | None] = mapped_column(JSON)
+    rows_upserted: Mapped[int] = mapped_column(Integer, default=0)
+    errors: Mapped[list | None] = mapped_column(JSON)
+    triggered_by: Mapped[str] = mapped_column(String(64), default="")

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.agents import router as agents_router
 from app.api.alerts import router as alerts_router
 from app.api.approvals import router as approvals_router
+from app.api.attrition import router as attrition_router
 from app.api.auth import router as auth_router
 from app.api.briefs import router as briefs_router
 from app.api.company_profile import router as company_profile_router
@@ -141,6 +142,7 @@ api.include_router(router)
 api.include_router(copilot_router)
 api.include_router(ingestion_router)
 api.include_router(sources_router)
+api.include_router(attrition_router)
 api.include_router(approvals_router)
 api.include_router(alerts_router)
 api.include_router(workflows_router)

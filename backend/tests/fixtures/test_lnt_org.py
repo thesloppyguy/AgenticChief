@@ -14,7 +14,7 @@ def h(user="admin", role=Role.ADMIN):
     return {"Authorization": f"Bearer {make_token(user, role)}"}
 
 
-def test_ensure_companies_seeds_five_lnt(client):
+def test_ensure_companies_seeds_api_ics(client):
     from app.db.session import get_db
     from app.main import app
 
@@ -28,8 +28,9 @@ def test_ensure_companies_seeds_five_lnt(client):
     codes = sorted(c.code for c in rows)
     assert codes == sorted(LNT_CODES)
     names = {c.code: c.name for c in rows}
-    assert names["LTTS"] == "L&T Technology Services"
-    assert names["LTMR"] == "L&T Metro Rail"
+    assert names["PTD"] == "Power Transmission & Distribution - IC"
+    assert "WETI" in names
+    assert len(LNT_CODES) >= 30
 
 
 def test_org_apis_and_rng_monitoring(client):
@@ -92,11 +93,12 @@ def test_org_apis_and_rng_monitoring(client):
     assert r.status_code == 200
     assert r.json()["group"]["score"] is not None
 
-    r = client.get("/demo/rng/sources/successfactors", params={"company_code": "LTTS"}, headers=h())
+    r = client.get("/demo/rng/sources/successfactors", params={"company_code": "PTD"}, headers=h())
     assert r.status_code == 200 and "d" in r.json()
 
 
 def test_fixtures_list(client):
     r = client.get("/fixtures", headers=h())
     assert r.status_code == 200
-    assert len(r.json()["companies"]) == 5
+    # Demo seed packs removed; attrition roster has no FIXTURE_SLUGS
+    assert r.json()["companies"] == []

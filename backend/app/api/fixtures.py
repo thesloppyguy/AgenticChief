@@ -25,10 +25,11 @@ def list_fixtures(_: Principal = Depends(require_admin)):
                 "code": code,
                 "name": name,
                 "archetype": arch,
-                "slug": FIXTURE_SLUGS[code],
-                "path": str(COMPANIES_DIR / FIXTURE_SLUGS[code]),
+                "slug": FIXTURE_SLUGS.get(code),
+                "path": str(COMPANIES_DIR / FIXTURE_SLUGS[code]) if code in FIXTURE_SLUGS else None,
             }
             for code, name, arch in LNT_COMPANIES
+            if code in FIXTURE_SLUGS
         ],
     }
 

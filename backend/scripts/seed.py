@@ -1,4 +1,4 @@
-"""Create tables and seed the 5 L&T Independent Companies (optionally with demo KPI rows).
+"""Create tables and seed Independent Companies from the attrition IC roster.
 
 Usage: uv run python -m scripts.seed [--demo] [--period 2026-10] [--reset]
 """
@@ -20,14 +20,19 @@ MANUAL = {"cost_per_hire", "top_talent_review", "idps_top_talent", "gptw_score"}
 
 
 def ensure_companies(db, *, reset: bool = False) -> None:
-    """Insert the 5 L&T ICs. With reset=True, wipe org data first."""
+    """Upsert all ICs from the roster. With reset=True, wipe org data first."""
     if reset:
         from app.org.reset import reset_org
 
         reset_org(db)
-    if db.scalar(select(Company).limit(1)):
-        return
-    db.add_all(Company(code=code, name=name) for code, name, _ in LNT_COMPANIES)
+    existing = {c.code: c for c in db.scalars(select(Company))}
+    for code, name, _ in LNT_COMPANIES:
+        row = existing.get(code)
+        if row is None:
+            db.add(Company(code=code, name=name))
+        elif row.name != name and row.name in (code, ""):
+            # Refresh placeholder names (e.g. WETI) if still code-only
+            row.name = name
     db.commit()
 
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Database, Terminal } from "lucide-react";
+import { Box, Database, RefreshCw, Terminal } from "lucide-react";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import { usePeriod } from "@/components/AppShell";
@@ -15,7 +15,7 @@ import {
   PanelShell,
   StatusPill,
 } from "@/components/settings/panel-chrome";
-import type { SourcesStatusEnvelope } from "@/lib/types";
+import type { AttritionStatusEnvelope, SourcesStatusEnvelope } from "@/lib/types";
 
 type Status = {
   mcp_enabled: boolean;
@@ -38,7 +38,7 @@ export function ConnectorsPanel({ mcpOnly = false }: { mcpOnly?: boolean }) {
         description={
           mcpOnly
             ? "MCP servers from mcp_servers.json and the live gateway process."
-            : "HR source health plus MCP connectors from env and mcp_servers.json."
+            : "Attrition CPI sync, HR source health, and MCP connectors."
         }
         count={
           data
@@ -49,7 +49,12 @@ export function ConnectorsPanel({ mcpOnly = false }: { mcpOnly?: boolean }) {
       <Loading error={error} loading={loading && !data} />
       {data && (
         <div className="space-y-4">
-          {!mcpOnly && <HrSourcesSection />}
+          {!mcpOnly && (
+            <>
+              <AttritionSection />
+              <HrSourcesSection />
+            </>
+          )}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {!mcpOnly && (
@@ -145,6 +150,87 @@ export function ConnectorsPanel({ mcpOnly = false }: { mcpOnly?: boolean }) {
         </div>
       )}
     </PanelShell>
+  );
+}
+
+function AttritionSection() {
+  const { data, error, loading, reload } = useApi<AttritionStatusEnvelope>("/attrition/status");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function sync() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const result = await api<{
+        status: string;
+        rows_upserted: number;
+        ics_ok: string[];
+        ics_failed: string[];
+      }>("/attrition/sync", { method: "POST", body: "{}" });
+      const failed = result.ics_failed?.length ?? 0;
+      setMsg(
+        failed
+          ? `Sync ${result.status}: ${result.rows_upserted} rows · ${result.ics_ok.length} ICs ok · ${failed} failed.`
+          : `Sync ${result.status}: ${result.rows_upserted} rows across ${result.ics_ok.length} ICs.`,
+      );
+      reload();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Attrition sync failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const last = data?.last_sync;
+  const icCount = data ? Object.keys(data.rows_by_ic).length : 0;
+
+  return (
+    <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-card dark:ring-white/10">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/5 px-4 py-3 dark:border-white/10">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <RefreshCw className="size-4 text-muted-foreground" />
+          Attrition (ICHRATTRITION)
+        </div>
+        <Button
+          size="sm"
+          className="rounded-full"
+          disabled={busy}
+          onClick={() => void sync()}
+        >
+          {busy ? "Syncing…" : "Sync attrition"}
+        </Button>
+      </div>
+      <Loading error={error} loading={loading && !data} />
+      {data && (
+        <div className="space-y-3 p-4">
+          <p className="rounded-xl bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+            {data.enabled
+              ? "Live CPI enabled — pulls MyzoneData.Employee for every IC."
+              : "Integration disabled — set INTEGRATIONS__ICHRATTRITION__ENABLED and credentials in backend/.env."}
+            {" "}
+            Roster {data.ic_roster.length} ICs · {data.total_rows} rows
+            {icCount ? ` across ${icCount} ICs` : ""}.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusPill
+              ok={data.enabled && data.base_url_configured}
+              label={data.enabled ? (data.base_url_configured ? "configured" : "missing URL") : "disabled"}
+            />
+            {last && (
+              <span className="text-xs text-muted-foreground">
+                Last {last.status}
+                {last.finished_at
+                  ? ` · ${new Date(last.finished_at).toLocaleString()}`
+                  : ""}
+                {last.errors?.length ? ` · ${last.errors.length} errors` : ""}
+              </span>
+            )}
+          </div>
+          {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
+        </div>
+      )}
+    </div>
   );
 }
 

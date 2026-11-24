@@ -22,7 +22,7 @@ from app.db.models import (
 
 # Field dictionary for AI / skills — keep in sync with models.
 CENSUS_FIELD_DICTIONARY: dict[str, str] = {
-    "employee.company_code": "Independent Company code (LTF, LTMR, LTR, LTTS, LTIM)",
+    "employee.company_code": "Independent Company code (PTD, WETI, RELT, …)",
     "employee.status": "active | separated",
     "employee.grade_cadre": "Grade / cadre (E1–M4A)",
     "employee.band": "Band letter derived from grade",
