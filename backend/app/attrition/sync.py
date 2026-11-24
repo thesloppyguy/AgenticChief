@@ -1,11 +1,17 @@
-"""Orchestrate ICHRATTRITION fetch → AttritionEmployee upsert for all ICs."""
+"""Orchestrate ICHRATTRITION fetch → AttritionEmployee upsert for all ICs.
+
+SQLite is single-writer: never hold a write transaction open across CPI HTTP calls.
+Commit the run row first, fetch outside the DB, then commit per IC.
+"""
 from __future__ import annotations
 
+import time
 from datetime import datetime, timezone
 from typing import Any
 
 import httpx
 from sqlalchemy import func, select
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.attrition.adapter import upsert_employee_from_attrition
@@ -16,7 +22,7 @@ from app.integrations.ich_attrition import (
     IchAttritionClient,
     map_employee_row,
 )
-from app.org.companies import LNT_CODES, LNT_BY_CODE
+from app.org.companies import LNT_BY_CODE, LNT_CODES
 
 
 def _ensure_company(db: Session, code: str, name: str | None) -> None:
@@ -27,7 +33,6 @@ def _ensure_company(db: Session, code: str, name: str | None) -> None:
     if row is None:
         db.add(Company(code=code, name=display))
         return
-    # Refresh placeholder / code-only names from ICDESCRIPTION
     if display and display != code and row.name in (code, "", roster_name if roster_name == code else code):
         row.name = display
     elif display and display != code and row.name == code:
@@ -50,6 +55,55 @@ def _upsert_mapped(db: Session, mapped: dict[str, Any]) -> AttritionEmployee:
     return row
 
 
+def _is_locked(exc: BaseException) -> bool:
+    return "locked" in str(exc).lower()
+
+
+def _commit(db: Session) -> None:
+    db.commit()
+
+
+def _persist_ic(db: Session, code: str, raw_employees: list[dict[str, Any]], now: datetime) -> int:
+    """Upsert one IC's employees and commit. Retries the whole IC write on lock. Returns rows written."""
+    delay = 0.05
+    for attempt in range(8):
+        try:
+            returned_ids: set[str] = set()
+            ic_desc = ""
+            n = 0
+            for raw in raw_employees:
+                mapped = map_employee_row(raw, synced_at=now)
+                if not mapped["company_code"]:
+                    mapped["company_code"] = code
+                if mapped["ic_description"]:
+                    ic_desc = mapped["ic_description"]
+                _ensure_company(db, mapped["company_code"], mapped.get("ic_description"))
+                if not mapped["employee_id"]:
+                    continue
+                returned_ids.add(mapped["employee_id"])
+                _upsert_mapped(db, mapped)
+                n += 1
+            _ensure_company(db, code, ic_desc or None)
+            if returned_ids:
+                stale = db.scalars(
+                    select(AttritionEmployee).where(
+                        AttritionEmployee.company_code == code,
+                        AttritionEmployee.employee_id.not_in(returned_ids),
+                    )
+                )
+                for s in stale:
+                    db.delete(s)
+            db.commit()
+            return n
+        except OperationalError as exc:
+            db.rollback()
+            if not _is_locked(exc) or attempt == 7:
+                raise
+            time.sleep(delay)
+            delay = min(delay * 2, 1.0)
+    return 0
+
+
 def sync_attrition(
     db: Session,
     *,
@@ -64,6 +118,9 @@ def sync_attrition(
     if not codes:
         raise ValueError("No IC codes to sync")
 
+    # Drop any ambient read transaction from auth/deps so we don't upgrade a long lock.
+    db.rollback()
+
     run = AttritionSyncRun(
         status="running",
         ics_requested=codes,
@@ -74,7 +131,8 @@ def sync_attrition(
         triggered_by=triggered_by or "",
     )
     db.add(run)
-    db.flush()
+    _commit(db)
+    run_id = run.id
 
     own_client = client is None
     if client is None:
@@ -83,7 +141,7 @@ def sync_attrition(
             run.finished_at = datetime.now(timezone.utc)
             run.errors = [f"{SOURCE_KEY} integration is disabled"]
             run.ics_failed = codes
-            db.commit()
+            _commit(db)
             return _run_dict(run)
         client = IchAttritionClient(cfg, transport=transport)
 
@@ -94,42 +152,40 @@ def sync_attrition(
     now = datetime.now(timezone.utc)
 
     try:
-        for code in codes:
+        for i, code in enumerate(codes, 1):
             try:
+                print(f"[{i}/{len(codes)}] Fetching {code} ...", flush=True)
+                # HTTP outside any write transaction
                 raw_employees = client.fetch_ic(code)
-                # Full refresh for this IC: drop rows no longer returned
-                returned_ids: set[str] = set()
-                ic_desc = ""
-                for raw in raw_employees:
-                    mapped = map_employee_row(raw, synced_at=now)
-                    if not mapped["company_code"]:
-                        mapped["company_code"] = code
-                    if mapped["ic_description"]:
-                        ic_desc = mapped["ic_description"]
-                    _ensure_company(db, mapped["company_code"], mapped.get("ic_description"))
-                    if not mapped["employee_id"]:
-                        continue
-                    returned_ids.add(mapped["employee_id"])
-                    _upsert_mapped(db, mapped)
-                    rows += 1
-                _ensure_company(db, code, ic_desc or None)
-                if returned_ids:
-                    stale = db.scalars(
-                        select(AttritionEmployee).where(
-                            AttritionEmployee.company_code == code,
-                            AttritionEmployee.employee_id.not_in(returned_ids),
-                        )
-                    )
-                    for s in stale:
-                        db.delete(s)
+                n = _persist_ic(db, code, raw_employees, now)
+                rows += n
                 ok.append(code)
-                db.flush()
+                print(f"[{i}/{len(codes)}] {code}: {n} rows", flush=True)
+                _checkpoint_run(db, run_id, ok=ok, failed=failed, rows=rows, errors=errors)
             except Exception as exc:  # noqa: BLE001 — continue other ICs
+                db.rollback()
                 failed.append(code)
                 errors.append({"ic": code, "error": str(exc)[:500]})
+                print(f"[{i}/{len(codes)}] {code}: FAILED {exc}", flush=True)
+                _checkpoint_run(db, run_id, ok=ok, failed=failed, rows=rows, errors=errors)
     finally:
         if own_client and client is not None:
             client.close()
+
+    run = db.get(AttritionSyncRun, run_id)
+    if run is None:
+        return {
+            "id": run_id,
+            "status": "error",
+            "started_at": None,
+            "finished_at": datetime.now(timezone.utc),
+            "ics_requested": codes,
+            "ics_ok": ok,
+            "ics_failed": failed,
+            "rows_upserted": rows,
+            "errors": errors + [{"error": "sync run row disappeared"}],
+            "triggered_by": triggered_by or "",
+        }
 
     run.ics_ok = ok
     run.ics_failed = failed
@@ -142,9 +198,34 @@ def sync_attrition(
         run.status = "error"
     else:
         run.status = "ok"
-    db.commit()
+    _commit(db)
     db.refresh(run)
     return _run_dict(run)
+
+
+def _checkpoint_run(
+    db: Session,
+    run_id: int,
+    *,
+    ok: list[str],
+    failed: list[str],
+    rows: int,
+    errors: list[dict[str, str]],
+) -> None:
+    run = db.get(AttritionSyncRun, run_id)
+    if run is None:
+        return
+    run.ics_ok = list(ok)
+    run.ics_failed = list(failed)
+    run.rows_upserted = rows
+    run.errors = list(errors)
+    try:
+        db.commit()
+    except OperationalError as exc:
+        db.rollback()
+        if not _is_locked(exc):
+            raise
+        # Progress checkpoint is best-effort; IC data already committed.
 
 
 def _run_dict(run: AttritionSyncRun) -> dict[str, Any]:

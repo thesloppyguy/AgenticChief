@@ -22,7 +22,7 @@ def ensure_sqlite_dir(url: str) -> None:
         Path(u.database).parent.mkdir(parents=True, exist_ok=True)
 
 
-def configure_sqlite(engine: Engine, foreign_keys: bool = True, busy_timeout_ms: int = 10_000) -> Engine:
+def configure_sqlite(engine: Engine, foreign_keys: bool = True, busy_timeout_ms: int = 60_000) -> Engine:
     """Apply per-connection pragmas. No-op for other databases.
 
     Alembic passes foreign_keys=False: its batch mode recreates tables, which FK checks would block.

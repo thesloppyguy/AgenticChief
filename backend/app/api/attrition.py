@@ -49,7 +49,10 @@ def sync(
         result = sync_attrition(db, ics=ics, triggered_by=who.user_id)
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
-    audit(db, who, "attrition_sync", result.get("status"), {
+    except Exception as exc:
+        # Surface lock / CPI failures as 503 instead of an opaque 500 ASGI traceback
+        raise HTTPException(503, f"Attrition sync failed: {exc}") from exc
+    audit(db, who, "attrition_sync", str(result.get("status")), {
         "ics_ok": result.get("ics_ok"),
         "ics_failed": result.get("ics_failed"),
         "rows_upserted": result.get("rows_upserted"),

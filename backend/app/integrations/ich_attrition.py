@@ -184,15 +184,25 @@ def map_employee_row(row: dict[str, Any], *, synced_at: datetime | None = None) 
 class IchAttritionClient:
     """HTTP client for ICHRATTRITION CPI endpoint."""
 
-    def __init__(self, cfg: IntegrationConfig, transport: httpx.BaseTransport | None = None):
+    def __init__(
+        self,
+        cfg: IntegrationConfig,
+        transport: httpx.BaseTransport | None = None,
+        *,
+        max_attempts: int = 2,
+    ):
         if not cfg.enabled:
             raise ValueError(f"{SOURCE_KEY} integration is disabled")
         if not cfg.base_url:
             raise ValueError(f"{SOURCE_KEY}: base_url is required")
         self._cfg = cfg
+        self._max_attempts = max(1, max_attempts)
+        self._transport = transport
+        # Fresh connection per request avoids stale keep-alives that CPI often resets.
         self._http = httpx.Client(
-            timeout=cfg.timeout_s,
-            transport=transport or httpx.HTTPTransport(retries=1),
+            timeout=httpx.Timeout(cfg.timeout_s, connect=15.0),
+            transport=transport or httpx.HTTPTransport(retries=0),
+            headers={"Connection": "close"},
         )
 
     def close(self) -> None:
@@ -205,21 +215,43 @@ class IchAttritionClient:
         self.close()
 
     def fetch_ic(self, ic_code: str) -> list[dict[str, Any]]:
-        """GET with XML body; return mapped-ready raw employee dicts."""
-        body = build_trigger_xml(ic_code)
+        """GET with XML body; return mapped-ready raw employee dicts. Retries connection drops."""
+        import time
+
+        body = build_trigger_xml(ic_code).encode()
         headers = {
             "Content-Type": "application/xml",
             "Accept": "application/json, application/xml, text/xml, */*",
             **_auth_headers(self._cfg),
         }
-        # CPI docs use GET with a body (unusual); httpx supports content= on request().
-        resp = self._http.request("GET", self._cfg.base_url, content=body.encode(), headers=headers)
-        resp.raise_for_status()
-        ctype = (resp.headers.get("content-type") or "").lower()
-        if "json" in ctype or resp.text.lstrip().startswith(("{", "[")):
-            return parse_employees(resp.json())
-        # Some tenants wrap JSON in text/plain
-        try:
-            return parse_employees(resp.json())
-        except Exception as exc:
-            raise ValueError(f"{SOURCE_KEY}: unexpected response for {ic_code}: {resp.text[:200]}") from exc
+        last_exc: Exception | None = None
+        for attempt in range(1, self._max_attempts + 1):
+            try:
+                if attempt > 1:
+                    print(
+                        f"  retry {attempt}/{self._max_attempts} for {ic_code} "
+                        f"(timeout {self._cfg.timeout_s}s)",
+                        flush=True,
+                    )
+                # CPI docs use GET with a body (unusual); httpx supports content= on request().
+                resp = self._http.request(
+                    "GET", self._cfg.base_url, content=body, headers=headers
+                )
+                resp.raise_for_status()
+                ctype = (resp.headers.get("content-type") or "").lower()
+                if "json" in ctype or resp.text.lstrip().startswith(("{", "[")):
+                    return parse_employees(resp.json())
+                try:
+                    return parse_employees(resp.json())
+                except Exception as exc:
+                    raise ValueError(
+                        f"{SOURCE_KEY}: unexpected response for {ic_code}: {resp.text[:200]}"
+                    ) from exc
+            except (httpx.TransportError, httpx.TimeoutException, ConnectionError, OSError) as exc:
+                last_exc = exc
+                print(f"  {ic_code} attempt {attempt} failed: {exc}", flush=True)
+                if attempt >= self._max_attempts:
+                    break
+                time.sleep(min(2 ** attempt, 5))
+        assert last_exc is not None
+        raise last_exc
