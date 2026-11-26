@@ -1,0 +1,307 @@
+{
+  "Employee_Detail": [
+    {
+      "Employee": {
+        "externalCode": "20119057",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20147812",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20354169",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "10950",
+        "CPRATING": "NA",
+        "dcscores": [
+          {
+            "DCstartdate": "2006-01-01",
+            "dctype": "MLP-SM",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          },
+          {
+            "DCstartdate": "2001-01-01",
+            "dctype": "MLP-MM",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "500812",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "14862",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2011-01-01",
+            "dctype": "MLP-TIER 1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          },
+          {
+            "DCstartdate": "2007-01-01",
+            "dctype": "MLP-TIER 1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          },
+          {
+            "DCstartdate": "2004-01-01",
+            "dctype": "SLP",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20062454",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20076580",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20038228",
+        "CPRATING": "Red"
+      }
+    }
+  ]
+}

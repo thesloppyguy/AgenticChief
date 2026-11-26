@@ -1,0 +1,5125 @@
+{
+  "Employee_Detail": [
+    {
+      "Employee": {
+        "externalCode": "20370644",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20370646",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20370648",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20370649",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20370650",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20353186",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20145966",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20303686",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20340284",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20135648",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "953579",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20009887",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "950850",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20365052",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20343440",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20364961",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20366999",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368540",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20332080",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20336119",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20367251",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20342670",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20358674",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20369676",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20340241",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20359304",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20373938",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20337898",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20370645",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "953008",
+        "CPRATING": "Green",
+        "dcscores": [
+          {
+            "DCstartdate": "2020-12-08",
+            "dctype": "DC2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Business Acumen",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Analytical Thinking",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Customer Centricity",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Communicating & Influencing",
+              "score": "A"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "People Management",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Drive for Results",
+              "score": "G"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Operational Excellence",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Change Orientation",
+              "score": "A"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "A"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20371860",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20371923",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20370740",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20364638",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20327170",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2025-05-15",
+            "dctype": "DC3",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Strategic Orientation",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Driving & Dealing with Change",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Critical Thinking",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Building Tomorrow’s Leaders",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Leveraging Synergy",
+              "score": "R"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Customer & Stakeholder Partnership",
+              "score": "R"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Result & Execution Leadership",
+              "score": "R"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Drive to Excel",
+              "score": "R"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20327960",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "116473",
+        "CPRATING": "NA",
+        "dcscores": [
+          {
+            "DCstartdate": "2020-03-03",
+            "dctype": "DC4",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Strategic mind-set",
+              "score": "G"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Learning Agility and Digital Mind-set",
+              "score": "G"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Conscientious Decision Making",
+              "score": "A"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Inspire and Deliver Results",
+              "score": "G"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Organizational Stewardship",
+              "score": "R"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Social Intelligence & Collaboration",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Strategic Talent Management",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Synergistic Customer Engagement",
+              "score": "A"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          },
+          {
+            "DCstartdate": "2016-01-01",
+            "dctype": "DC3",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          },
+          {
+            "DCstartdate": "2009-01-01",
+            "dctype": "MLP-TIER 2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          },
+          {
+            "DCstartdate": "2006-01-01",
+            "dctype": "MLP-MM",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": ""
+            }
+          },
+          {
+            "DCstartdate": "2002-01-01",
+            "dctype": "MLP-E",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20373945",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376903",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376634",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377697",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20378576",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20378781",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20379452",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20381521",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20381397",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20382232",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20384839",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20384820",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20384946",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20384994",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20385735",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20388415",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20388417",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20388799",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389053",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389133",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389186",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389228",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389366",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389369",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389405",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389397",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389428",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389458",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389468",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389469",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389478",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389473",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389498",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389528",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389533",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389540",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389555",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389577",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389583",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389609",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389553",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389714",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389402",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389833",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389470",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389571",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389813",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389940",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389983",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390057",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390081",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389835",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390204",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390305",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390373",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390384",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390386",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390401",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390341",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390464",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390543",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390261",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390541",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390709",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390743",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390829",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390824",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391054",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390965",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389523",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391163",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391446",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391540",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391350",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390895",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391206",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391880",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391976",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391983",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392068",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392128",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392147",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392149",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392405",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392627",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392886",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393132",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393197",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392207",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391280",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393058",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394585",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394575",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395919",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395920",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395921",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395922",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395924",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395930",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395932",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395933",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395935",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395936",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395937",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395941",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395942",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395944",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395945",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395918",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395923",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395925",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395926",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395928",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395929",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395931",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395934",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395938",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395939",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395943",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395946",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393764",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395927",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397133",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397134",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397135",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397136",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397137",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397138",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397139",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397141",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394609",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393201",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397191",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397745",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398084",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397857",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398313",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394550",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398362",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398375",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394666",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397292",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398303",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399079",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399023",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400141",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400143",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400144",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20396726",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400258",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400338",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400339",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400251",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400071",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399329",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400805",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400937",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397873",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "950602",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2011-01-01",
+            "dctype": "MLP-TIER 2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          },
+          {
+            "DCstartdate": "2003-01-01",
+            "dctype": "ELP-E",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395940",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400300",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401175",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401212",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401540",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20011289",
+        "CPRATING": "Green",
+        "dcscores": [
+          {
+            "DCstartdate": "2022-03-24",
+            "dctype": "DC2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Business Acumen",
+              "score": "G"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Analytical Thinking",
+              "score": "A"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Customer Centricity",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Communicating & Influencing",
+              "score": "G"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "People Management",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Drive for Results",
+              "score": "G"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Operational Excellence",
+              "score": "G"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Change Orientation",
+              "score": "G"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          },
+          {
+            "DCstartdate": "2015-01-01",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20038692",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "48276",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20379317",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "952289",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2014-03-04",
+            "dctype": "DC2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          },
+          {
+            "DCstartdate": "2010-01-01",
+            "dctype": "MLP-TIER 1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          },
+          {
+            "DCstartdate": "2008-01-01",
+            "dctype": "MLP-TIER 1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400352",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20349856",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377271",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20378854",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20381530",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394665",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20388325",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389212",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389361",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389484",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389580",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389492",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389874",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389852",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389532",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389573",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389744",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390796",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390904",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391014",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391248",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391299",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391417",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391315",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391479",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391277",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391549",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391161",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391665",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391972",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392154",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391087",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392095",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392737",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392675",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392753",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393096",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391721",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392124",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393151",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393193",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393200",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393204",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393206",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393267",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393234",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393608",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393693",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393781",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393752",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393766",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394028",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393194",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393198",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394045",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394177",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393940",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394234",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394144",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394207",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393259",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394147",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394206",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394212",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394204",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394152",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394213",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394525",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394558",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394240",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394606",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394359",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394614",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394662",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393974",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394466",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394599",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20396713",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20396767",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394390",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394470",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394395",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394468",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394514",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394518",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394519",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394531",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394476",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394511",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394474",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394658",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397546",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394443",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397360",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397817",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397843",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397985",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398054",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397984",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398114",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398369",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398762",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398763",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398764",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398770",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397430",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399025",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398328",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399057",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399024",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399230",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399264",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399107",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399128",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399130",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399319",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399322",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399326",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399372",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398319",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399192",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399416",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399727",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399763",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399318",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399758",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398381",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399378",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399762",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397422",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400041",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399189",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400084",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399832",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400201",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399867",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399955",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400080",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400361",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400495",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400031",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400307",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399853",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400539",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400736",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400077",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400549",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399981",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400741",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400320",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400650",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400748",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400290",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400523",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400612",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400782",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400936",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400597",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400814",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400945",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401064",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400010",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401060",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400761",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400858",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401192",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401237",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401252",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400533",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401202",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400531",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401128",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401129",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400529",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401321",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400769",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401205",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401174",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401443",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401219",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397952",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400965",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401201",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401440",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401141",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401213",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401501",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401530",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401517",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401505",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401786",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400941",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400540",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401882",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "198755",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20002155",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20110156",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "795093",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20005744",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2024-03-06",
+            "dctype": "DC3",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Strategic Orientation",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Driving & Dealing with Change",
+              "score": "A"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Critical Thinking",
+              "score": "A"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Building Tomorrow’s Leaders",
+              "score": "G"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Leveraging Synergy",
+              "score": "G"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Customer & Stakeholder Partnership",
+              "score": "G"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Result & Execution Leadership",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Drive to Excel",
+              "score": "G"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20305660",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20318624",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20320650",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20335275",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20349864",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20350148",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20350661",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399814",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376085",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20361370",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20367732",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368306",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368307",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20374002",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398331",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376108",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377248",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377838",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20379316",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20379449",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20380809",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20380970",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20381019",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20381399",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20381412",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394426",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20381566",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20381842",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20386715",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389487",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389489",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389490",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389495",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389545",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389574",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389591",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389589",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389593",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389629",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389551",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389679",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389681",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389777",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389985",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389986",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389987",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389730",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390059",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390186",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390168",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390232",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390274",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390292",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390394",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390663",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390698",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390509",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390279",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390567",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390851",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390369",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390826",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390863",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390905",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390974",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391059",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391017",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391037",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391152",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390658",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391273",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390961",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391240",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391075",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391710",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391784",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391783",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391713",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391538",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391799",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391993",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391719",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392427",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392732",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392782",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392236",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392705",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393223",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392622",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393388",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393497",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393569",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393763",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393973",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393898",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393899",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393900",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393901",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393902",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393903",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394433",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394508",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393975",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394082",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394103",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393205",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394191",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394660",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20395947",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394224",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20396730",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394683",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393199",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397703",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394464",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397858",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397366",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398062",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397234",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397326",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398196",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398274",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398073",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397968",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399078",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399126",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399167",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399320",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399321",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399122",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399397",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399441",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399407",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399418",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399781",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399668",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399152",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "285260",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399954",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399972",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400249",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399893",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398034",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400040",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400490",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399190",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399864",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400364",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400023",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400428",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400437",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400486",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399419",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400288",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398293",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399142",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400541",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400049",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397888",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400602",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400497",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400763",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400651",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400909",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400930",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400949",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400762",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401110",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400525",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400287",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400656",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400947",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401034",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401068",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400767",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400998",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401099",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400768",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401145",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401221",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399877",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400764",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401107",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401297",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401133",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401203",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401254",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401546",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401692",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400726",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399875",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401770",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401784",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401981",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401069",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401539",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399757",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400961",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399091",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401291",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391318",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401797",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390564",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20378798",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401794",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398000",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400696",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397776",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20311993",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-06-15",
+            "dctype": "DC2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Business Acumen",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Analytical Thinking",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Customer Centricity",
+              "score": "A"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Drive for Results",
+              "score": "A"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Operational Excellence",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Change Orientation",
+              "score": "G"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "People Management",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Communicating & Influencing",
+              "score": "A"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "A"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391901",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401340",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400543",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401316",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390085",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392797",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400765",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400770",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401611",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401119",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401312",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399413",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20086238",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392074",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401898",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389191",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401765",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398052",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393209",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400459",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401492",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401247",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400537",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20402151",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400994",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401451",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391868",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401787",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401796",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390105",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401222",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399382",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401198",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20154719",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393052",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400074",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389539",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401195",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389407",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399026",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20402099",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398019",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20064506",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "760333",
+        "CPRATING": "NA",
+        "dcscores": [
+          {
+            "DCstartdate": "2018-01-23",
+            "dctype": "DC3",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          },
+          {
+            "DCstartdate": "2011-01-01",
+            "dctype": "MLP-TIER 2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394663",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401939",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401541",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400744",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389464",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399838",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401795",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20317360",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399784",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401915",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401894",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401774",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401790",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400263",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20393604",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401803",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401317",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399865",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20073574",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20402132",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20355979",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398483",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20005819",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2024-06-01",
+            "dctype": "DC2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Business Acumen",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Analytical Thinking",
+              "score": "A"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Customer Centricity",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Drive for Results",
+              "score": "G"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Operational Excellence",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Change Orientation",
+              "score": "G"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "People Management",
+              "score": "G"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Communicating & Influencing",
+              "score": "A"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401211",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400527",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401895",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389023",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401346",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400484",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401522",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400536",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400542",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400903",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390132",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400082",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390884",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401226",
+        "CPRATING": "NA"
+      }
+    }
+  ]
+}

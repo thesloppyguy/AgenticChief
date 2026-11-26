@@ -1,0 +1,2264 @@
+{
+  "Employee_Detail": [
+    {
+      "Employee": {
+        "externalCode": "20330191",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20402171",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20371727",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20103073",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2025-04-18",
+            "dctype": "DC3",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Strategic Orientation",
+              "score": "R"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Driving & Dealing with Change",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Critical Thinking",
+              "score": "R"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Building Tomorrow’s Leaders",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Leveraging Synergy",
+              "score": "R"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Customer & Stakeholder Partnership",
+              "score": "R"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Result & Execution Leadership",
+              "score": "R"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Drive to Excel",
+              "score": "R"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20071817",
+        "CPRATING": "Green",
+        "dcscores": [
+          {
+            "DCstartdate": "2024-12-17",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Achievement Orientation",
+              "score": "R"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Customer Orientation",
+              "score": "A"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Decision Making",
+              "score": "A"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Impactful Communication",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Innovation Mindset",
+              "score": "G"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Plan for Results",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "A"
+            }
+          },
+          {
+            "DCstartdate": "2023-07-24",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "DC1-P1 C"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20143684",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "G"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "A"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "A"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20315535",
+        "CPRATING": "Red",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20317659",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20357077",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20357078",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20320037",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "G"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "A"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "R"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "G"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "A"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20320352",
+        "CPRATING": "Red",
+        "dcscores": [
+          {
+            "DCstartdate": "2023-07-17",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "DC1-P1 NC"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20320808",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20322832",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20323477",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20323588",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20325336",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20357069",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20326420",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20326545",
+        "CPRATING": "Green",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "R"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "R"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "G"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "R"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20326546",
+        "CPRATING": "Green",
+        "dcscores": [
+          {
+            "DCstartdate": "2025-08-30",
+            "dctype": "DC2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Business Acumen",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Analytical Thinking",
+              "score": "A"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Customer Centricity",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Drive for Results",
+              "score": "A"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Operational Excellence",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Change Orientation",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "People Management",
+              "score": "G"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Communicating & Influencing",
+              "score": "G"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20326596",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20357070",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2024-12-09",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "DC1-P1 C"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20387381",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20327557",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20327610",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20327922",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20328543",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368332",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368331",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20186599",
+        "CPRATING": "Red",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "G"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "G"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "R"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "G"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20329753",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20329757",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20329826",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2025-02-13",
+            "dctype": "DC2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Business Acumen",
+              "score": "G"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Analytical Thinking",
+              "score": "A"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Customer Centricity",
+              "score": "A"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Communicating & Influencing",
+              "score": "A"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "People Management",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Drive for Results",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Operational Excellence",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Change Orientation",
+              "score": "A"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "A"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20386904",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20330161",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20362539",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "G"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "G"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20330222",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20330387",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20330399",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20331163",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20331526",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20331911",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20388805",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20332412",
+        "CPRATING": "Green",
+        "dcscores": [
+          {
+            "DCstartdate": "2025-08-30",
+            "dctype": "DC2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Business Acumen",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Analytical Thinking",
+              "score": "A"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Customer Centricity",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Drive for Results",
+              "score": "G"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Operational Excellence",
+              "score": "G"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Change Orientation",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "People Management",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Communicating & Influencing",
+              "score": "G"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20334262",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20334086",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20334502",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20334679",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20335575",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368348",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20335636",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20337018",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20386810",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20338275",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20357071",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20339824",
+        "CPRATING": "Red",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "A"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "R"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "R"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "R"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377524",
+        "CPRATING": "Green",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "G"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "R"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "R"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20341516",
+        "CPRATING": "Green",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "G"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "R"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "G"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "R"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "G"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20341716",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20342237",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20342239",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20343085",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20343864",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377769",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20344168",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20344169",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20344170",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20344451",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20344261",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20344905",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368347",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20345672",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20345845",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20346389",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20347182",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368329",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20387322",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20347641",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20348161",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368511",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20348692",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20386812",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20348650",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20349044",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2025-02-13",
+            "dctype": "DC2",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Business Acumen",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Analytical Thinking",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Customer Centricity",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Communicating & Influencing",
+              "score": "A"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "People Management",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Drive for Results",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Operational Excellence",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Change Orientation",
+              "score": "A"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "A"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368527",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20349220",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20349759",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20349774",
+        "CPRATING": "NA",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-08-20",
+            "dctype": "DC3",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Strategic Orientation",
+              "score": "A"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Driving & Dealing with Change",
+              "score": "A"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Critical Thinking",
+              "score": "A"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Building Tomorrow’s Leaders",
+              "score": "A"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Leveraging Synergy",
+              "score": "G"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Customer & Stakeholder Partnership",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Result & Execution Leadership",
+              "score": "R"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Drive to Excel",
+              "score": "G"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "A"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20350279",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20350280",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20348859",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20350474",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "G"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "G"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "G"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "G"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "A"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20397236",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20386811",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20350784",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20352424",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20355137",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20356321",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20386836",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20387220",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20355966",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20355316",
+        "CPRATING": "Green",
+        "dcscores": [
+          {
+            "DCstartdate": "2024-12-09",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "DC1-P1 NC"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20357884",
+        "CPRATING": "Amber",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-05",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Innovation Mindset",
+              "score": "R"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Decision Making",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Plan for Results",
+              "score": "R"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Achievement Orientation",
+              "score": "A"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Impactful Communication",
+              "score": "A"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "People Orientation",
+              "score": "A"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Customer Orientation",
+              "score": "G"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20358511",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20359938",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20359453",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20360460",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20360663",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20360820",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20364640",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368522",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368579",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20368589",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20371732",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20372204",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20373284",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "658013",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20373995",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376022",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376237",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376106",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376461",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376390",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20375464",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376694",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376975",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376010",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377171",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377021",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377473",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377496",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20377727",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20378261",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20376570",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20378396",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20378408",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20378886",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20379361",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20379507",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20379870",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20384142",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20384955",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20385260",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20385783",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20386817",
+        "CPRATING": "Green"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20387314",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20387315",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20387318",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20387736",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20387965",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20388121",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20388347",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389146",
+        "CPRATING": "Red"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390036",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390044",
+        "CPRATING": "Amber"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390115",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20390276",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20388992",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20389029",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20391579",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392694",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392696",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392673",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20392932",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394504",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394507",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394510",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20394588",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398093",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20398269",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399016",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399165",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399953",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399860",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20399949",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400256",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400261",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400528",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400626",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20400645",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401016",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401207",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401406",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401456",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401667",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401721",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401819",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401855",
+        "CPRATING": "NA"
+      }
+    },
+    {
+      "Employee": {
+        "externalCode": "20401859",
+        "CPRATING": "NA"
+      }
+    }
+  ]
+}

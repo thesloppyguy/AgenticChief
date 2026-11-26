@@ -1,0 +1,159 @@
+{
+  "Employee_Detail": [
+    {
+      "Employee": {
+        "externalCode": "11",
+        "CPRATING": "NA",
+        "dcscores": [
+          {
+            "DCstartdate": "2026-09-02",
+            "dctype": "DC1",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Strategic mind-set",
+              "score": "G"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Learning Agility and Digital Mind-set",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Conscientious Decision Making",
+              "score": "R"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Drive for Results",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Organizational Stewardship",
+              "score": "R"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Social Intelligence & Collaboration",
+              "score": "R"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Strategic Talent Management",
+              "score": "R"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Synergistic Customer Engagement",
+              "score": "A"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          },
+          {
+            "DCstartdate": "2024-10-28",
+            "dctype": "",
+            "Comp1": {
+              "slno": "1",
+              "competency": "Strategic mind-set",
+              "score": "G"
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "Learning Agility and Digital Mind-set",
+              "score": "R"
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "Conscientious Decision Making",
+              "score": "R"
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "Drive for Results",
+              "score": "R"
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "Organizational Stewardship",
+              "score": "R"
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "Social Intelligence & Collaboration",
+              "score": "R"
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "Strategic Talent Management",
+              "score": "R"
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "Synergistic Customer Engagement",
+              "score": "A"
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "R"
+            }
+          },
+          {
+            "DCstartdate": "2023-12-18",
+            "dctype": "DC-4P",
+            "Comp1": {
+              "slno": "1",
+              "competency": "",
+              "score": ""
+            },
+            "Comp2": {
+              "slno": "2",
+              "competency": "",
+              "score": ""
+            },
+            "Comp3": {
+              "slno": "3",
+              "competency": "",
+              "score": ""
+            },
+            "Comp4": {
+              "slno": "4",
+              "competency": "",
+              "score": ""
+            },
+            "Comp5": {
+              "slno": "5",
+              "competency": "",
+              "score": ""
+            },
+            "Comp6": {
+              "slno": "6",
+              "competency": "",
+              "score": ""
+            },
+            "Comp7": {
+              "slno": "7",
+              "competency": "",
+              "score": ""
+            },
+            "Comp8": {
+              "slno": "8",
+              "competency": "",
+              "score": ""
+            },
+            "Comp9": {
+              "slno": "9",
+              "competency": "Overall Score",
+              "score": "G"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
